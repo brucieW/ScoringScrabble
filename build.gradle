@@ -6,6 +6,20 @@ task clean(type: Delete) {
 
 buildscript {
     ext {
-        compose_version = '1.0.1'
+        compose_version = '1.0.4'
+        accompanist_version = '0.18.0'
+        kotlin_version = '1.5.31'
+        objectboxVersion = '2.9.1'
     }
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.1.0-beta01'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "io.objectbox:objectbox-gradle-plugin:$objectboxVersion"
+    }
+
 }
