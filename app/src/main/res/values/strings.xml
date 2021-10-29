@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">Scoring Scrabble</string>
 
+    <string name="select_players">Select Players</string>
+    <string name="playing_with_teams">Playing with teams</string>
+
     <string name="about_text">Application for keeping track of all of your scrabble game scores.</string>
     <string name="version">Version 1.0</string>
     <string name="programmed_by">Programmed by Bruce Edgerton</string>

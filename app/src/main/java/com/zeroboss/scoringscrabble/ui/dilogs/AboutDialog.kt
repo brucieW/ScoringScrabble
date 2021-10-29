@@ -40,7 +40,7 @@ fun AboutDialog(
                     Row(
                     ) {
                         Image(
-                            painter = painterResource(R.drawable.app_image),
+                            painter = painterResource(R.drawable.letter_s),
                             contentDescription = "",
                             modifier = Modifier.fillMaxWidth(fraction = .35F)
                         )

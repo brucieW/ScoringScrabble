@@ -1,7 +1,6 @@
 package com.zeroboss.scoringscrabble.ui.screens
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,17 +11,19 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.zeroboss.scoringscrabble.R
-import com.zeroboss.scoringscrabble.data.common.CommonDb
 import com.zeroboss.scoringscrabble.ui.common.menu.DropdownMenuExt
 import com.zeroboss.scoringscrabble.ui.common.menu.DropdownMenuItemExt
 import com.zeroboss.scoringscrabble.ui.dilogs.AboutDialog
+import com.zeroboss.scoringscrabble.ui.dilogs.SelectPlayersDialog
 import com.zeroboss.scoringscrabble.ui.theme.*
 import com.zeroboss.scoringscrabble.ui.viewmodels.ScoringViewModel
 import org.koin.androidx.compose.get
@@ -54,15 +55,14 @@ fun AppBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
-            painterResource(R.drawable.app_image),
+            painterResource(R.drawable.logo),
             "",
             modifier = Modifier
-                .size(64.dp)
                 .padding(start = 10.dp, end = 20.dp)
         )
 
         Text(
-            text = "Scoring Sheet",
+            text = "Score Sheet",
             style = navigationTitle2,
             modifier = Modifier.weight(1f)
         )
@@ -87,28 +87,23 @@ fun AppBar(
 fun Body(
     scoringViewModel: ScoringViewModel
 ) {
+    val (showSelectPlayers, setShowSelectPlayers) = remember { mutableStateOf(true) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Blue50)
-            .padding(bottom = 5.dp)
+            .padding(bottom = 5.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = "Match Items",
-                style = typography.h6
-            )
-        }
-
-        Card(
-            modifier = Modifier.fillMaxSize()
-        ) {
-
-        }
     }
+
+    SelectPlayersDialog(
+        showDialog = showSelectPlayers,
+        setShowDialog = setShowSelectPlayers,
+        get()
+    )
 }
 
 @Composable

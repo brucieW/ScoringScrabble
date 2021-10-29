@@ -1,6 +1,15 @@
 package com.zeroboss.scoringscrabble.data.common
 
+import android.service.autofill.FieldClassification
+import com.zeroboss.scoringscrabble.data.entities.Player
+import com.zeroboss.scoringscrabble.data.entities.Player_
+import com.zeroboss.scoringscrabble.data.entities.ScoringSheetData
+import com.zeroboss.scoringscrabble.data.entities.Team
 import io.objectbox.BoxStore
+import io.objectbox.kotlin.boxFor
+import io.objectbox.query.Query
+import io.objectbox.reactive.DataObserver
+import io.objectbox.reactive.DataSubscription
 import org.koin.core.component.KoinComponent
 import org.koin.java.KoinJavaComponent.get
 import java.io.File
@@ -11,8 +20,7 @@ object CommonDb : KoinComponent {
     val liveFile = File("scoringScrabble-db")
     val boxStore: BoxStore = get(BoxStore::class.java)
 
-//    private var matchQuery: Query<FieldClassification.Match?>? = null
-//    private var playerQuery: Query<Player?>? = null
+    private var playerQuery: Query<Player?>? = null
 
     // This clears all data from the database.
     fun clearBoxStore() {
@@ -24,7 +32,7 @@ object CommonDb : KoinComponent {
         boxStore.close()
     }
 
-//    fun deletePlayer(player: Player) {
+//
 //        // Remove teams and matches that contain this player
 //        val teamBox = boxStore.boxFor<Team>()
 //        val teams = teamBox.query().contains(Team_.name, player.name).build().find()
@@ -183,73 +191,51 @@ object CommonDb : KoinComponent {
 //        boxStore.boxFor<ActiveStatus>().put(status)
 //    }
 //
-//    fun subscribeToPlayers(
-//        observer: DataObserver<MutableList<Player?>>
-//    ): DataSubscription {
-//        if (playerQuery == null) {
-//            playerQuery = boxStore.boxFor<Player>().query().order(Player_.name).build()
-//        }
-//
-//        return playerQuery!!.subscribe().observer(observer)
-//    }
-//
-//    /**
-//     * Return all of the players in the store.
-//     */
-//    fun getPlayers(): MutableList<Player?> {
-//        val players = playerQuery()!!.find()
-//
-//        return if (playerQuery == null) mutableListOf() else players
-//    }
-//
-//    private fun playerQuery(): Query<Player?>? {
-//        if (playerQuery == null) {
-//            playerQuery = boxStore.boxFor<Player>().query().order(Player_.name).build()
-//        }
-//
-//        return playerQuery
-//    }
-//
-//    fun getPlayerCount(): Long {
-//        return boxStore.boxFor<Player>().count()
-//    }
-//
-//    fun getTeamCount(): Long {
-//        return boxStore.boxFor<Team>().count()
-//    }
-//
-//    fun getMatchCount(): Long {
-//        return boxStore.boxFor<FieldClassification.Match>().count()
-//    }
-//
-//    // Returns a player with the given name or creates a new one if not found.
-//    private fun getPlayer(
-//        name: String
-//    ): Player {
-//        val player = boxStore.boxFor<Player>()
-//            .query().equal(Player_.name, name).build().findFirst()
-//
-//        return player ?: Player(name = name)
-//    }
-//
-//    fun subscribeToMatches(
-//        observer: DataObserver<MutableList<FieldClassification.Match?>>
-//    ): DataSubscription {
-//        if (matchQuery == null) {
-//            matchQuery = boxStore.boxFor<FieldClassification.Match>()
-//                .query().order(Match_.lastPlayed, QueryBuilder.DESCENDING).build()
-//        }
-//
-//        return matchQuery!!.subscribe().observer(observer)
-//    }
-//
-//    /**
-//     * Return all of the teams in the store.
-//     */
-//    fun getMatches(): MutableList<FieldClassification.Match?> {
-//        return matchQuery!!.find()
-//    }
-//
+    fun subscribeToPlayers(
+        observer: DataObserver<MutableList<Player?>>
+    ): DataSubscription {
+        if (playerQuery == null) {
+            playerQuery = boxStore.boxFor<Player>().query().order(Player_.name).build()
+        }
+
+        return playerQuery!!.subscribe().observer(observer)
+    }
+
+    /**
+     * Return all of the players in the store.
+     */
+    fun getPlayers(): MutableList<Player?> {
+        val players = playerQuery()!!.find()
+
+        return if (playerQuery == null) mutableListOf() else players
+    }
+
+    private fun playerQuery(): Query<Player?>? {
+        if (playerQuery == null) {
+            playerQuery = boxStore.boxFor<Player>().query().order(Player_.name).build()
+        }
+
+        return playerQuery
+    }
+
+    fun getPlayerCount(): Long {
+        return boxStore.boxFor<Player>().count()
+    }
+
+    fun getTeamCount(): Long {
+        return boxStore.boxFor<Team>().count()
+    }
+
+    // Returns a player with the given name or creates a new one if not found.
+    private fun getPlayer(
+        name: String
+    ): Player {
+        val player = boxStore.boxFor<Player>()
+            .query().equal(Player_.name, name).build().findFirst()
+
+        return player ?: Player(name = name)
+    }
+
 //    fun createGame(
 //        match: FieldClassification.Match
 //    ): Game {
