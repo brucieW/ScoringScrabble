@@ -8,6 +8,7 @@ import com.google.accompanist.navigation.animation.composable
 import com.zeroboss.scoringscrabble.ui.screens.Navigation
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.zeroboss.scoringscrabble.ui.screens.ScoreSheet
+import com.zeroboss.scoringscrabble.ui.screens.SelectPlayers
 import com.zeroboss.scoringscrabble.ui.screens.Splash
 
 @ExperimentalMaterialApi
@@ -25,6 +26,10 @@ fun ScoringScrabbleApp() {
             Navigation.Splash.route,
         ) {
             Splash(navController)
+        }
+
+        composable(Navigation.SelectPlayers.route) {
+            SelectPlayers(navController)
         }
 
         composable(Navigation.ScoreSheet.route) {

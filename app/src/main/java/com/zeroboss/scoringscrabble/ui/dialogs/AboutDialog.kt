@@ -1,4 +1,4 @@
-package com.zeroboss.scoringscrabble.ui.dilogs
+package com.zeroboss.scoringscrabble.ui.dialogs
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*

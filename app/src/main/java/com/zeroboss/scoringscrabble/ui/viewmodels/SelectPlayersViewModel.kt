@@ -21,7 +21,7 @@ class SelectPlayersViewModel(
     private val _teamListVisible = createFlags(2)
 
     private val _playerNames = createNames(4)
-    val playerNames: List<LiveData<String>> = _playerNames
+    val playerNames: List<MutableLiveData<String>> = _playerNames
 
     private val playerListVisible = createFlags(4)
 
@@ -53,6 +53,7 @@ class SelectPlayersViewModel(
 
     fun changeUsingTeams() {
         isTeamType.value = !(isTeamType.value)!!
+        checkDataValid()
     }
 
     fun saveScoringSheetData() {
@@ -71,9 +72,17 @@ class SelectPlayersViewModel(
         }
     }
 
+    fun clearAllPlayerNames() {
+        for (playerId in 0..3) {
+            playerNames[playerId].value = ""
+        }
+
+        checkDataValid()
+    }
+
     fun getPlayerNameWithOffset(
         offset: Int
-    ): LiveData<String> {
+    ): MutableLiveData<String> {
         return playerNames[offset]
     }
 
@@ -84,31 +93,36 @@ class SelectPlayersViewModel(
     }
 
     fun onPlayerNameChanged(
-        teamId: Int,
         playerId: Int,
         text: String
     ) {
-//        playerNames[getOffset(teamId, playerId)].value = text
-//
-//        // Check data is valid.
-//
-//        var valid = true
-//        var unique = true
-//
-//        val itemsWithText = playerNames.filter { name -> name.value!!.isNotEmpty() }
-//
-//        if (itemsWithText.size < 4) {
-//            valid = false
-//        }
-//
-//        val distinct = itemsWithText.distinctBy { it.value!!.uppercase() }
-//
-//        if (distinct.size != itemsWithText.size) {
-//            unique = false
-//        }
-//
-//        _uniquePlayerNames.value = unique
-//        _dataValid.value = valid
+        playerNames[playerId].value = text
+        checkDataValid()
+    }
+
+    fun checkDataValid() {
+
+        var valid = true
+        var unique = true
+
+        val itemsWithText = playerNames.filter { name -> name.value!!.isNotEmpty() }
+
+        val minSize = if (isTeamType.value!!) 4 else 2
+
+        if (itemsWithText.size < minSize) {
+            valid = false
+        }
+
+        if (itemsWithText.isNotEmpty()) {
+            val distinct = itemsWithText.distinctBy { it.value!!.uppercase() }
+
+            if (distinct.size != itemsWithText.size) {
+                unique = false
+            }
+        }
+
+        _uniquePlayerNames.value = unique
+        _dataValid.value = valid
     }
 
     fun onTeamDropdownClicked(
@@ -121,13 +135,11 @@ class SelectPlayersViewModel(
     }
 
     fun onPlayerDropdownClicked(
-        teamId: Int = -1,
         playerId: Int
     ) {
         setPlayerDropdownVisible(
-            teamId,
             playerId,
-            !playerListVisible[getOffset(teamId, playerId)].value!!
+            !playerListVisible[playerId].value!!
         )
     }
 
@@ -158,7 +170,7 @@ class SelectPlayersViewModel(
 
 
 
-    fun onClickSave() {
+    fun onStartScoring() {
 //        val match = createMatch(
 //            players = playerNames.map { it.value!! }
 //        )
@@ -180,12 +192,11 @@ class SelectPlayersViewModel(
     }
 
     fun setPlayerDropdownVisible(
-        teamId: Int,
         playerId: Int,
         visible: Boolean
     ) {
-//        clearAllPlayerLists()
-//        playerListVisible[getOffset(teamId, playerId)].value = visible
+        clearAllPlayerLists()
+        playerListVisible[playerId].value = visible
     }
 
     fun clearAllPlayerLists() {

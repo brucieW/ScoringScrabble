@@ -11,19 +11,15 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.zeroboss.scoringscrabble.R
 import com.zeroboss.scoringscrabble.ui.common.menu.DropdownMenuExt
 import com.zeroboss.scoringscrabble.ui.common.menu.DropdownMenuItemExt
-import com.zeroboss.scoringscrabble.ui.dilogs.AboutDialog
-import com.zeroboss.scoringscrabble.ui.dilogs.SelectPlayersDialog
+import com.zeroboss.scoringscrabble.ui.dialogs.AboutDialog
 import com.zeroboss.scoringscrabble.ui.theme.*
 import com.zeroboss.scoringscrabble.ui.viewmodels.ScoringViewModel
 import org.koin.androidx.compose.get
@@ -87,8 +83,6 @@ fun AppBar(
 fun Body(
     scoringViewModel: ScoringViewModel
 ) {
-    val (showSelectPlayers, setShowSelectPlayers) = remember { mutableStateOf(true) }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -98,12 +92,6 @@ fun Body(
         verticalArrangement = Arrangement.Center
     ) {
     }
-
-    SelectPlayersDialog(
-        showDialog = showSelectPlayers,
-        setShowDialog = setShowSelectPlayers,
-        get()
-    )
 }
 
 @Composable
