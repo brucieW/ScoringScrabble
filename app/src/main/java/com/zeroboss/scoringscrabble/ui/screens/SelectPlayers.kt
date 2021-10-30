@@ -110,7 +110,8 @@ fun Body(
                 text = R.string.playing_with_teams,
                 checked = usingTeams!!,
                 checkStateChanged = { selectPlayersViewModel.changeUsingTeams() },
-                modifier = Modifier.padding(end = 40.dp)
+                modifier = Modifier.padding(end = 30.dp),
+                horizontalArrangement = Arrangement.Center
             )
 
             PlayerSelection(

@@ -38,7 +38,7 @@ fun Splash(
     LaunchedEffect(
         key1 = "JumpToHome",
         block = {
-            delay(3000)
+            delay(3500)
             navController.popBackStack()
             navController.navigate(Navigation.SelectPlayers.route)
         }
@@ -57,9 +57,10 @@ fun SplashScreenContent() {
         verticalArrangement = Arrangement.Center
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
         ) {
-            Letter(R.drawable.letter_s, start = 10.dp)
+            Letter(R.drawable.letter_s)
             Letter(R.drawable.letter_c, top = 10.dp)
             Letter(R.drawable.letter_r)
             Letter(R.drawable.letter_a, top = 10.dp)
@@ -70,13 +71,13 @@ fun SplashScreenContent() {
         }
 
         Letter(R.drawable.letter_s, start = 4.dp, top = 50.dp)
-        Letter(R.drawable.letter_c, start = 4.dp, top = 6.dp)
-        Letter(R.drawable.letter_o, start = 4.dp, top = 6.dp)
-        Letter(R.drawable.letter_r, start = 4.dp, top = 6.dp)
+        Letter(R.drawable.letter_c, start = 4.dp, top = 2.dp)
+        Letter(R.drawable.letter_o, start = 4.dp, top = 2.dp)
+        Letter(R.drawable.letter_r, start = 4.dp, top = 2.dp)
 
         Row(
             modifier = Modifier
-                .padding(top = 6.dp)
+                .padding(top = 2.dp)
         ) {
             Letter(R.drawable.letter_s, start = 0.dp)
             Letter(R.drawable.letter_h)
@@ -91,7 +92,7 @@ fun SplashScreenContent() {
 @Composable
 fun Letter(
     image: Int,
-    start: Dp = 6.dp,
+    start: Dp = 2.dp,
     top: Dp = 0.dp
 ) {
     Card(
@@ -102,7 +103,7 @@ fun Letter(
         Image(
             painterResource(image),
             "",
-            contentScale = ContentScale.FillBounds
+            contentScale = ContentScale.Fit
         )
     }
 }
