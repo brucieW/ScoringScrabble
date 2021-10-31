@@ -24,7 +24,7 @@
     },
     {
       "id": "2:5708056048375620981",
-      "lastPropertyId": "2:3526474581105288610",
+      "lastPropertyId": "4:7166271018800183980",
       "name": "ScoringSheetData",
       "properties": [
         {
@@ -38,6 +38,18 @@
           "name": "isTeamType",
           "type": 1,
           "flags": 4
+        },
+        {
+          "id": "3:3900806028850708283",
+          "name": "started",
+          "type": 6,
+          "flags": 2
+        },
+        {
+          "id": "4:7166271018800183980",
+          "name": "finished",
+          "type": 6,
+          "flags": 2
         }
       ],
       "relations": [
@@ -63,11 +75,6 @@
           "name": "id",
           "type": 6,
           "flags": 1
-        },
-        {
-          "id": "2:2338857289932645396",
-          "name": "name",
-          "type": 9
         }
       ],
       "relations": [
@@ -87,7 +94,9 @@
   "modelVersionParserMinimum": 5,
   "retiredEntityUids": [],
   "retiredIndexUids": [],
-  "retiredPropertyUids": [],
+  "retiredPropertyUids": [
+    2338857289932645396
+  ],
   "retiredRelationUids": [],
   "version": 1
 }

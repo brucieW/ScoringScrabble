@@ -17,6 +17,7 @@ import com.zeroboss.scoringscrabble.ui.theme.typography
 fun TextWithDropDown(
     modifier: Modifier = Modifier,
     text: String,
+    horizontal: Arrangement.Horizontal = Arrangement.SpaceBetween,
     onClickedDropDown: () -> Unit,
     onFocusAltered: () -> Unit,
 ) {
@@ -31,7 +32,7 @@ fun TextWithDropDown(
                     onFocusAltered()
                 }
             },
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = horizontal,
         verticalAlignment = Alignment.CenterVertically,
 
     ) {

@@ -12,8 +12,10 @@ import io.objectbox.relation.ToOne
 data class Team(
     @Id
     var id: Long = 0,
-
-    var name: String = "",
 ) {
     var players = ToMany<Player>(this, Team_.players)
+
+    fun getTeamName() : String {
+        return if (players.size < 2) "" else "${players[0].name} and ${players[1].name}"
+    }
 }

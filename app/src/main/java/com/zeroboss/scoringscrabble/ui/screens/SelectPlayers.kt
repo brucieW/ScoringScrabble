@@ -12,7 +12,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.navigation.NavController
+import com.zeroboss.scoring500.ui.common.TextWithDropDown
 import com.zeroboss.scoringscrabble.ui.viewmodels.SelectPlayersViewModel
 import com.zeroboss.scoringscrabble.R
 import com.zeroboss.scoringscrabble.ui.common.*
@@ -90,9 +90,9 @@ fun Body(
     navController: NavController,
     selectPlayersViewModel: SelectPlayersViewModel
 ) {
-    val usingTeams: Boolean? by selectPlayersViewModel.isTeamType.observeAsState()
-    val enabled: Boolean? by selectPlayersViewModel.dataValid.observeAsState()
-    val uniqueNames: Boolean? by selectPlayersViewModel.uniquePlayerNames.observeAsState()
+    val usingTeams: Boolean by selectPlayersViewModel.isTeamType
+    val enabled: Boolean by selectPlayersViewModel.dataValid
+    val uniqueNames: Boolean by selectPlayersViewModel.uniquePlayerNames
 
     Card(
         modifier = Modifier
@@ -108,18 +108,18 @@ fun Body(
         ) {
             CommonCheckBox(
                 text = R.string.playing_with_teams,
-                checked = usingTeams!!,
+                checked = usingTeams,
                 checkStateChanged = { selectPlayersViewModel.changeUsingTeams() },
                 modifier = Modifier.padding(end = 30.dp),
                 horizontalArrangement = Arrangement.Center
             )
 
             PlayerSelection(
-                usingTeams!!,
+                usingTeams,
                 selectPlayersViewModel
             )
 
-            if (!uniqueNames!!) {
+            if (!uniqueNames) {
                 Text(
                     modifier = Modifier
                         .padding(top = 5.dp)
@@ -136,7 +136,7 @@ fun Body(
                 modifier = Modifier.padding(20.dp),
                 buttonData = getTwoButtons(
                     firstButtonText = "Start Scoring",
-                    firstButtonEnabled = enabled!! && uniqueNames!!,
+                    firstButtonEnabled = enabled && uniqueNames,
                     onFirstButtonClicked = {
                         selectPlayersViewModel.onStartScoring()
                         navController.navigate("score_sheet")
@@ -151,25 +151,124 @@ fun Body(
 }
 
 @Composable
+fun TeamSelection(
+    isVisible: Boolean = false,
+    selectPlayersViewModel: SelectPlayersViewModel,
+    teamId: Int
+) {
+    if (isVisible) {
+        Popup() {
+            Box(
+                modifier = Modifier
+                    .size(180.dp, 300.dp)
+                    .background(
+                        Color.LightGray,
+                        RoundedCornerShape(10.dp)
+                    )
+
+            ) {
+                Column(
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(start = 10.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Select Team",
+                            style = normalText,
+                            color = Blue800
+                        )
+
+                        IconButton(
+                            onClick = { closeTeamPopup(selectPlayersViewModel, teamId) }
+                        ) {
+                            Icon(
+                                Icons.Rounded.Close, contentDescription = "",
+                                tint = Blue800
+                            )
+                        }
+                    }
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .background(
+                                Color.LightGray,
+                                RoundedCornerShape(10.dp)
+                            )
+                            .padding(start = 10.dp, end = 10.dp, bottom = 10.dp, top = 0.dp)
+                    ) {
+                        itemsIndexed(selectPlayersViewModel.getFilteredTeams()) { _, name ->
+                            ClickableText(
+                                text = AnnotatedString(name),
+                                style = normalText,
+                                onClick = {
+                                    selectPlayersViewModel.setTeamDropdownVisible(
+                                        teamId,
+                                        false
+                                    )
+
+                                    val players = name.split("/")
+                                    selectPlayersViewModel.setPlayerNames(
+                                        teamId,
+                                        players
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun closeTeamPopup(
+    selectPlayersViewModel: SelectPlayersViewModel,
+    teamId: Int
+) {
+    selectPlayersViewModel.setTeamDropdownVisible(
+        teamId,
+        false
+    )
+}
+
+@Composable
 fun PlayerSelection(
     usingTeams: Boolean,
     selectPlayersViewModel: SelectPlayersViewModel
 ) {
-    val names = mutableListOf<State<String?>>()
-    val playerDropDownsVisible = mutableListOf<State<Boolean?>>()
+    val names = mutableListOf<String>()
 
-    for (playerId in 0..3) {
-        names.add(selectPlayersViewModel.getPlayerNameWithOffset(playerId).observeAsState())
-        playerDropDownsVisible.add(
-            selectPlayersViewModel.isPlayerDropDownVisibleWithOffset(playerId).observeAsState()
-        )
+    for (i in 0..3) {
+        val name: String by selectPlayersViewModel.playerNames[i]
+        names.add(name)
     }
 
-    for (teamId in 1..2) {
+    val uniqueNames: Boolean by selectPlayersViewModel.uniquePlayerNames
+
+    val teamDropdownVisible = mutableListOf<Boolean>()
+
+    for (teamId in 0..1) {
+        val isVisible: Boolean by selectPlayersViewModel.teamListVisible[teamId]
+        teamDropdownVisible.add(isVisible)
+    }
+
+    val playerDropDownsVisible = mutableListOf<Boolean>()
+
+    for (playerId in 0..3) {
+        val isVisible: Boolean by selectPlayersViewModel.playerListVisible[playerId]
+        playerDropDownsVisible.add(isVisible)
+    }
+
+    for (teamId in 0..1) {
         PlayerNames(
             usingTeams,
             teamId,
             names,
+            teamDropdownVisible,
             playerDropDownsVisible,
             selectPlayersViewModel
         )
@@ -180,20 +279,30 @@ fun PlayerSelection(
 fun PlayerNames(
     usingTeams: Boolean,
     teamId: Int,
-    nameState: List<State<String?>>,
-    dropDownState: List<State<Boolean?>>,
+    names: List<String>,
+    teamVisibleState: List<Boolean>,
+    dropDownState: List<Boolean>,
     selectPlayersViewModel: SelectPlayersViewModel
 ) {
     if (usingTeams) {
-        Text(
-            text = "Team $teamId",
+        TextWithDropDown(
+            text = "Team ${teamId + 1}",
             modifier = Modifier.padding(top = 5.dp),
-            style = textTitleStyle
+            horizontal = Arrangement.Start,
+            onClickedDropDown = { selectPlayersViewModel.onTeamDropdownClicked(teamId) },
+            onFocusAltered = { selectPlayersViewModel.setTeamDropdownVisible(teamId, false)},
         )
+
+        TeamSelection(
+            teamVisibleState[teamId],
+            selectPlayersViewModel,
+            teamId
+        )
+
     }
 
-    val start = if (teamId == 1) 0 else 2
-    val end = if (teamId == 1) 1 else 3
+    val start = if (teamId == 0) 0 else 2
+    val end = if (teamId == 0) 1 else 3
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -204,7 +313,7 @@ fun PlayerNames(
                 modifier = Modifier
                     .padding(bottom = 5.dp, end = 5.dp)
                     .weight(0.5F),
-                text = nameState[playerId].value!!,
+                text = names[playerId],
                 label = "Player ${playerId + 1}",
                 onNameChanged = { text ->
                     selectPlayersViewModel.onPlayerNameChanged(
@@ -218,7 +327,7 @@ fun PlayerNames(
                 onFocusAltered = { selectPlayersViewModel.clearAllPlayerLists() }
             )
 
-            if (dropDownState[playerId].value!!) {
+            if (dropDownState[playerId]) {
                 PlayerNamesSelection(
                     selectPlayersViewModel,
                     playerId

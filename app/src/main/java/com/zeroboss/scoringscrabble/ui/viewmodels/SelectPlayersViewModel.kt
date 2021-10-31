@@ -1,13 +1,15 @@
 package com.zeroboss.scoringscrabble.ui.viewmodels
 
-import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.LiveData
+import androidx.compose.runtime.*
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zeroboss.scoringscrabble.data.ScoringSheetDataRepository
+import com.zeroboss.scoringscrabble.data.common.CommonDb.boxStore
 import com.zeroboss.scoringscrabble.data.common.CommonDb.getPlayers
-import com.zeroboss.scoringscrabble.data.entities.ScoringSheetData_.teams
+import com.zeroboss.scoringscrabble.data.entities.Player
+import com.zeroboss.scoringscrabble.data.entities.Team
+import io.objectbox.kotlin.boxFor
 import kotlinx.coroutines.launch
 
 class SelectPlayersViewModel(
@@ -15,50 +17,52 @@ class SelectPlayersViewModel(
 ) : ViewModel()  {
     private val data = scoringSheetDataRepository.getScoringSheetData()
 
-    private val _isTeamType = MutableLiveData<Boolean>(data.isTeamType)
-    var isTeamType: MutableLiveData<Boolean> = _isTeamType
+    private val _isTeamType = mutableStateOf<Boolean>(data.isTeamType)
+    var isTeamType = _isTeamType
 
     private val _teamListVisible = createFlags(2)
+    var teamListVisible = _teamListVisible
 
-    private val _playerNames = createNames(4)
-    val playerNames: List<MutableLiveData<String>> = _playerNames
+    private val _playerNames = createPlayerNames()
+    var playerNames = _playerNames
 
-    private val playerListVisible = createFlags(4)
+    private val _playerListVisible = createFlags(4)
+    var playerListVisible = _playerListVisible
 
-    private fun createNames(count: Int): List<MutableLiveData<String>> {
-        val list = mutableListOf<MutableLiveData<String>>()
+    private fun createPlayerNames() : MutableList<MutableState<String>> {
+        val list = mutableListOf<MutableState<String>>()
 
-        for (i in 1..count) {
-            list.add(MutableLiveData<String>(""))
+        for (i in 0..3) {
+            list.add(mutableStateOf(if (i < data.players.size) data.players[i].name else ""))
         }
 
         return list
     }
 
-    private fun createFlags(count: Int): List<MutableLiveData<Boolean>> {
-        val list = mutableListOf<MutableLiveData<Boolean>>()
+    private fun createFlags(count: Int): List<MutableState<Boolean>> {
+        val list = mutableListOf<MutableState<Boolean>>()
 
         for (i in 1..count) {
-            list.add(MutableLiveData<Boolean>(false))
+            list.add(mutableStateOf<Boolean>(false))
         }
 
         return list
     }
 
-    private val _uniquePlayerNames = MutableLiveData<Boolean>(true)
-    val uniquePlayerNames: LiveData<Boolean> = _uniquePlayerNames
+    private val _uniquePlayerNames = mutableStateOf<Boolean>(true)
+    var uniquePlayerNames = _uniquePlayerNames
 
-    private val _dataValid = MutableLiveData<Boolean>(false)
-    var dataValid: LiveData<Boolean> = _dataValid
+    private val _dataValid = mutableStateOf<Boolean>(false)
+    var dataValid = _dataValid
 
     fun changeUsingTeams() {
-        isTeamType.value = !(isTeamType.value)!!
+        isTeamType.value = !(isTeamType.value)
         checkDataValid()
     }
 
     fun saveScoringSheetData() {
         viewModelScope.launch {
-            data.isTeamType = isTeamType.value!!
+            data.isTeamType = isTeamType.value
             data.players.clear()
             data.teams.clear()
 
@@ -73,8 +77,8 @@ class SelectPlayersViewModel(
     }
 
     fun clearAllPlayerNames() {
-        for (playerId in 0..3) {
-            playerNames[playerId].value = ""
+        for (i in 0..3) {
+            _playerNames[i].value = ""
         }
 
         checkDataValid()
@@ -82,14 +86,20 @@ class SelectPlayersViewModel(
 
     fun getPlayerNameWithOffset(
         offset: Int
-    ): MutableLiveData<String> {
-        return playerNames[offset]
+    ): MutableState<String> {
+        return _playerNames[offset]
     }
 
     fun isPlayerDropDownVisibleWithOffset(
         offset: Int
-    ): MutableLiveData<Boolean> {
-        return playerListVisible[offset]
+    ): Boolean {
+        return playerListVisible[offset].value
+    }
+
+    fun isTeamDropDownVisibleWithOffset(
+        offset: Int
+    ): Boolean {
+        return teamListVisible[offset].value
     }
 
     fun onPlayerNameChanged(
@@ -100,21 +110,20 @@ class SelectPlayersViewModel(
         checkDataValid()
     }
 
-    fun checkDataValid() {
-
+    private fun checkDataValid() {
         var valid = true
         var unique = true
 
-        val itemsWithText = playerNames.filter { name -> name.value!!.isNotEmpty() }
+        val itemsWithText = playerNames.filter { name -> name.value.isNotEmpty() }
 
-        val minSize = if (isTeamType.value!!) 4 else 2
+        val minSize = if (isTeamType.value) 4 else 2
 
         if (itemsWithText.size < minSize) {
             valid = false
         }
 
         if (itemsWithText.isNotEmpty()) {
-            val distinct = itemsWithText.distinctBy { it.value!!.uppercase() }
+            val distinct = itemsWithText.distinctBy { it.value.uppercase() }
 
             if (distinct.size != itemsWithText.size) {
                 unique = false
@@ -128,10 +137,48 @@ class SelectPlayersViewModel(
     fun onTeamDropdownClicked(
         teamId: Int,
     ) {
-//        setTeamDropdownVisible(
-//            teamId,
-//            !teamListVisible[teamId - 1].value!!
-//        )
+        setTeamDropdownVisible(
+            teamId,
+            !teamListVisible[teamId].value
+        )
+    }
+
+    fun getFilteredTeams(): List<String> {
+        val excludeTeamNames = mutableListOf<String>()
+
+        for (i in 0..3 step 2) {
+            val player1 = playerNames[i].value
+            val player2 = playerNames[i + 1].value
+
+            if (player1.isNotEmpty() && player2.isNotEmpty()) {
+                excludeTeamNames.add("$player1/$player2")
+            }
+        }
+
+        return getFilteredTeamNames(excludeTeamNames)
+    }
+
+    fun getFilteredTeamNames(
+        exclude: List<String>
+    ): List<String> {
+        return getTeams()
+            .map { team -> team.getTeamName() }.filter { name -> !exclude.contains(name) }
+    }
+
+    fun getTeams(): List<Team> {
+        return boxStore.boxFor<Team>().all
+    }
+
+    fun setPlayerNames(
+        teamId: Int,
+        playerNames: List<String>
+    ) {
+        val start = if (teamId == 0) 0 else 1
+        val end = if (teamId == 0) 1 else 3
+
+        for (playerId in start..end) {
+            onPlayerNameChanged(playerId, playerNames[playerId])
+        }
     }
 
     fun onPlayerDropdownClicked(
@@ -139,7 +186,7 @@ class SelectPlayersViewModel(
     ) {
         setPlayerDropdownVisible(
             playerId,
-            !playerListVisible[playerId].value!!
+            !playerListVisible[playerId].value
         )
     }
 
@@ -156,7 +203,7 @@ class SelectPlayersViewModel(
     }
 
     fun getFilteredPlayers(): List<String> {
-        val exclude = playerNames.map { name -> name.value!! }
+        val exclude = playerNames.map { name -> name.value }
 
         return getFilteredPlayerNames(exclude.filter { name -> name.isNotEmpty() })
     }
@@ -172,7 +219,7 @@ class SelectPlayersViewModel(
 
     fun onStartScoring() {
 //        val match = createMatch(
-//            players = playerNames.map { it.value!! }
+//            players = playerNames.map { it.value }
 //        )
 //
 //        setActiveGame(createGame(match))
@@ -183,8 +230,8 @@ class SelectPlayersViewModel(
         teamId: Int,
         visible: Boolean
     ) {
-//        clearAllTeamLists()
-//        teamListVisible[teamId - 1].value = visible
+        clearAllTeamLists()
+        teamListVisible[teamId].value = visible
     }
 
     fun clearAllTeamLists() {

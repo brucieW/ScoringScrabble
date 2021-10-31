@@ -13,6 +13,7 @@ import io.objectbox.reactive.DataSubscription
 import org.koin.core.component.KoinComponent
 import org.koin.java.KoinJavaComponent.get
 import java.io.File
+import java.time.LocalDateTime
 
 object CommonDb : KoinComponent {
 
@@ -32,59 +33,7 @@ object CommonDb : KoinComponent {
         boxStore.close()
     }
 
-//
-//        // Remove teams and matches that contain this player
-//        val teamBox = boxStore.boxFor<Team>()
-//        val teams = teamBox.query().contains(Team_.name, player.name).build().find()
-//        teamBox.remove(teams)
-//
-//        boxStore.boxFor<Player>().remove(player)
-//    }
-//
-//    fun getPlayerFromName(playerName: String): Player? {
-//        return boxStore.boxFor<Player>().query()
-//            .equal(Player_.name, playerName).build().findFirst()
-//    }
-//
-//    /**
-//     * Create a new team in database.
-//     */
-//    private fun createTeam(
-//        players: List<String>,
-//        match: FieldClassification.Match
-//    ): Team {
-//        var team = Team()
-//        team.name = buildTeamName(players)
-//        team.players.add(getPlayer(players[0]))
-//        team.players.add(getPlayer(players[1]))
-//        team.matches.add(match)
-//
-//        val currentTeam = getTeamFromPlayers(players)
-//
-//        if (currentTeam == null) {
-//            boxStore.boxFor<Team>().put(team)
-//        } else {
-//            team = currentTeam
-//        }
-//
-//        return team
-//    }
-//
-//    fun getTeamFromPlayers(
-//        players: List<String>
-//    ): Team? {
-//        return boxStore.boxFor<Team>().query()
-//            .equal(Team_.name, buildTeamName(players)).build().findFirst()
-//    }
-//
-//    /**
-//     * Return all of the teams in the store.
-//     */
-//    fun getTeams(): List<Team> {
-//        return boxStore.boxFor<Team>().all
-//    }
-//
-//    fun createMatch(
+//    fun createScoreSheet(
 //        players: List<String>,
 //        lastPlayed: LocalDateTime = LocalDateTime.now()
 //    ): FieldClassification.Match {
@@ -114,7 +63,7 @@ object CommonDb : KoinComponent {
 //
 //        return match
 //    }
-//
+
 //    fun deleteMatch(match: FieldClassification.Match) {
 //        // Remove all games and hands associated with match
 //        match.games.forEach {
