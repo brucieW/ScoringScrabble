@@ -3,9 +3,9 @@ package com.zeroboss.scoringscrabble.di
 import android.content.Context
 import android.util.Log
 import com.zeroboss.scoringscrabble.BuildConfig
+import com.zeroboss.scoringscrabble.data.MyObjectBox
 import com.zeroboss.scoringscrabble.data.common.CommonDb.boxStore
 import com.zeroboss.scoringscrabble.data.common.CommonDb.testFile
-import com.zeroboss.scoringscrabble.data.entities.MyObjectBox
 import io.objectbox.BoxStore
 import io.objectbox.DebugFlags
 import io.objectbox.android.AndroidObjectBrowser

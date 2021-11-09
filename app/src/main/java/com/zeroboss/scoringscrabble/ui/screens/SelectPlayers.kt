@@ -1,7 +1,6 @@
 package com.zeroboss.scoringscrabble.ui.screens
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,7 +14,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -41,58 +39,32 @@ fun SelectPlayers(
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier.fillMaxSize(),
-        topBar = { SelectPlayersAppBar(navController) },
-        content = { Body(navController, get()) },
-        backgroundColor = Blue50
+        topBar = {
+            TopPanel(
+                R.string.select_players,
+                onClickReturn = {
+                    navController.navigate("home")
+                }
+            )
+        },
+
+        content = {
+            SelectPlayersBody(
+                navController,
+                get()
+            )
+        }
     )
 }
 
 @Composable
-fun SelectPlayersAppBar(
-    navController: NavController
-) {
-    Row(
-        modifier = Modifier
-            .height(58.dp)
-            .background(Blue800),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Image(
-            painterResource(R.drawable.logo),
-            "",
-            modifier = Modifier
-                .padding(start = 10.dp, end = 20.dp)
-        )
-
-        Text(
-            text = stringResource(id = R.string.select_players),
-            style = navigationTitle2,
-            modifier = Modifier.weight(1f)
-        )
-
-        DropDownMenu(navController)
-
-        IconButton(
-            onClick = { Runtime.getRuntime().exit(0) }
-        ) {
-            Icon(
-                Icons.Rounded.Close,
-                contentDescription = "Close Application",
-                tint = Color.White,
-                modifier = Modifier.padding(end = 10.dp)
-            )
-        }
-    }
-}
-
-@Composable
-fun Body(
+fun SelectPlayersBody(
     navController: NavController,
     selectPlayersViewModel: SelectPlayersViewModel
 ) {
-    val usingTeams: Boolean by selectPlayersViewModel.isTeamType
-    val enabled: Boolean by selectPlayersViewModel.dataValid
-    val uniqueNames: Boolean by selectPlayersViewModel.uniquePlayerNames
+    val usingTeams by selectPlayersViewModel.isTeamType
+    val enabled by selectPlayersViewModel.dataValid
+    val uniqueNames by selectPlayersViewModel.uniquePlayerNames
 
     Card(
         modifier = Modifier
@@ -114,44 +86,46 @@ fun Body(
                 horizontalArrangement = Arrangement.Center
             )
 
-            PlayerSelection(
-                usingTeams,
-                selectPlayersViewModel
-            )
+            if (usingTeams) {
+                PlayerNameSelection(
+                    usingTeams,
+                    selectPlayersViewModel
+                )
 
-            if (!uniqueNames) {
-                Text(
-                    modifier = Modifier
-                        .padding(top = 5.dp)
-                        .fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    text = stringResource(id = R.string.unique_names),
-                    color = Color.Red,
-                    style = normalText,
-                    fontStyle = FontStyle.Italic
+                if (!uniqueNames) {
+                    Text(
+                        modifier = Modifier
+                            .padding(top = 5.dp)
+                            .fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        text = stringResource(id = R.string.unique_names),
+                        color = Color.Red,
+                        style = normalText,
+                        fontStyle = FontStyle.Italic
+                    )
+                }
+
+                MultipleButtonBar(
+                    modifier = Modifier.padding(20.dp),
+                    buttonData = getTwoButtons(
+                        firstButtonText = "Start Scoring",
+                        firstButtonEnabled = enabled && uniqueNames,
+                        onFirstButtonClicked = {
+//                            selectPlayersViewModel.onStartScoring()
+                            navController.navigate("score_sheet")
+                        },
+
+                        secondButtonText = "Cancel",
+                        onSecondButtonClicked = { } //selectPlayersViewModel.clearAllPlayerNames() }
+                    )
                 )
             }
-
-            MultipleButtonBar(
-                modifier = Modifier.padding(20.dp),
-                buttonData = getTwoButtons(
-                    firstButtonText = "Start Scoring",
-                    firstButtonEnabled = enabled && uniqueNames,
-                    onFirstButtonClicked = {
-                        selectPlayersViewModel.onStartScoring()
-                        navController.navigate("score_sheet")
-                    },
-
-                    secondButtonText = "Cancel",
-                    onSecondButtonClicked = { selectPlayersViewModel.clearAllPlayerNames() }
-                )
-            )
         }
     }
 }
 
 @Composable
-fun TeamSelection(
+fun TeamNameSelection(
     isVisible: Boolean = false,
     selectPlayersViewModel: SelectPlayersViewModel,
     teamId: Int
@@ -236,7 +210,7 @@ private fun closeTeamPopup(
 }
 
 @Composable
-fun PlayerSelection(
+fun PlayerNameSelection(
     usingTeams: Boolean,
     selectPlayersViewModel: SelectPlayersViewModel
 ) {
@@ -290,14 +264,19 @@ fun PlayerNames(
             modifier = Modifier.padding(top = 5.dp),
             horizontal = Arrangement.Start,
             onClickedDropDown = { selectPlayersViewModel.onTeamDropdownClicked(teamId) },
-            onFocusAltered = { selectPlayersViewModel.setTeamDropdownVisible(teamId, false)},
+            onFocusAltered = {
+                selectPlayersViewModel.setTeamDropdownVisible(
+                    teamId,
+                    false
+                )
+            },
         )
 
-        TeamSelection(
-            teamVisibleState[teamId],
-            selectPlayersViewModel,
-            teamId
-        )
+//        TeamSelection(
+//            teamVisibleState[teamId],
+//            selectPlayersViewModel,
+//            teamId
+//        )
 
     }
 
@@ -317,12 +296,13 @@ fun PlayerNames(
                 label = "Player ${playerId + 1}",
                 onNameChanged = { text ->
                     selectPlayersViewModel.onPlayerNameChanged(
+                        1,
                         playerId,
                         text
                     )
                 },
                 onTrailingIconClicked = {
-                    selectPlayersViewModel.onPlayerDropdownClicked(playerId)
+                    selectPlayersViewModel.onPlayerDropdownClicked(1, playerId)
                 },
                 onFocusAltered = { selectPlayersViewModel.clearAllPlayerLists() }
             )
@@ -387,6 +367,7 @@ fun PlayerNamesSelection(
                         onClick = {
                             closePlayerPopup(selectPlayersViewModel, playerId)
                             selectPlayersViewModel.onPlayerNameChanged(
+                                1,
                                 playerId,
                                 name
                             )
@@ -403,6 +384,7 @@ private fun closePlayerPopup(
     playerId: Int
 ) {
     selectPlayersViewModel.setPlayerDropdownVisible(
+        1,
         playerId,
         false
     )

@@ -1,9 +1,37 @@
 <resources>
     <string name="app_name">Scoring Scrabble</string>
 
+    <string name="match_items">Match Items</string>
     <string name="select_players">Select Players</string>
     <string name="playing_with_teams">Playing with teams</string>
     <string name="unique_names">Player names must be unique</string>
+
+    <string name="new_game">New Game</string>
+    <string name="score_sheet">Score Sheet</string>
+    <string name="edit_games">Edit Games</string>
+    <string name="preferences">Preferences</string>
+    <string name="statistics">Statistics</string>
+
+    <string name="delete_match">Delete Match</string>
+    <string name="warning_removal_text">This will remove ALL data and the program will be restarted. Are you sure you want to continue?"</string>
+    <string name="warning_deleting_match">"This will permanently delete the selected match and all of its associated games."</string>
+    <string name="warning_deleting_game">"This will permanently delete this game and all of the associated hands."</string>
+    <string name="backup_database">Backup Database</string>
+    <string name="restore_database">Restore Database</string>
+    <string name="clear_database">Clear Database</string>
+
+    <string name="warning">WARNING!</string>
+
+    <string name="team_rankings">Team Rankings</string>
+    <string name="player_rankings">Player Rankings</string>
+    <string name="wins_losses">Wins/Losses</string>
+
+    <string name="team_name">Team Name</string>
+    <string name="player_name">Player Name</string>
+
+    <string name="select_backup">Select Backup</string>
+    <string name="backup_tag">"Backing up data using the following tag"</string>
+    <string name="clear_backups">"This will remove all backups from your device"</string>
 
     <string name="about_text">Application for keeping track of all of your scrabble game scores.</string>
     <string name="version">Version 1.0</string>
@@ -13,6 +41,7 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="close">Close</string>
+    <string name="are_you_sure">Do you want to continue?</string>
 
     <string name="about">About</string>
 </resources>

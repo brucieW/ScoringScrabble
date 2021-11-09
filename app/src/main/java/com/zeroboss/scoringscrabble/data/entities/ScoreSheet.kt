@@ -8,7 +8,7 @@ import io.objectbox.relation.ToMany
 import java.time.LocalDateTime
 
 @Entity
-data class ScoringSheetData(
+data class ScoreSheet(
     @Id
     var id: Long = 0,
 
@@ -22,6 +22,6 @@ data class ScoringSheetData(
     @Convert(converter = LocalDateTimeConverter::class, dbType = Long::class)
     var finished: LocalDateTime? = null
 ) {
-    var teams = ToMany<Team>(this, ScoringSheetData_.teams)
-    var players = ToMany<Player>(this, ScoringSheetData_.players)
+    var teams = ToMany<Team>(this, ScoreSheet_.teams)
+    var players = ToMany<Player>(this, ScoreSheet_.players)
 }

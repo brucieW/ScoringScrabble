@@ -23,37 +23,6 @@
       "relations": []
     },
     {
-      "id": "2:5708056048375620981",
-      "lastPropertyId": "2:3526474581105288610",
-      "name": "ScoringSheetData",
-      "properties": [
-        {
-          "id": "1:8194891918435007099",
-          "name": "id",
-          "type": 6,
-          "flags": 1
-        },
-        {
-          "id": "2:3526474581105288610",
-          "name": "isTeamType",
-          "type": 1,
-          "flags": 4
-        }
-      ],
-      "relations": [
-        {
-          "id": "1:266198553383672078",
-          "name": "teams",
-          "targetId": "3:1225666462574276763"
-        },
-        {
-          "id": "2:3054071413581899393",
-          "name": "players",
-          "targetId": "1:8159694893041796200"
-        }
-      ]
-    },
-    {
       "id": "3:1225666462574276763",
       "lastPropertyId": "2:2338857289932645396",
       "name": "Team",
@@ -72,19 +41,71 @@
           "targetId": "1:8159694893041796200"
         }
       ]
+    },
+    {
+      "id": "4:5680705874799773243",
+      "lastPropertyId": "4:1146943989244134101",
+      "name": "ScoringSheet",
+      "properties": [
+        {
+          "id": "1:5145922528234591363",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:2472233487062687333",
+          "name": "isTeamType",
+          "type": 1,
+          "flags": 4
+        },
+        {
+          "id": "3:2963718997030583795",
+          "name": "started",
+          "type": 6,
+          "flags": 2
+        },
+        {
+          "id": "4:1146943989244134101",
+          "name": "finished",
+          "type": 6,
+          "flags": 2
+        }
+      ],
+      "relations": [
+        {
+          "id": "4:1546637811267495428",
+          "name": "teams",
+          "targetId": "3:1225666462574276763"
+        },
+        {
+          "id": "5:2282992372402154708",
+          "name": "players",
+          "targetId": "1:8159694893041796200"
+        }
+      ]
     }
   ],
-  "lastEntityId": "3:1225666462574276763",
+  "lastEntityId": "4:5680705874799773243",
   "lastIndexId": "0:0",
-  "lastRelationId": "3:1529796799622252375",
+  "lastRelationId": "5:2282992372402154708",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,
-  "retiredEntityUids": [],
+  "retiredEntityUids": [
+    5708056048375620981
+  ],
   "retiredIndexUids": [],
   "retiredPropertyUids": [
-    2338857289932645396
+    2338857289932645396,
+    8194891918435007099,
+    3526474581105288610,
+    3900806028850708283,
+    7166271018800183980
   ],
-  "retiredRelationUids": [],
+  "retiredRelationUids": [
+    266198553383672078,
+    3054071413581899393
+  ],
   "version": 1
 }

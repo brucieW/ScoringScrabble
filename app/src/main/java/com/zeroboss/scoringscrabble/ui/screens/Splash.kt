@@ -40,7 +40,7 @@ fun Splash(
         block = {
             delay(3500)
             navController.popBackStack()
-            navController.navigate(Navigation.SelectPlayers.route)
+            navController.navigate(Navigation.ScoreSheet.route)
         }
     )
 }
