@@ -26,6 +26,8 @@ val gridLineColorLight = Color.Black
 val gridLineColorDark = Color.White
 
 val darkGreen = Color(0xFF228B22)
+val lightGreen = Color(0xFFBFEEb7)
+val lightSalmon = Color(0xFFFDC0B9)
 
 val buttonBrush = Brush.horizontalGradient(
     colors = listOf(Blue800, Blue400, Blue800)
