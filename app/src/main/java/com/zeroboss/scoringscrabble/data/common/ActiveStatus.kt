@@ -1,5 +1,6 @@
 package com.zeroboss.scoringscrabble.data.common
 
+import com.zeroboss.scoringscrabble.R
 import com.zeroboss.scoringscrabble.data.entities.Game
 import com.zeroboss.scoringscrabble.data.entities.Match
 import com.zeroboss.scoringscrabble.data.entities.Player
@@ -10,7 +11,7 @@ object ActiveStatus {
     var activeGame: Game? = null
     var isTeamGame: Boolean = false
     var players: MutableList<Player>? = null
-    val letterFrequency: MutableList<Int> = resetLetterFrequency()
+    var letterFrequency: MutableList<Int> = resetLetterFrequency()
 }
 
 fun resetLetterFrequency() : MutableList<Int> {
