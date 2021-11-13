@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.imageResource
@@ -65,37 +66,12 @@ fun ScoreSheetBody(
 ) {
     val rowState = rememberLazyListState()
 
-    val directionEast by scoringViewModel.directionEast
-    val directionSouth by scoringViewModel.directionSouth
-    val firstPos by scoringViewModel.firstPos
-    val letters by scoringViewModel.letters
-
     LazyRow(
         modifier = Modifier.fillMaxHeight(),
         state = rowState
     ) {
         item {
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(start = 10.dp, end = 10.dp, top = 22.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "Turn",
-                    modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
-                )
-
-                (1..22).forEach { index ->
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 2.dp, bottom = 2.dp),
-                        text = "$index",
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
+            TurnsColumn()
         }
 
         items(items = scoringViewModel._players, itemContent = { player ->
@@ -106,149 +82,32 @@ fun ScoreSheetBody(
         })
 
         item {
-            Column {
-                Row() {
-                    Column() {
-                        Text(
-                            text = "Player 1's Turn",
-                            style = textTitleStyle,
-                            modifier = Modifier.padding(start = 20.dp, top = 10.dp, end = 10.dp)
-                        )
+            ScrabbleBoardLayout(scoringViewModel)
+        }
+    }
+}
 
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(start = 20.dp)
-                        ) {
-                            Text(
-                                text = "Direction: ",
-                                style = textTitleStyle
-                            )
+@Composable
+fun TurnsColumn() {
+    Column(
+        modifier = Modifier
+            .fillMaxHeight()
+            .padding(start = 10.dp, end = 10.dp, top = 22.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Turn",
+            modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
+        )
 
-                            DirectionButton(
-                                directionEast,
-                                onClick = { scoringViewModel.setDirectionEast() },
-                                image = Icons.Rounded.East,
-                                description = "East Direction"
-                            )
-
-                            DirectionButton(
-                                directionSouth,
-                                onClick = { scoringViewModel.setDirectionSouth() },
-                                image = Icons.Rounded.South,
-                                description = "South Direction"
-                            )
-                        }
-                    }
-
-                    Column(
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        IconButton(
-                            modifier = Modifier.size(32.dp),
-                            onClick = {
-                            }
-                        ) {
-                            Icon(
-                                Icons.Rounded.Check,
-                                contentDescription = "",
-                                tint = darkGreen
-                            )
-                        }
-                        IconButton(
-                            modifier = Modifier.size(32.dp),
-                            onClick = {
-                            }
-                        ) {
-                            Icon(
-                                Icons.Rounded.Refresh,
-                                contentDescription = "",
-                                tint = Color.Black
-                            )
-                        }
-                    }
-
-                    Column(
-                        modifier = Modifier.padding(start = 5.dp, top = 10.dp),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "Skip Turn",
-                            style = smallerText
-                        )
-
-                        IconButton(
-                            modifier = Modifier.size(32.dp),
-                            onClick = {
-                            }
-                        ) {
-                            Icon(
-                                Icons.Rounded.CancelPresentation,
-                                contentDescription = "",
-                                tint = Color.Red
-                            )
-                        }
-                    }
-
-                    Column() {
-                        Row() {
-                            TextField(
-                                value = firstPos,
-                                onValueChange = { scoringViewModel.setFirstPos(it) },
-                                label = { Text("First Pos") },
-                                modifier = Modifier
-                                    .width(130.dp)
-                                    .padding(start = 20.dp, end = 10.dp, top = 5.dp)
-                            )
-
-                            TextField(
-                                value = letters,
-                                onValueChange = { scoringViewModel.setLetters(it) },
-                                label = { Text("Letters") },
-                                modifier = Modifier
-                                    .width(160.dp)
-                                    .padding(top = 5.dp)
-                            )
-
-                        }
-                    }
-                }
-
-                Row(
-                    modifier = Modifier
-                        .padding(start = 35.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    ('A'..'O').forEach { letter ->
-                        Text(
-                            modifier = Modifier.padding(start = 14.dp, end = 14.dp),
-                            text = "$letter",
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-
-                Row() {
-                    Column(
-                        modifier = Modifier.padding(start = 10.dp, end = 4.dp),
-                        horizontalAlignment = Alignment.End
-                    ) {
-                        (1..15).forEach { index ->
-                            Text(
-                                text = "$index",
-                                modifier = Modifier.padding(top = 9.dp, bottom = 9.dp),
-                                textAlign = TextAlign.Right
-                            )
-                        }
-
-                    }
-
-                    Column {
-                        ShowBoard(scoringViewModel)
-                    }
-                }
-            }
+        (1..22).forEach { index ->
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 2.dp, bottom = 2.dp),
+                text = "$index",
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
@@ -352,6 +211,144 @@ fun ScoringCard(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun ScrabbleBoardLayout(
+    scoringViewModel: ScoringSheetViewModel
+) {
+    val lazyState = rememberLazyListState()
+
+    LazyColumn(
+        state = lazyState
+    ) {
+        stickyHeader {
+            BoardHeader(scoringViewModel)
+        }
+
+        item {
+            ScrabbleBoard(scoringViewModel)
+        }
+    }
+
+}
+
+@Composable
+fun BoardHeader(
+    scoringViewModel: ScoringSheetViewModel
+) {
+    val directionEast by scoringViewModel.directionEast
+    val directionSouth by scoringViewModel.directionSouth
+    val firstPos by scoringViewModel.firstPos
+    val letters by scoringViewModel.letters
+
+    Row() {
+        Column() {
+            Text(
+                text = "Player 1's Turn",
+                style = textTitleStyle,
+                modifier = Modifier.padding(start = 20.dp, top = 10.dp, end = 10.dp)
+            )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(start = 20.dp)
+            ) {
+                Text(
+                    text = "Direction: ",
+                    style = textTitleStyle
+                )
+
+                DirectionButton(
+                    directionEast,
+                    onClick = { scoringViewModel.setDirectionEast() },
+                    image = Icons.Rounded.East,
+                    description = "East Direction"
+                )
+
+                DirectionButton(
+                    directionSouth,
+                    onClick = { scoringViewModel.setDirectionSouth() },
+                    image = Icons.Rounded.South,
+                    description = "South Direction"
+                )
+            }
+        }
+
+        Column(
+            verticalArrangement = Arrangement.Center
+        ) {
+            IconButton(
+                modifier = Modifier.size(32.dp),
+                onClick = {
+                }
+            ) {
+                Icon(
+                    Icons.Rounded.Check,
+                    contentDescription = "",
+                    tint = darkGreen
+                )
+            }
+            IconButton(
+                modifier = Modifier.size(32.dp),
+                onClick = {
+                }
+            ) {
+                Icon(
+                    Icons.Rounded.Refresh,
+                    contentDescription = "",
+                    tint = Color.Black
+                )
+            }
+        }
+
+        Column(
+            modifier = Modifier.padding(start = 5.dp, top = 10.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Skip Turn",
+                style = smallerText
+            )
+
+            IconButton(
+                modifier = Modifier.size(32.dp),
+                onClick = {
+                }
+            ) {
+                Icon(
+                    Icons.Rounded.CancelPresentation,
+                    contentDescription = "",
+                    tint = Color.Red
+                )
+            }
+        }
+
+        Column() {
+            Row() {
+                TextField(
+                    value = firstPos,
+                    onValueChange = { scoringViewModel.setFirstPos(it) },
+                    label = { Text("First Pos") },
+                    modifier = Modifier
+                        .width(130.dp)
+                        .padding(start = 20.dp, end = 10.dp, top = 5.dp)
+                )
+
+                TextField(
+                    value = letters,
+                    onValueChange = { scoringViewModel.setLetters(it) },
+                    label = { Text("Letters") },
+                    modifier = Modifier
+                        .width(160.dp)
+                        .padding(top = 5.dp)
+                )
+
+            }
+        }
+    }
+}
+
 @Composable
 fun DirectionButton(
     direction: Boolean,
@@ -374,13 +371,31 @@ fun DirectionButton(
 }
 
 @Composable
-fun ShowBoard(
+fun ScrabbleBoard(
     scoringViewModel: ScoringSheetViewModel
 ) {
     val density = LocalDensity.current
     val image = ImageBitmap.imageResource(id = R.drawable.scrabble_board)
-    val side = with(density) { 600.dp.toPx() }.toInt()
     val letterBitmaps = mutableListOf<ImageBitmap>()
+
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
+    val screenWidth = configuration.screenWidthDp.dp
+
+    var sideToUse: Dp
+    var multiplier = 0.95
+
+    if (screenHeight > screenWidth) {
+        sideToUse = screenWidth
+    } else {
+        sideToUse = screenHeight
+        multiplier = 0.8
+    }
+
+    val sideInPixels = with(density) { (multiplier * sideToUse.toPx()).toInt() }
+
+    val side = with(density) { sideInPixels.toDp() }
+    val tileWidth = sideInPixels / 16
 
     scoringViewModel.letters.value.forEach {
         letterBitmaps.add(ImageBitmap.imageResource(id = Letters.get(it).image))
@@ -388,19 +403,20 @@ fun ShowBoard(
 
     Canvas(
         modifier = Modifier
-            .size(620.dp)
-            .padding(end = 20.dp, bottom = 20.dp)
+            .size(side)
             .border(BorderStroke(1.dp, Color.Black))
             .fillMaxSize()
             .pointerInput(Unit) {
                 detectTapGestures(
                     onPress = {
-                        val x = it.x
-                        val y = it.y
-                        val tileWidth = side / 15
-                        val col = 'A' + (x / tileWidth).toInt()
-                        val row = (y / tileWidth).toInt() + 1
-                        scoringViewModel.setFirstPos("$col$row")
+                        val x = it.x - tileWidth
+
+                        if (x >= 0) {
+                            val y = it.y - tileWidth
+                            val col = 'A' + (x / tileWidth).toInt()
+                            val row = (y / tileWidth).toInt() + 1
+                            scoringViewModel.setFirstPos("$col$row")
+                        }
                     }
                 )
             }
@@ -408,22 +424,28 @@ fun ShowBoard(
         drawImage(
             image = image,
             dstOffset = IntOffset.Zero,
-            dstSize = IntSize(side, side)
+            dstSize = IntSize(sideInPixels, sideInPixels)
         )
 
         // Show tiles.
         val firstPos = convertPosition(scoringViewModel.firstPos.value)
 
         if (firstPos.isValid()) {
-            var start = 215
+            var column = ('A' + (tileWidth * firstPos.column)).code - tileWidth
+            var row = (tileWidth * firstPos.row)
+
             letterBitmaps.forEach {
                 drawImage(
                     image = it,
-                    dstOffset = IntOffset(375, start),
-                    dstSize = IntSize(50, 50)
+                    dstOffset = IntOffset(column, row),
+                    dstSize = IntSize(tileWidth, tileWidth)
                 )
 
-                start += 53
+                if (scoringViewModel.directionEast.value) {
+                    column += tileWidth
+                } else {
+                    row += tileWidth
+                }
             }
         }
 
