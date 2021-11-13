@@ -21,12 +21,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.zeroboss.scoringscrabble.R
 import com.zeroboss.scoringscrabble.data.entities.Letters
+import com.zeroboss.scoringscrabble.data.entities.Player
 import com.zeroboss.scoringscrabble.data.entities.TurnData
 import com.zeroboss.scoringscrabble.data.entities.convertPosition
 import com.zeroboss.scoringscrabble.ui.common.TopPanel
@@ -62,7 +64,6 @@ fun ScoreSheetBody(
     scoringViewModel: ScoringSheetViewModel
 ) {
     val rowState = rememberLazyListState()
-    val context = LocalContext.current
 
     val directionEast by scoringViewModel.directionEast
     val directionSouth by scoringViewModel.directionSouth
@@ -98,117 +99,10 @@ fun ScoreSheetBody(
         }
 
         items(items = scoringViewModel._players, itemContent = { player ->
-            Card(
-                modifier = Modifier
-                    .width(150.dp)
-                    .padding(top = 20.dp, end = 10.dp),
-                shape = RoundedCornerShape(20.dp),
-                backgroundColor = Color.White,
-                border = BorderStroke(1.dp, Color.Black),
-                elevation = 10.dp
-            ) {
-                Column {
-                    Text(
-                        text = player.name,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(6.dp),
-                        textAlign = TextAlign.Center,
-                        style = textTitleStyle
-                    )
-
-                    Divider(color = Color.Black)
-
-                    (0..21).forEach { item ->
-                        val data = scoringViewModel.turnData
-
-                        Row(
-                            modifier = Modifier
-                                .background(if (item % 2 == 0) lightGreen else Color.White)
-                                .padding(2.dp)
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            if (item < data.size) {
-                                Text("50")
-                                IconButton(
-                                    modifier = Modifier
-                                        .size(16.dp),
-                                    onClick = {
-                                        Toast.makeText(context, "Clicked", Toast.LENGTH_LONG).show()
-                                    }
-                                ) {
-                                    Icon(
-                                        Icons.Rounded.Add,
-                                        contentDescription = "",
-                                        tint = Color.Black
-                                    )
-                                }
-
-                                Text("100")
-                            } else {
-                                Text("")
-                            }
-                        }
-                    }
-
-//                    Row(
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .background(lightSalmon),
-//                        horizontalArrangement = Arrangement.SpaceBetween
-//                    ) {
-//                        Text(
-//                            text = "Overtime Penalty",
-//                            modifier = Modifier.weight(0.5f)
-//                        )
-//
-//                        Text(
-//                            text = "25",
-//                            modifier = Modifier.weight(0.5f)
-//                        )
-//
-//                        Divider()
-//                    }
-
-                    Divider(color = Color.Black)
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(lightSalmon)
-                            .padding(10.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Unused Tiles",
-                            //                            modifier = Modifier.weight(0.5f)
-                        )
-
-                        Text(
-                            text = "3",
-                            //                            modifier = Modifier.weight(0.5f)
-                        )
-                    }
-
-                    Divider(color = Color.Black, thickness = 3.dp)
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(10.dp)
-                            .background(Color.White),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Total"
-                        )
-
-                        Text(text = "240")
-                    }
-                }
-            }
+            ScoringCard(
+                scoringViewModel,
+                player
+            )
         })
 
         item {
@@ -360,6 +254,105 @@ fun ScoreSheetBody(
 }
 
 @Composable
+fun ScoringCard(
+    scoringViewModel: ScoringSheetViewModel,
+    player: Player
+) {
+    val context = LocalContext.current
+
+    Card(
+        modifier = Modifier
+            .width(150.dp)
+            .padding(top = 20.dp, end = 10.dp),
+        shape = RoundedCornerShape(20.dp),
+        backgroundColor = Color.White,
+        border = BorderStroke(1.dp, Color.Black),
+        elevation = 10.dp
+    ) {
+        Column {
+            Text(
+                text = player.name,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(6.dp),
+                textAlign = TextAlign.Center,
+                style = textTitleStyle
+            )
+
+            BlackDivider()
+
+            (0..21).forEach { item ->
+                val data = scoringViewModel.turnData
+
+                Row(
+                    modifier = Modifier
+                        .background(if (item % 2 == 0) lightGreen else Color.White)
+                        .padding(2.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (item < data.size) {
+                        Text("50")
+                        IconButton(
+                            modifier = Modifier
+                                .size(16.dp),
+                            onClick = {
+                                Toast.makeText(context, "Clicked", Toast.LENGTH_LONG).show()
+                            }
+                        ) {
+                            Icon(
+                                Icons.Rounded.Add,
+                                contentDescription = "",
+                                tint = Color.Black
+                            )
+                        }
+
+                        Text("100")
+                    } else {
+                        Text("")
+                    }
+                }
+            }
+
+            BlackDivider()
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(lightSalmon)
+                    .padding(10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Unused Tiles",
+                )
+
+                Text(
+                    text = "3",
+                )
+            }
+
+            BlackDivider(thickness = 3.dp)
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+                    .background(Color.White),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Total"
+                )
+
+                Text(text = "240")
+            }
+        }
+    }
+}
+
+@Composable
 fun DirectionButton(
     direction: Boolean,
     onClick: () -> Unit,
@@ -422,15 +415,15 @@ fun ShowBoard(
         val firstPos = convertPosition(scoringViewModel.firstPos.value)
 
         if (firstPos.isValid()) {
-            var start = 420
+            var start = 215
             letterBitmaps.forEach {
                 drawImage(
                     image = it,
-                    dstOffset = IntOffset(742, start),
-                    dstSize = IntSize(100, 105)
+                    dstOffset = IntOffset(375, start),
+                    dstSize = IntSize(50, 50)
                 )
 
-                start += 105
+                start += 53
             }
         }
 
@@ -452,6 +445,16 @@ fun TurnData(
     }
 
     Divider()
+}
+
+@Composable
+fun BlackDivider(
+    thickness: Dp = 1.dp
+) {
+    Divider(
+        color = Color.Black,
+        thickness = thickness
+    )
 }
 
 @Composable
