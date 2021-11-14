@@ -12,6 +12,9 @@ class ScoringSheetViewModel(
     val _players = mutableListOf<Player>()
     private var _availableLetters = ActiveStatus.letterFrequency.map { }
 
+    private val _activePlayer = mutableStateOf(Player())
+    val activePlayer = _activePlayer
+
     private val _directionEast = mutableStateOf<Boolean>(true)
     val directionEast = _directionEast
 
@@ -55,10 +58,12 @@ class ScoringSheetViewModel(
         for (playerId in 1..4) {
             _players.add(Player(name = "Player $playerId"))
 
-            for (turn in 1..5) {
+            for (turn in 1..4) {
                 turnData.add(getTurnData(playerId, turn))
             }
         }
+
+        _activePlayer.value = _players[0]
     }
 
 //    private val _matches = MutableStateFlow(currentMatchCards)
