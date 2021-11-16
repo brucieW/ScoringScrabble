@@ -5,13 +5,13 @@ import com.zeroboss.scoringscrabble.R
 data class Letter (
     val letter: Char,
     val image: Int,
-    val value: Byte,
-    val quantity: Byte
+    val value: Int,
+    val quantity: Int
 )
 
 object Letters {
     private val letters: List<Letter> = listOf<Letter>(
-        Letter('A', R.drawable.letter_a, 3, 2),
+        Letter('A', R.drawable.letter_a, 3, 9),
         Letter('B', R.drawable.letter_b, 3, 2),
         Letter('C', R.drawable.letter_c, 3, 2),
         Letter('D', R.drawable.letter_d, 2, 4),

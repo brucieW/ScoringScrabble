@@ -1,7 +1,8 @@
 package com.zeroboss.scoringscrabble.ui.viewmodels
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.text.toUpperCase
 import androidx.lifecycle.ViewModel
 import com.zeroboss.scoringscrabble.data.common.ActiveStatus
 import com.zeroboss.scoringscrabble.data.entities.*
@@ -31,25 +32,46 @@ class ScoringSheetViewModel(
         _directionEast.value = false
     }
 
+    var tileStartX = mutableListOf<Float>()
+    var tileStartY = mutableListOf<Float>()
+
     private val _firstPos = mutableStateOf("")
     val firstPos = _firstPos
 
-    fun setFirstPos(firstPos: String) {
-        _firstPos.value = firstPos
+    fun setFirstPos(x: Float, y: Float) {
+        _firstPos.value = ""
+
+        for (col in 0..14) {
+            if (x >= tileStartX[col] && x <= tileStartX[col + 1]) {
+                for (row in 0..14) {
+                    if (y >= tileStartY[row] && y <= tileStartY[row + 1]) {
+                        _firstPos.value = "${'A' + col}${row + 1}"
+                        return
+                    }
+                }
+            }
+        }
     }
 
-    private val _letters = mutableStateOf("")
-    val letters = _letters
-
-    fun setLetters(letters: String) {
-        _letters.value = letters.uppercase()
+    fun adjustLastStartItems(tileWidth: Float) {
+        tileStartX[15] = tileStartX[14] + tileWidth + 2
+        tileStartY[15] = tileStartY[14] + tileWidth + 2
     }
 
-    private val _firstMove = mutableStateOf<Boolean>(true)
-    val firstMove = _firstMove
+    private val _tileCounts = mutableListOf<MutableState<Int>>()
+    val tileCounts = _tileCounts
 
-    fun setFirstMove(firstMove: Boolean) {
-        _firstMove.value = firstMove
+    fun setTileCount(
+        letter: Letter
+    ) {
+        _tileCounts[letter.letter - 'A'].value = letter.quantity
+    }
+
+    fun addToTileCount(
+        index: Int,
+        count: Int
+    ) {
+        _tileCounts[index].value += count
     }
 
     val turnData = mutableListOf<TurnData>()
@@ -64,6 +86,15 @@ class ScoringSheetViewModel(
         }
 
         _activePlayer.value = _players[0]
+
+        for (i in 1..16) {
+            tileStartX.add(0f)
+            tileStartY.add(0f)
+        }
+
+        ('A'..'Z').forEach {
+            _tileCounts.add(mutableStateOf(Letters.get(it).quantity))
+        }
     }
 
 //    private val _matches = MutableStateFlow(currentMatchCards)

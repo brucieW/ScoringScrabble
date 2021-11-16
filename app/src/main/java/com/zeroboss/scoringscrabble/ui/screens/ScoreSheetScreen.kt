@@ -1,5 +1,7 @@
 package com.zeroboss.scoringscrabble.ui.screens
 
+import android.graphics.Paint
+import android.widget.ImageButton
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -12,13 +14,18 @@ import androidx.compose.material.icons.rounded.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -29,7 +36,8 @@ import com.zeroboss.scoringscrabble.R
 import com.zeroboss.scoringscrabble.data.entities.Letters
 import com.zeroboss.scoringscrabble.data.entities.Player
 import com.zeroboss.scoringscrabble.data.entities.TurnData
-import com.zeroboss.scoringscrabble.data.entities.convertPosition
+import com.zeroboss.scoringscrabble.ui.common.TileSettings
+import com.zeroboss.scoringscrabble.ui.common.TileType
 import com.zeroboss.scoringscrabble.ui.common.TopPanel
 import com.zeroboss.scoringscrabble.ui.theme.*
 import com.zeroboss.scoringscrabble.ui.viewmodels.ScoringSheetViewModel
@@ -206,6 +214,7 @@ fun ScrabbleBoardLayout(
 
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun BoardHeader(
     scoringViewModel: ScoringSheetViewModel
@@ -214,7 +223,9 @@ fun BoardHeader(
     val directionEast by scoringViewModel.directionEast
     val directionSouth by scoringViewModel.directionSouth
     val firstPos by scoringViewModel.firstPos
-    val letters by scoringViewModel.letters
+
+    val screenWidth = with(LocalDensity.current) { LocalConfiguration.current.screenWidthDp }
+    val tileWidth = (screenWidth / 16)
 
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -292,31 +303,67 @@ fun BoardHeader(
                         )
                     }
                 }
-                TilesSelector(
-                    start = 'A',
-                    end = 'Z'
-                )
-
             }
 
         }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        ShowTiles(scoringViewModel, 'A', 'I', tileWidth)
+        ShowTiles(scoringViewModel, 'J', 'R', tileWidth)
+        ShowTiles(scoringViewModel, 'S', 'Z', tileWidth)
+
+        Spacer(modifier = Modifier.height(10.dp))
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun TilesSelector(
+fun ShowTiles(
+    scoringViewModel: ScoringSheetViewModel,
     start: Char,
-    end: Char
+    end: Char,
+    tileWidth: Int
 ) {
+    val badgeCounts = scoringViewModel.tileCounts
+
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 10.dp),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         for (tile in start..end) {
-            Text(
-                text = tile.toString(),
-                modifier = Modifier
-            )
+            val offset = tile - 'A'
+
+            if (badgeCounts[offset].value == 0) {
+                Image(
+                    painter = painterResource(Letters.get(tile).image),
+                    contentDescription = "",
+                    modifier = Modifier.size(tileWidth.dp)
+                )
+
+                Spacer(modifier = Modifier.width(20.dp))
+            } else {
+                BadgeBox(
+                    badgeContent = {
+                        Text(
+                            text = badgeCounts[offset].value.toString()
+                        )
+                    },
+                    modifier = Modifier
+                        .padding(end = 20.dp)
+                        .clickable {
+                            scoringViewModel.addToTileCount(offset, -1)
+                        }
+                ) {
+                    Image(
+                        painter = painterResource(Letters.get(tile).image),
+                        contentDescription = "",
+                        modifier = Modifier.size(tileWidth.dp)
+                    )
+                }
+            }
         }
     }
 }
@@ -369,8 +416,6 @@ fun DirectionButton(
             tint = if (direction) darkGreen else Color.Gray
         )
     }
-
-
 }
 
 @Composable
@@ -378,75 +423,140 @@ fun ScrabbleBoard(
     scoringViewModel: ScoringSheetViewModel
 ) {
     val density = LocalDensity.current
-    val image = ImageBitmap.imageResource(id = R.drawable.scrabble_board)
-    val letterBitmaps = mutableListOf<ImageBitmap>()
+    val config = LocalConfiguration.current
+    val screenWidth = with(density) { config.screenWidthDp.dp.toPx().toInt() }
+    val tileWidth = (screenWidth.toFloat() / 18f) + 2f
+    val star = ImageBitmap.imageResource(id = R.drawable.starting_star)
 
-    val configuration = LocalConfiguration.current
-    val screenHeight = configuration.screenHeightDp.dp
-    val screenWidth = configuration.screenWidthDp.dp
 
-    val sideInPixels = with(density) { screenWidth.toPx().toInt() }
+    Surface(
+        modifier = Modifier
+            .size(
+                config.screenWidthDp.dp,
+                config.screenWidthDp.dp
+            )
+            .border(BorderStroke(1.dp, Color.Black))
+            .background(Color.White)
+    ) {
 
-    val tileWidth = sideInPixels / 16
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onPress = { scoringViewModel.setFirstPos(it.x, it.y) }
+                    )
+                }
+        ) {
+            var x = tileWidth * 2 - tileWidth / 3
+            var y = tileWidth - tileWidth / 4
 
-    scoringViewModel.letters.value.forEach {
-        letterBitmaps.add(ImageBitmap.imageResource(id = Letters.get(it).image))
+            for (col in 0..14) {
+                drawColumnText(this, tileWidth, x, y, ('A' + col).toString())
+                x += tileWidth + 2
+            }
+
+            x = tileWidth / 2
+            y = tileWidth + tileWidth * 3 / 4
+
+            for (col in 1..15) {
+                drawColumnText(this, tileWidth, x, y, col.toString())
+                y += tileWidth + 2
+            }
+
+            y = tileWidth
+
+            for (row in 0..14) {
+                x = tileWidth + tileWidth / 3
+
+                for (col in 0..14) {
+                    val position = ('A' + col).toString()
+
+                    if (row == 1) {
+                        scoringViewModel.tileStartX[col] = x
+                    }
+
+                    if (col == 1) {
+                        scoringViewModel.tileStartY[row] = y
+                    }
+
+                    drawTile(
+                        this,
+                        position + (row + 1).toString(),
+                        x,
+                        y,
+                        tileWidth,
+                        star
+                    )
+
+                    x += tileWidth + 2
+                }
+
+                y += tileWidth + 2
+            }
+
+            scoringViewModel.adjustLastStartItems(tileWidth)
+        }
+    }
+}
+
+
+fun drawColumnText(
+    compose: DrawScope,
+    tileWidth: Float,
+    x: Float,
+    y: Float,
+    text: String
+) {
+    val paint = Paint().apply {
+        textAlign = Paint.Align.CENTER
+        textSize = tileWidth / 3 * 2
+        color = android.graphics.Color.BLACK
     }
 
-    Canvas(
-        modifier = Modifier
-            .size(screenWidth)
-            .border(BorderStroke(1.dp, Color.Black))
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onPress = {
-                        val x = it.x - tileWidth
+    compose.drawContext.canvas.nativeCanvas.drawText(
+        text,
+        x,
+        y,
+        paint
+    )
+}
 
-                        if (x >= 0) {
-                            val y = it.y - tileWidth
-                            val col = 'A' + (x / tileWidth).toInt()
-                            val row = (y / tileWidth).toInt() + 1
-                            scoringViewModel.setFirstPos("$col$row")
-                        }
-                    }
-                )
-            }
-    ) {
-        drawImage(
-            image = image,
-            dstOffset = IntOffset.Zero,
-            dstSize = IntSize(sideInPixels, sideInPixels)
+fun drawTile(
+    compose: DrawScope,
+    position: String,
+    x: Float,
+    y: Float,
+    side: Float,
+    star: ImageBitmap
+) {
+    val tileInfo = TileSettings.getTileInfo(position)
+
+    compose.drawRect(
+        color = tileInfo.info.color,
+        topLeft = Offset(x, y),
+        size = Size(side, side)
+    )
+
+    val paint = Paint().apply {
+        textAlign = Paint.Align.CENTER
+        textSize = side / 2
+        color = android.graphics.Color.WHITE
+    }
+
+    compose.drawContext.canvas.nativeCanvas.drawText(
+        tileInfo.info.text,
+        x + (side / 2),
+        y + (side / 2) + (side * 0.1f),
+        paint
+    )
+
+    if (tileInfo == TileType.Starting) {
+        compose.drawImage(
+            image = star,
+            dstOffset = IntOffset(x.toInt(), y.toInt()),
+            dstSize = IntSize(side.toInt(), side.toInt())
         )
-
-        // Show tiles.
-        val firstPos = convertPosition(scoringViewModel.firstPos.value)
-
-        if (firstPos.isValid()) {
-            var x = ('A' + (tileWidth * firstPos.column)).code
-
-            if (screenWidth < screenHeight) {
-                x -= tileWidth
-            } else {
-                x += tileWidth
-            }
-
-            var y = (tileWidth * firstPos.row)
-
-            letterBitmaps.forEach {
-                drawImage(
-                    image = it,
-                    dstOffset = IntOffset(x, y),
-                    dstSize = IntSize(tileWidth, tileWidth)
-                )
-
-                if (scoringViewModel.directionEast.value) {
-                    x += tileWidth
-                } else {
-                    y += tileWidth
-                }
-            }
-        }
-
     }
 }
 
