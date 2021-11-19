@@ -3,6 +3,7 @@ package com.zeroboss.scoringscrabble.ui.viewmodels
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import com.zeroboss.scoringscrabble.data.common.ActiveStatus
 import com.zeroboss.scoringscrabble.data.entities.*
@@ -61,6 +62,9 @@ class ScoringSheetViewModel(
     private val _tileCounts = mutableListOf<MutableState<Int>>()
     val tileCounts = _tileCounts
 
+    val tileImages = mutableListOf<ImageBitmap>()
+
+
     fun setTileCount(
         letter: Letter
     ) {
@@ -74,13 +78,16 @@ class ScoringSheetViewModel(
         _tileCounts[index].value += count
     }
 
-    val turnData = mutableListOf<TurnData>()
+    fun clickedBackSpace() {
+    }
+
+    val turnData = mutableListOf<MutableState<TurnData>>()
 
     init {
         for (playerId in 1..4) {
             _players.add(Player(name = "Player $playerId"))
 
-            for (turn in 1..4) {
+            for (turn in 1..6) {
                 turnData.add(getTurnData(playerId, turn))
             }
         }
@@ -105,76 +112,88 @@ class ScoringSheetViewModel(
 private fun getTurnData(
     playerId: Int,
     turn: Int
-): TurnData {
+): MutableState<TurnData> {
     when (playerId) {
         1 -> {
             when (turn) {
-                1 -> return TurnData(
-                    playerId,
-                    turn,
-                    listOf(
-                        LetterAndPosition(Letters.get('O'), convertPosition("C8")),
-                        LetterAndPosition(Letters.get('V'), convertPosition("C9")),
-                        LetterAndPosition(Letters.get('E'), convertPosition("C10")),
-                        LetterAndPosition(Letters.get('R'), convertPosition("C11")),
-                        LetterAndPosition(Letters.get('B'), convertPosition("C12")),
-                        LetterAndPosition(Letters.get('I'), convertPosition("C13")),
-                        LetterAndPosition(Letters.get('D'), convertPosition("C14")),
+                1 -> return mutableStateOf(
+                    TurnData(
+                        playerId,
+                        turn,
+                        listOf(
+                            LetterAndPosition(Letters.get('O'), convertPosition("C8")),
+                            LetterAndPosition(Letters.get('V'), convertPosition("D8")),
+                            LetterAndPosition(Letters.get('E'), convertPosition("E8")),
+                            LetterAndPosition(Letters.get('R'), convertPosition("F8")),
+                            LetterAndPosition(Letters.get('B'), convertPosition("G8")),
+                            LetterAndPosition(Letters.get('I'), convertPosition("H8")),
+                            LetterAndPosition(Letters.get('D'), convertPosition("I8")),
+                        )
                     )
                 )
 
-                2 -> return TurnData(
-                    playerId,
-                    turn,
-                    listOf(
-                        LetterAndPosition(Letters.get('U'), convertPosition("M2")),
-                        LetterAndPosition(Letters.get('G'), convertPosition("M3")),
-                        LetterAndPosition(Letters.get('A'), convertPosition("M4")),
-                        LetterAndPosition(Letters.get('R'), convertPosition("M5")),
+                2 -> return mutableStateOf(
+                    TurnData(
+                        playerId,
+                        turn,
+                        listOf(
+                            LetterAndPosition(Letters.get('U'), convertPosition("M2")),
+                            LetterAndPosition(Letters.get('G'), convertPosition("M3")),
+                            LetterAndPosition(Letters.get('A'), convertPosition("M4")),
+                            LetterAndPosition(Letters.get('R'), convertPosition("M5")),
+                        )
                     )
                 )
 
-                3 -> return TurnData(
-                    playerId,
-                    turn,
-                    listOf(
-                        LetterAndPosition(Letters.get('D'), convertPosition("C9")),
-                        LetterAndPosition(Letters.get('E'), convertPosition("C10")),
-                        LetterAndPosition(Letters.get('A'), convertPosition("C11")),
+                3 -> return mutableStateOf(
+                    TurnData(
+                        playerId,
+                        turn,
+                        listOf(
+                            LetterAndPosition(Letters.get('D'), convertPosition("C9")),
+                            LetterAndPosition(Letters.get('E'), convertPosition("C10")),
+                            LetterAndPosition(Letters.get('A'), convertPosition("C11")),
+                        )
                     )
                 )
 
-                4 -> return TurnData(
-                    playerId,
-                    turn,
-                    listOf(
-                        LetterAndPosition(Letters.get('U'), convertPosition("F9")),
-                        LetterAndPosition(Letters.get('R'), convertPosition("F10")),
-                        LetterAndPosition(Letters.get('A'), convertPosition("F11")),
-                        LetterAndPosition(Letters.get('L'), convertPosition("F12")),
-                        LetterAndPosition(Letters.get('I'), convertPosition("F13")),
-                        LetterAndPosition(Letters.get('S'), convertPosition("F14")),
-                        LetterAndPosition(Letters.get('E'), convertPosition("F15")),
+                4 -> return mutableStateOf(
+                    TurnData(
+                        playerId,
+                        turn,
+                        listOf(
+                            LetterAndPosition(Letters.get('U'), convertPosition("F9")),
+                            LetterAndPosition(Letters.get('R'), convertPosition("F10")),
+                            LetterAndPosition(Letters.get('A'), convertPosition("F11")),
+                            LetterAndPosition(Letters.get('L'), convertPosition("F12")),
+                            LetterAndPosition(Letters.get('I'), convertPosition("F13")),
+                            LetterAndPosition(Letters.get('S'), convertPosition("F14")),
+                            LetterAndPosition(Letters.get('E'), convertPosition("F15")),
+                        )
                     )
                 )
 
-                5 -> return TurnData(
-                    playerId,
-                    turn,
-                    listOf(
-                        LetterAndPosition(Letters.get('X'), convertPosition("B14")),
-                        LetterAndPosition(Letters.get('E'), convertPosition("B15")),
+                5 -> return mutableStateOf(
+                    TurnData(
+                        playerId,
+                        turn,
+                        listOf(
+                            LetterAndPosition(Letters.get('X'), convertPosition("B14")),
+                            LetterAndPosition(Letters.get('E'), convertPosition("B15")),
+                        )
                     )
                 )
 
-                6 -> return TurnData(
-                    playerId,
-                    turn,
-                    listOf(
-                        LetterAndPosition(Letters.get('H'), convertPosition("L12")),
-                        LetterAndPosition(Letters.get('O'), convertPosition("L13")),
-                        LetterAndPosition(Letters.get('O'), convertPosition("L14")),
-                        LetterAndPosition(Letters.get('K'), convertPosition("L15")),
+                6 -> return mutableStateOf(
+                    TurnData(
+                        playerId,
+                        turn,
+                        listOf(
+                            LetterAndPosition(Letters.get('H'), convertPosition("L12")),
+                            LetterAndPosition(Letters.get('O'), convertPosition("L13")),
+                            LetterAndPosition(Letters.get('O'), convertPosition("L14")),
+                            LetterAndPosition(Letters.get('K'), convertPosition("L15")),
+                        )
                     )
                 )
             }
@@ -183,24 +202,26 @@ private fun getTurnData(
         2 -> {
             when (turn) {
                 1 -> {
-                    return TurnData(
-                        playerId,
-                        turn,
-                        listOf(
-                            LetterAndPosition(Letters.get('U'), convertPosition("I1")),
-                            LetterAndPosition(Letters.get('N'), convertPosition("I2")),
-                            LetterAndPosition(Letters.get('V'), convertPosition("I3")),
-                            LetterAndPosition(Letters.get('E'), convertPosition("I4")),
-                            LetterAndPosition(Letters.get('I'), convertPosition("I5")),
-                            LetterAndPosition(Letters.get('L'), convertPosition("I6")),
-                            LetterAndPosition(Letters.get('E'), convertPosition("I7")),
-                            LetterAndPosition(Letters.get('D'), convertPosition("I8")),
+                    return mutableStateOf(
+                        TurnData(
+                            playerId,
+                            turn,
+                            listOf(
+                                LetterAndPosition(Letters.get('U'), convertPosition("I1")),
+                                LetterAndPosition(Letters.get('N'), convertPosition("I2")),
+                                LetterAndPosition(Letters.get('V'), convertPosition("I3")),
+                                LetterAndPosition(Letters.get('E'), convertPosition("I4")),
+                                LetterAndPosition(Letters.get('I'), convertPosition("I5")),
+                                LetterAndPosition(Letters.get('L'), convertPosition("I6")),
+                                LetterAndPosition(Letters.get('E'), convertPosition("I7")),
+                                LetterAndPosition(Letters.get('D'), convertPosition("I8")),
+                            )
                         )
                     )
                 }
 
                 2 -> {
-                    return TurnData(
+                    return mutableStateOf(TurnData(
                         playerId,
                         turn,
                         listOf(
@@ -208,19 +229,19 @@ private fun getTurnData(
                             LetterAndPosition(Letters.get('O'), convertPosition("N3")),
                             LetterAndPosition(Letters.get('D'), convertPosition("N4")),
                         )
-                    )
+                    ))
                 }
 
-                3 -> return TurnData(
+                3 -> return mutableStateOf(TurnData(
                     playerId,
                     turn,
                     listOf(
                         LetterAndPosition(Letters.get('P'), convertPosition("A9")),
                         LetterAndPosition(Letters.get('O'), convertPosition("B9")),
                     )
-                )
+                ))
 
-                4 -> return TurnData(
+                4 -> return mutableStateOf(TurnData(
                     playerId,
                     turn,
                     listOf(
@@ -232,18 +253,18 @@ private fun getTurnData(
                         LetterAndPosition(Letters.get('E'), convertPosition("K11")),
                         LetterAndPosition(Letters.get('S'), convertPosition("L11")),
                     )
-                )
+                ))
 
-                5 -> return TurnData(
+                5 -> return mutableStateOf(TurnData(
                     playerId,
                     turn,
                     listOf(
                         LetterAndPosition(Letters.get('G'), convertPosition("A13")),
                         LetterAndPosition(Letters.get('P'), convertPosition("A15")),
                     )
-                )
+                ))
 
-                6 -> return TurnData(
+                6 -> return mutableStateOf(TurnData(
                     playerId,
                     turn,
                     listOf(
@@ -253,14 +274,14 @@ private fun getTurnData(
                         LetterAndPosition(Letters.get('M'), convertPosition("N15")),
                         LetterAndPosition(Letters.get('E'), convertPosition("O15")),
                     )
-                )
+                ))
             }
         }
 
         3 -> {
             when (turn) {
                 1 -> {
-                    return TurnData(
+                    return mutableStateOf(TurnData(
                         playerId,
                         turn,
                         listOf(
@@ -270,11 +291,11 @@ private fun getTurnData(
                             LetterAndPosition(Letters.get('T'), convertPosition("L1")),
                             LetterAndPosition(Letters.get('S'), convertPosition("M1")),
                         )
-                    )
+                    ))
                 }
 
                 2 -> {
-                    return TurnData(
+                    return mutableStateOf(TurnData(
                         playerId,
                         turn,
                         listOf(
@@ -285,19 +306,19 @@ private fun getTurnData(
                             LetterAndPosition(Letters.get('N'), convertPosition("J5")),
                             LetterAndPosition(Letters.get('G'), convertPosition("K5"))
                         )
-                    )
+                    ))
                 }
 
-                3 -> return TurnData(
+                3 -> return mutableStateOf(TurnData(
                     playerId,
                     turn,
                     listOf(
                         LetterAndPosition(Letters.get('H'), convertPosition("B10")),
                         LetterAndPosition(Letters.get('M'), convertPosition("B11"))
                     )
-                )
+                ))
 
-                4 -> return TurnData(
+                4 -> return mutableStateOf(TurnData(
                     playerId,
                     turn,
                     listOf(
@@ -309,46 +330,46 @@ private fun getTurnData(
                         LetterAndPosition(Letters.get('R'), convertPosition("H14")),
                         LetterAndPosition(Letters.get('E'), convertPosition("I14"))
                     )
-                )
+                ))
 
-                5 -> return TurnData(
+                5 -> return mutableStateOf(TurnData(
                     playerId,
                     turn,
                     listOf(
                         LetterAndPosition(Letters.get('E'), convertPosition("C14")),
                         LetterAndPosition(Letters.get('N'), convertPosition("C15"))
                     )
-                )
+                ))
 
-                6 -> return TurnData(
+                6 -> return mutableStateOf(TurnData(
                     playerId,
                     turn,
                     listOf(
                         LetterAndPosition(Letters.get('J'), convertPosition("K13")),
-                        LetterAndPosition(Letters.get('Y'), convertPosition("K15")),
-                        LetterAndPosition(Letters.get('S'), convertPosition("K16"))
+                        LetterAndPosition(Letters.get('Y'), convertPosition("M13")),
+                        LetterAndPosition(Letters.get('S'), convertPosition("N13"))
                     )
-                )
+                ))
             }
         }
 
         4 -> {
             when (turn) {
                 1 -> {
-                    return TurnData(
+                    return mutableStateOf(TurnData(
                         playerId,
                         turn,
                         listOf(
                             LetterAndPosition(Letters.get('L'), convertPosition("G2")),
                             LetterAndPosition(Letters.get('I'), convertPosition("H2")),
                             LetterAndPosition(Letters.get('I'), convertPosition("J2")),
-                            LetterAndPosition(Letters.get('N'), convertPosition("K22"))
+                            LetterAndPosition(Letters.get('N'), convertPosition("K2"))
                         )
-                    )
+                    ))
                 }
 
                 2 -> {
-                    return TurnData(
+                    return mutableStateOf(TurnData(
                         playerId,
                         turn,
                         listOf(
@@ -356,11 +377,11 @@ private fun getTurnData(
                             LetterAndPosition(Letters.get('A'), convertPosition("G6")),
                             LetterAndPosition(Letters.get('I'), convertPosition("H6"))
                         )
-                    )
+                    ))
                 }
 
                 3 -> {
-                    return TurnData(
+                    return mutableStateOf(TurnData(
                         playerId,
                         turn,
                         listOf(
@@ -370,29 +391,29 @@ private fun getTurnData(
                             LetterAndPosition(Letters.get('N'), convertPosition("A7")),
                             LetterAndPosition(Letters.get('I'), convertPosition("A8"))
                         )
-                    )
+                    ))
                 }
 
-                4 -> return TurnData(
+                4 -> return mutableStateOf(TurnData(
                     playerId,
                     turn,
                     listOf(
                         LetterAndPosition(Letters.get('Y'), convertPosition("H12")),
                         LetterAndPosition(Letters.get('C'), convertPosition("H13")),
                         LetterAndPosition(Letters.get('A'), convertPosition("H15"))
-                    )
+                    ))
                 )
 
-                5 -> return TurnData(
+                5 -> return mutableStateOf(TurnData(
                     playerId,
                     turn,
                     listOf(
                         LetterAndPosition(Letters.get('D'), convertPosition("A15")),
                         LetterAndPosition(Letters.get('E'), convertPosition("D15"))
                     )
-                )
+                ))
 
-                6 -> return TurnData(
+                6 -> return mutableStateOf(TurnData(
                     playerId,
                     turn,
                     listOf(
@@ -400,10 +421,10 @@ private fun getTurnData(
                         LetterAndPosition(Letters.get('I'), convertPosition("N11")),
                         LetterAndPosition(Letters.get('N'), convertPosition("N12"))
                     )
-                )
+                ))
             }
         }
     }
 
-    return TurnData()
+    return mutableStateOf(TurnData())
 }

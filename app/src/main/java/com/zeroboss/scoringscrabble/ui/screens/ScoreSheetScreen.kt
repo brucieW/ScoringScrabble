@@ -1,7 +1,6 @@
 package com.zeroboss.scoringscrabble.ui.screens
 
 import android.graphics.Paint
-import android.widget.ImageButton
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -33,6 +32,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.zeroboss.scoringscrabble.R
+import com.zeroboss.scoringscrabble.data.entities.LetterAndPosition
 import com.zeroboss.scoringscrabble.data.entities.Letters
 import com.zeroboss.scoringscrabble.data.entities.Player
 import com.zeroboss.scoringscrabble.data.entities.TurnData
@@ -228,25 +228,48 @@ fun BoardHeader(
     val tileWidth = (screenWidth / 16)
 
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.padding(10.dp),
+        verticalArrangement = Arrangement.Center
     ) {
         Row {
-            Column() {
+            Column(
+                modifier = Modifier
+                    .padding(end = 20.dp),
+                    verticalArrangement = Arrangement.Center
+            ) {
                 Text(
-                    text = "${activePlayer.name}'s Turn",
+                    text = activePlayer.name,
                     style = textTitleStyle,
-                    modifier = Modifier.padding(start = 20.dp, top = 10.dp, end = 10.dp)
+                    textAlign = TextAlign.Left,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            Column(
+                modifier = Modifier.padding(end = 10.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "First Pos",
+                    style = smallerText
                 )
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(start = 20.dp)
-                ) {
-                    Text(
-                        text = "Direction: ",
-                        style = textTitleStyle
-                    )
+                Text(
+                    text = firstPos,
+                    style = normalText,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
+            Column() {
+                Text(
+                    text = "Direction ",
+                    style = smallerText
+                )
+
+                Row() {
                     DirectionButton(
                         directionEast,
                         onClick = { scoringViewModel.setDirectionEast() },
@@ -263,7 +286,10 @@ fun BoardHeader(
                 }
             }
 
-            Column() {
+            Column(
+                modifier = Modifier.padding(end = 10.dp),
+                verticalArrangement = Arrangement.Center
+            ) {
                 Row() {
                     TextWithIcon(
                         text = "Accept",
@@ -275,33 +301,15 @@ fun BoardHeader(
                     TextWithIcon(
                         text = "Skip",
                         image = Icons.Rounded.CancelPresentation,
-                        onClick = { /*TODO*/ },
+                        onClick = { },
                         tint = Color.Red
                     )
 
                     TextWithIcon(
                         text = "Refresh",
                         image = Icons.Rounded.Refresh,
-                        onClick = { /*TODO*/ }
+                        onClick = { }
                     )
-
-                    Column(
-                        modifier = Modifier.padding(top = 10.dp),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "First Pos",
-                            style = smallerText
-                        )
-
-                        Text(
-                            text = firstPos,
-                            style = normalText,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
                 }
             }
 
@@ -309,9 +317,21 @@ fun BoardHeader(
 
         Spacer(modifier = Modifier.height(10.dp))
 
+        if (scoringViewModel.tileImages.size == 0) {
+            ('A'..'Z').forEach {
+                scoringViewModel.tileImages.add(ImageBitmap.imageResource(id = Letters.get(it).image))
+            }
+        }
+
         ShowTiles(scoringViewModel, 'A', 'I', tileWidth)
         ShowTiles(scoringViewModel, 'J', 'R', tileWidth)
-        ShowTiles(scoringViewModel, 'S', 'Z', tileWidth)
+
+        ShowTiles(
+            scoringViewModel,
+            'S',
+            'Z',
+            tileWidth,
+            true)
 
         Spacer(modifier = Modifier.height(10.dp))
     }
@@ -323,7 +343,8 @@ fun ShowTiles(
     scoringViewModel: ScoringSheetViewModel,
     start: Char,
     end: Char,
-    tileWidth: Int
+    tileWidth: Int,
+    addBackSpace: Boolean = false
 ) {
     val badgeCounts = scoringViewModel.tileCounts
 
@@ -337,13 +358,7 @@ fun ShowTiles(
             val offset = tile - 'A'
 
             if (badgeCounts[offset].value == 0) {
-                Image(
-                    painter = painterResource(Letters.get(tile).image),
-                    contentDescription = "",
-                    modifier = Modifier.size(tileWidth.dp)
-                )
-
-                Spacer(modifier = Modifier.width(20.dp))
+                Spacer(modifier = Modifier.width(tileWidth.dp + 20.dp))
             } else {
                 BadgeBox(
                     badgeContent = {
@@ -365,6 +380,17 @@ fun ShowTiles(
                 }
             }
         }
+
+        if (addBackSpace) {
+            Image(
+                bitmap = ImageBitmap.imageResource(id = R.drawable.backspace),
+                contentDescription = "Backspace",
+                Modifier
+                    .clickable { scoringViewModel.clickedBackSpace() }
+                    .size(tileWidth.dp)
+            )
+
+        }
     }
 }
 
@@ -376,7 +402,7 @@ fun TextWithIcon(
     tint: Color = Color.Black,
 ) {
     Column(
-        Modifier.padding(top = 10.dp, end = 10.dp),
+        Modifier.padding(end = 10.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -407,13 +433,13 @@ fun DirectionButton(
     description: String
 ) {
     IconButton(
-        modifier = Modifier.size(40.dp),
+        modifier = Modifier.size(32.dp),
         onClick = { onClick() }
     ) {
         Icon(
             image,
             contentDescription = description,
-            tint = if (direction) darkGreen else Color.Gray
+            tint = if (direction) Color.Green else Color.Gray
         )
     }
 }
@@ -425,20 +451,18 @@ fun ScrabbleBoard(
     val density = LocalDensity.current
     val config = LocalConfiguration.current
     val screenWidth = with(density) { config.screenWidthDp.dp.toPx().toInt() }
-    val tileWidth = (screenWidth.toFloat() / 18f) + 2f
+//    val screenHeight = with(density) { config.screenHeightDp.dp.toPx().toInt() }
+    val tileWidth = (screenWidth.toFloat() / 17.5f)
     val star = ImageBitmap.imageResource(id = R.drawable.starting_star)
-
 
     Surface(
         modifier = Modifier
             .size(
-                config.screenWidthDp.dp,
-                config.screenWidthDp.dp
+                config.screenWidthDp.dp - 5.dp,
+                config.screenWidthDp.dp - 5.dp
             )
             .border(BorderStroke(1.dp, Color.Black))
-            .background(Color.White)
     ) {
-
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
@@ -496,10 +520,23 @@ fun ScrabbleBoard(
             }
 
             scoringViewModel.adjustLastStartItems(tileWidth)
+            val tileWidthInt = tileWidth.toInt()
+
+            for (turn in scoringViewModel.turnData) {
+                for (letter in turn.value.letters) {
+                    val xPos = scoringViewModel.tileStartX[letter.position.column].toInt() - tileWidthInt - 1
+                    val yPos = scoringViewModel.tileStartY[letter.position.row].toInt() - tileWidthInt - 1
+
+                    drawImage(
+                        image = scoringViewModel.tileImages[letter.letter.letter - 'A'],
+                        dstOffset = IntOffset(xPos, yPos),
+                        dstSize = IntSize(tileWidthInt, tileWidthInt)
+                    )
+                }
+            }
         }
     }
 }
-
 
 fun drawColumnText(
     compose: DrawScope,
