@@ -1,15 +1,12 @@
 package com.zeroboss.scoringscrabble.data.repositories
 
-import io.objectbox.BoxStore
-import io.objectbox.kotlin.boxFor
-
 interface PreferencesRepository {
     fun getPreferences(): Preferences
     suspend fun savePreferences(preferencesData: Preferences)
 }
 
 class PreferencesRepositoryImpl constructor(
-    private val boxStore: BoxStore
+//    private val boxStore: BoxStore
 ) : PreferencesRepository {
     private val preferenceBox = boxStore.boxFor(Preferences::class)
 

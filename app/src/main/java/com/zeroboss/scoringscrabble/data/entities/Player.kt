@@ -1,13 +1,12 @@
 package com.zeroboss.scoringscrabble.data.entities
 
-import io.objectbox.annotation.Entity
-import io.objectbox.annotation.Id
+import io.realm.RealmObject
+import io.realm.annotations.PrimaryKey
 
-@Entity
-data class Player(
-    @Id
-    var id: Long = 0,
+open class Player(
+   var name: String = "",
 
-    var name: String = "",
-) {
-}
+   @PrimaryKey
+   var id: Int = 0,
+) : RealmObject()
+

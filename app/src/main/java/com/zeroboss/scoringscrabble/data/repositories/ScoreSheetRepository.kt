@@ -1,9 +1,6 @@
 package com.zeroboss.scoringscrabble.data.repositories
 
-import com.zeroboss.scoringscrabble.data.common.CommonDb.getAllScoreSheets
-import com.zeroboss.scoringscrabble.data.common.CommonDb.scoreSheetBox
 import com.zeroboss.scoringscrabble.data.entities.ScoreSheet
-import io.objectbox.BoxStore
 
 interface ScoreSheetRepository {
     fun getScoreSheets() : List<ScoreSheet>
@@ -13,7 +10,7 @@ interface ScoreSheetRepository {
 class ScoreSheetRepositoryImpl constructor(
 ) : ScoreSheetRepository {
     override fun getScoreSheets(): MutableList<ScoreSheet> {
-        return getAllScoreSheets()
+        return mutableListOf() //getAllScoreSheets()
     }
 
     override fun saveScoreSheet(scoreSheet: ScoreSheet) {

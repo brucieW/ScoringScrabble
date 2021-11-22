@@ -8,8 +8,8 @@ buildscript {
     ext {
         compose_version = '1.0.5'
         accompanist_version = '0.18.0'
-        kotlin_version = '1.5.31'
-        objectboxVersion = '2.9.1'
+        kotlin_version = '1.6.0'
+        realm_version = '10.5.1'
     }
     repositories {
         google()
@@ -17,9 +17,9 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.0-alpha03'
+        classpath 'com.android.tools.build:gradle:7.2.0-alpha05'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "io.objectbox:objectbox-gradle-plugin:$objectboxVersion"
+        classpath "io.realm:realm-gradle-plugin:$realm_version"
     }
 
 }

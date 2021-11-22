@@ -1,21 +1,17 @@
 package com.zeroboss.scoringscrabble.data.entities
 
-import android.service.autofill.FieldClassification
-import io.objectbox.BoxStore
-import io.objectbox.annotation.Backlink
-import io.objectbox.annotation.Entity
-import io.objectbox.annotation.Id
-import io.objectbox.relation.ToMany
-import io.objectbox.relation.ToOne
+import io.realm.RealmList
+import io.realm.RealmObject
+import io.realm.annotations.PrimaryKey
 
-@Entity
-data class Team(
-    @Id
-    var id: Long = 0,
-) {
-    var players = ToMany<Player>(this, Team_.players)
+open class Team(
+    var players: RealmList<Player> = RealmList(),
+
+    @PrimaryKey
+    var id: Long = 0
+) : RealmObject() {
 
     fun getTeamName() : String {
-        return if (players.size < 2) "" else "${players[0].name} and ${players[1].name}"
+        return if (players.size < 2) "" else "${players[0]?.name} and ${players[1]?.name}"
     }
 }
