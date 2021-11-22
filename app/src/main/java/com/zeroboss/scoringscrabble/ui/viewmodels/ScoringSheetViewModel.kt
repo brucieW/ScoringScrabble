@@ -33,6 +33,22 @@ class ScoringSheetViewModel(
         _directionEast.value = false
     }
 
+    private val _unusedTiles = mutableStateListOf(
+        mutableStateOf(0),
+        mutableStateOf(0),
+        mutableStateOf(0),
+        mutableStateOf(0)
+    )
+
+    val unusedTiles = _unusedTiles
+
+    fun setUnusedTiles(
+        offset: Int,
+        value: Int
+    ) {
+        _unusedTiles[offset].value = value
+    }
+
     var tileStartX = mutableListOf<Float>()
     var tileStartY = mutableListOf<Float>()
 
@@ -65,12 +81,6 @@ class ScoringSheetViewModel(
     val tileImages = mutableListOf<ImageBitmap>()
 
 
-    fun setTileCount(
-        letter: Letter
-    ) {
-        _tileCounts[letter.letter - 'A'].value = letter.quantity
-    }
-
     fun addToTileCount(
         index: Int,
         count: Int
@@ -99,7 +109,7 @@ class ScoringSheetViewModel(
             tileStartY.add(0f)
         }
 
-        ('A'..'Z').forEach {
+        ('A'..'[').forEach {
             _tileCounts.add(mutableStateOf(Letters.get(it).quantity))
         }
     }
@@ -287,7 +297,7 @@ private fun getTurnData(
                         listOf(
                             LetterAndPosition(Letters.get('Q'), convertPosition("H1")),
                             LetterAndPosition(Letters.get('B'), convertPosition("J1")),
-                            LetterAndPosition(Letters.get('I'), convertPosition("K1")),
+                            LetterAndPosition(Letters.get('['), convertPosition("K1"), Letters.get('I')),
                             LetterAndPosition(Letters.get('T'), convertPosition("L1")),
                             LetterAndPosition(Letters.get('S'), convertPosition("M1")),
                         )
@@ -327,7 +337,7 @@ private fun getTurnData(
                         LetterAndPosition(Letters.get('R'), convertPosition("D14")),
                         LetterAndPosition(Letters.get('O'), convertPosition("E14")),
                         LetterAndPosition(Letters.get('E'), convertPosition("G14")),
-                        LetterAndPosition(Letters.get('R'), convertPosition("H14")),
+                        LetterAndPosition(Letters.get('['), convertPosition("H14"), Letters.get('R')),
                         LetterAndPosition(Letters.get('E'), convertPosition("I14"))
                     )
                 ))

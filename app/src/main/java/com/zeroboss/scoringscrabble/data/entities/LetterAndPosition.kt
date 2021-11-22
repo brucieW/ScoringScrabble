@@ -2,7 +2,8 @@ package com.zeroboss.scoringscrabble.data.entities
 
 data class LetterAndPosition(
     val letter: Letter,
-    val position: Position
+    val position: Position,
+    val blankValue: Letter? = null
 )
 
 data class Position(
