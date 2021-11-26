@@ -1,10 +1,7 @@
 package com.zeroboss.scoringscrabble
 
 import android.app.Application
-import com.zeroboss.scoringscrabble.di.boxStoreModule
-import com.zeroboss.scoringscrabble.di.scoringSheetModule
-import com.zeroboss.scoringscrabble.di.scoringViewModelModule
-import com.zeroboss.scoringscrabble.di.selectPlayersViewModel
+import com.zeroboss.scoringscrabble.di.*
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -18,9 +15,10 @@ class ScoringApplication : Application() {
             androidContext(this@ScoringApplication)
             modules(listOf(
                 boxStoreModule,
+                homeViewModelModule,
                 scoringSheetModule,
                 selectPlayersViewModel,
-                scoringViewModelModule
+                scoringViewModelModule,
             ))
         }
     }

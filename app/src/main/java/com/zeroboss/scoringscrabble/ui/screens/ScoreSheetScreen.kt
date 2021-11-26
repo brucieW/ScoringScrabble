@@ -59,14 +59,14 @@ fun ScoreSheet(
                 onClickReturn = { navController.popBackStack() }
             )
         },
-        content = { ScoreSheetBody(get()) }
+        content = { HomeBody(get()) }
     )
 }
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @ExperimentalAnimationApi
 @Composable
-fun ScoreSheetBody(
+fun HomeBody(
     scoringViewModel: ScoringSheetViewModel
 ) {
     val rowState = rememberLazyListState()
@@ -259,13 +259,24 @@ fun BoardHeader(
             Column(
                 modifier = Modifier
                     .padding(end = 20.dp),
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     text = activePlayer.name,
                     style = textTitleStyle,
                     textAlign = TextAlign.Left,
                     modifier = Modifier.fillMaxWidth()
+                )
+
+                Image(
+                    bitmap = ImageBitmap.imageResource(id = R.drawable.backspace),
+                    contentDescription = "Backspace",
+                    Modifier
+                        .clickable { scoringViewModel.clickedBackSpace() }
+                        .size(tileWidth.dp)
+                        .padding(top = 5.dp)
+                        .alpha(0.4f)
                 )
             }
 
@@ -335,39 +346,11 @@ fun BoardHeader(
                         onClick = { }
                     )
 
-                    Column(
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "Undo",
-                            style = smallerText,
-                            modifier = Modifier.alpha(0.4f)
-                        )
-
-                        Image(
-                            bitmap = ImageBitmap.imageResource(id = R.drawable.backspace),
-                            contentDescription = "Backspace",
-                            Modifier
-                                .clickable { scoringViewModel.clickedBackSpace() }
-                                .size(tileWidth.dp)
-                                .padding(top = 5.dp)
-                                .alpha(0.4f)
-                        )
-                    }
-
                 }
             }
-
         }
 
         Spacer(modifier = Modifier.height(10.dp))
-
-        if (scoringViewModel.tileImages.size == 0) {
-            ('A'..'[').forEach {
-                scoringViewModel.tileImages.add(ImageBitmap.imageResource(id = Letters.get(it).image))
-            }
-        }
 
         ShowTiles(scoringViewModel, 'A', 'I', tileWidth)
         ShowTiles(scoringViewModel, 'J', 'R', tileWidth)

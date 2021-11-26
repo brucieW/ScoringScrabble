@@ -29,7 +29,7 @@ val dialogTitle = TextStyle(
 
 val navigationTitle2 = TextStyle(
     fontFamily = FontFamily.Default,
-    fontSize = 24.sp,
+    fontSize = 22.sp,
     color = Color.White
 )
 

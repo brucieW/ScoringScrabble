@@ -19,51 +19,40 @@ class SelectPlayersViewModel() : ViewModel()  {
     private val _isTeamType = mutableStateOf<Boolean>(false)
     val isTeamType = _isTeamType
 
-    val playerNames = createNames(4)
-    val playerListVisible = createFlags(4)
-    val teamListVisible = createFlags(2)
-
-    fun createNames(count: Int): List<MutableState<String>> {
-        val list = mutableListOf<MutableState<String>>()
-
-        for (i in 1..count) {
-            list.add(mutableStateOf(""))
-        }
-
-        return list
+    fun changeUsingTeams() {
+        _isTeamType.value = !_isTeamType.value
     }
 
-    private fun createFlags(count: Int): List<MutableState<Boolean>> {
-        val list = mutableStateListOf<MutableState<Boolean>>()
+    private val teamListVisible = listOf(
+        MutableLiveData<Boolean>(false),
+        MutableLiveData<Boolean>(false),
+    )
 
-        for (i in 1..count) {
-            list.add(mutableStateOf(false))
-        }
-
-        return list
+    fun isTeamListVisible(
+        offset: Int
+    ) : MutableLiveData<Boolean> {
+        return teamListVisible[offset]
     }
+
+    val playerNames = listOf(
+        MutableLiveData(""),
+        MutableLiveData(""),
+        MutableLiveData(""),
+        MutableLiveData("")
+    )
+
+    val playerListVisible = listOf(
+        MutableLiveData<Boolean>(false),
+        MutableLiveData<Boolean>(false),
+        MutableLiveData<Boolean>(false),
+        MutableLiveData<Boolean>(false)
+    )
 
     private val _uniquePlayerNames = mutableStateOf(true)
     val uniquePlayerNames = _uniquePlayerNames
 
     private val _dataValid = mutableStateOf(false)
     val dataValid = _dataValid
-
-    fun isTeamListVisible(
-        teamId: Int
-    ) : MutableState<Boolean> {
-        return teamListVisible[teamId]
-    }
-
-    fun changeUsingTeams() {
-        _isTeamType.value = !_isTeamType.value
-    }
-
-    fun isPlayerListVisible(
-        playerId: Int
-    ): MutableState<Boolean> {
-        return playerListVisible[playerId]
-    }
 
     fun getFilteredTeams(): List<String> {
         val excludeTeamNames = mutableListOf<String>()
@@ -72,7 +61,7 @@ class SelectPlayersViewModel() : ViewModel()  {
             val player1 = playerNames[i].value
             val player2 = playerNames[i + 1].value
 
-            if (player1.isNotEmpty() && player2.isNotEmpty()) {
+            if (player1!!.isNotEmpty() && player2!!.isNotEmpty()) {
                 excludeTeamNames.add("$player1/$player2")
             }
         }
@@ -83,10 +72,10 @@ class SelectPlayersViewModel() : ViewModel()  {
     fun getFilteredPlayers(): List<String> {
         val exclude = playerNames.map { name -> name.value }
 
-        return getFilteredPlayerNames(exclude.filter { name -> name.isNotEmpty() })
+        return getFilteredPlayerNames(exclude.filter { name -> name!!.isNotEmpty() } as List<String>)
     }
 
-    fun getOffset(
+    private fun getOffset(
         teamId: Int,
         playerId: Int
     ): Int {
@@ -110,13 +99,13 @@ class SelectPlayersViewModel() : ViewModel()  {
         var valid = true
         var unique = true
 
-        val itemsWithText = playerNames.filter { name -> name.value.isNotEmpty() }
+        val itemsWithText = playerNames.filter { name -> name.value!!.isNotEmpty() }
 
         if (itemsWithText.size < 4) {
             valid = false
         }
 
-        val distinct = itemsWithText.distinctBy { it.value.uppercase() }
+        val distinct = itemsWithText.distinctBy { it.value!!.uppercase() }
 
         if (distinct.size != itemsWithText.size) {
             unique = false
@@ -131,7 +120,7 @@ class SelectPlayersViewModel() : ViewModel()  {
     ) {
         setTeamDropdownVisible(
             teamId,
-            !teamListVisible[teamId - 1].value
+            !teamListVisible[teamId - 1].value!!
         )
     }
 
@@ -142,8 +131,12 @@ class SelectPlayersViewModel() : ViewModel()  {
         setPlayerDropdownVisible(
             teamId,
             playerId,
-            !playerListVisible[getOffset(teamId, playerId)].value
+            !playerListVisible[getOffset(teamId, playerId)].value!!
         )
+    }
+
+    fun onStartScoring() {
+
     }
 
     fun onClickSave() {
@@ -163,7 +156,7 @@ class SelectPlayersViewModel() : ViewModel()  {
         teamListVisible[teamId - 1].value = visible
     }
 
-    fun clearAllTeamLists() {
+    private fun clearAllTeamLists() {
         teamListVisible.forEach { it.value = false }
     }
 
@@ -180,25 +173,16 @@ class SelectPlayersViewModel() : ViewModel()  {
         playerListVisible.forEach { it.value = false }
     }
 
-    fun getPlayerNameWithOffset(
-        offset: Int
-    ): MutableState<String> {
-        return playerNames[offset]
-    }
-
-    private fun getPlayerName(
-        teamId: Int,
-        playerId: Int
-    ): MutableState<String> {
-        return playerNames[getOffset(teamId, playerId)]
+    fun clearPlayerNames() {
+        playerNames.forEach { name -> name.value = "" }
     }
 
     fun setPlayerNames(
         teamId: Int,
-        playerNames: List<String>
+        players: List<String>
     ) {
-        for (playerId in 1..2) {
-            onPlayerNameChanged(teamId, playerId, playerNames[playerId - 1])
+        players.forEachIndexed { index, name ->
+            playerNames[getOffset(teamId, index)].value = name
         }
     }
 }

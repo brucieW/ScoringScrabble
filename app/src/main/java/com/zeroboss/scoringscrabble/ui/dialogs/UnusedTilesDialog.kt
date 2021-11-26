@@ -2,6 +2,7 @@ package com.zeroboss.scoringscrabble.ui.dialogs
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
@@ -13,6 +14,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -59,6 +61,7 @@ fun UnusedTilesDialog(
                         value = unusedTiles.value.text,
                         onValueChange = { text -> unusedTiles.value = TextFieldValue(text) },
                         label = { Text("Unused Tiles Total Value ") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         maxLines = 1,
                         modifier = Modifier
                             .focusRequester(focusRequester)
@@ -86,7 +89,7 @@ fun UnusedTilesDialog(
                             onFirstButtonClicked = {
                                 scoringSheetViewModel.setUnusedTiles(
                                     offset = playerId,
-                                    value = unusedTiles.value.text.toInt()
+                                    value = unusedTiles.value.text
                                 )
                                 setShowDialog(false)
                             },

@@ -44,9 +44,9 @@ class ScoringSheetViewModel(
 
     fun setUnusedTiles(
         offset: Int,
-        value: Int
+        value: String
     ) {
-        _unusedTiles[offset].value = value
+        _unusedTiles[offset].value = if (value.isEmpty()) 0 else value.toInt()
     }
 
     var tileStartX = mutableListOf<Float>()
@@ -77,9 +77,6 @@ class ScoringSheetViewModel(
 
     private val _tileCounts = mutableListOf<MutableState<Int>>()
     val tileCounts = _tileCounts
-
-    val tileImages = mutableListOf<ImageBitmap>()
-
 
     fun addToTileCount(
         index: Int,

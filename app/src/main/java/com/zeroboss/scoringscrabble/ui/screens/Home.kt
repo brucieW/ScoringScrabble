@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -64,8 +65,20 @@ fun Home(
         scaffoldState = scaffoldState,
         modifier = Modifier.fillMaxSize(),
         topBar = { HomeAppBar(navController) },
-        content = { ScoreSheetBody(navController, get()) },
-        backgroundColor = Blue50
+        content = { HomeBody(navController, get()) },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    navController.navigate("select_players")
+                },
+                contentColor = Color.White,
+                backgroundColor = Blue800,
+            ) {
+                Icon(Icons.Filled.Add, "")
+            }
+        },
+        isFloatingActionButtonDocked = true,
+        floatingActionButtonPosition = FabPosition.End,
     )
 }
 
@@ -109,7 +122,7 @@ fun HomeAppBar(
 
 @ExperimentalMaterialApi
 @Composable
-fun ScoreSheetBody(
+fun HomeBody(
     navController: NavController,
     homeViewModel: HomeViewModel
 ) {
@@ -140,7 +153,7 @@ fun ScoreSheetBody(
         modifier = Modifier
             .fillMaxSize()
             .background(Blue50)
-            .padding(bottom = 5.dp)
+            .padding(top = 10.dp, bottom = 10.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),

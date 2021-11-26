@@ -56,21 +56,19 @@
         {
           "id": "2:2502316624397069485",
           "name": "started",
-          "type": 6,
-          "flags": 2
+          "type": 6
         },
         {
           "id": "3:1799850675354183422",
           "name": "finished",
-          "type": 6,
-          "flags": 2
+          "type": 6
         },
         {
           "id": "4:5640838568853846834",
           "name": "matchId",
           "indexId": "1:3997468916643070699",
           "type": 11,
-          "flags": 1548,
+          "flags": 520,
           "relationTarget": "Match"
         }
       ],
@@ -90,8 +88,7 @@
         {
           "id": "2:7975807430930859967",
           "name": "lastPlayed",
-          "type": 6,
-          "flags": 2
+          "type": 6
         }
       ],
       "relations": [
@@ -126,20 +123,17 @@
         {
           "id": "2:5223925713819051164",
           "name": "isTeamType",
-          "type": 1,
-          "flags": 4
+          "type": 1
         },
         {
           "id": "3:8885912714936878130",
           "name": "started",
-          "type": 6,
-          "flags": 2
+          "type": 6
         },
         {
           "id": "4:8299073722871695521",
           "name": "finished",
-          "type": 6,
-          "flags": 2
+          "type": 6
         }
       ],
       "relations": [
