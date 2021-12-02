@@ -1,9 +1,24 @@
 package com.zeroboss.scoringscrabble.data.entities
 
+import com.zeroboss.scoringscrabble.data.common.LetterConverter
+import com.zeroboss.scoringscrabble.data.common.PositionConverter
+import io.objectbox.annotation.Convert
+import io.objectbox.annotation.Entity
+import io.objectbox.annotation.Id
+
+@Entity
 data class LetterAndPosition(
+    @Convert(converter = LetterConverter::class, dbType = String::class)
     val letter: Letter,
+
+    @Convert(converter = PositionConverter::class, dbType = String::class)
     val position: Position,
-    val blankValue: Letter? = null
+
+    @Convert(converter = LetterConverter::class, dbType = String::class)
+    val blankValue: Letter?,
+
+    @Id
+    var id: Long = 0
 )
 
 data class Position(

@@ -42,8 +42,6 @@ import com.zeroboss.scoringscrabble.ui.theme.*
 import com.zeroboss.scoringscrabble.ui.viewmodels.ScoringSheetViewModel
 import org.koin.androidx.compose.get
 
-@ExperimentalAnimationApi
-@ExperimentalMaterialApi
 @Composable
 fun ScoreSheet(
     navController: NavController
@@ -63,8 +61,6 @@ fun ScoreSheet(
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
-@ExperimentalAnimationApi
 @Composable
 fun HomeBody(
     scoringViewModel: ScoringSheetViewModel

@@ -3,6 +3,7 @@ package com.zeroboss.scoringscrabble
 import android.app.Application
 import android.content.Context
 import com.zeroboss.scoringscrabble.data.common.CommonDb.testFile
+import com.zeroboss.scoringscrabble.data.entities.Game
 import com.zeroboss.scoringscrabble.data.entities.Match
 import com.zeroboss.scoringscrabble.data.entities.Player
 import com.zeroboss.scoringscrabble.data.entities.Team
@@ -23,19 +24,24 @@ open class BaseBoxStoreTest : KoinTest {
     @Mock
     private lateinit var context: Application
 
-    private lateinit var store: BoxStore
+    private lateinit var testStore: BoxStore
 
     fun getPlayerBox() : Box<Player> {
-        return store.boxFor(Player::class)
+        return testStore.boxFor(Player::class)
     }
 
     fun getTeamBox() : Box<Team> {
-        return store.boxFor(Team::class)
+        return testStore.boxFor(Team::class)
     }
 
     fun getMatchBox() : Box<Match> {
-        return store.boxFor(Match::class)
+        return testStore.boxFor(Match::class)
     }
+
+    fun getGameBox() : Box<Game> {
+        return testStore.boxFor(Game::class)
+    }
+
 
     @Before
     fun createDatabase() {
@@ -46,12 +52,12 @@ open class BaseBoxStoreTest : KoinTest {
             ))
         }
 
-        store = get(io.objectbox.BoxStore::class.java)
+        testStore = get(io.objectbox.BoxStore::class.java)
     }
 
     @After
     fun tearDownDatabase() {
-        store.close()
+        testStore.close()
         BoxStore.deleteAllFiles(testFile)
     }
 }

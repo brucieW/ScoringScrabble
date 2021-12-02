@@ -25,7 +25,7 @@ fun Splash(
     LaunchedEffect(
         key1 = "JumpToHome",
         block = {
-            delay(3500)
+            delay(1000)
             navController.popBackStack()
             navController.navigate(Navigation.Home.route)
         }

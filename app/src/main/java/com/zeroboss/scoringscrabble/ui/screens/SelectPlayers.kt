@@ -29,8 +29,6 @@ import com.zeroboss.scoringscrabble.ui.common.*
 import com.zeroboss.scoringscrabble.ui.theme.*
 import org.koin.androidx.compose.get
 
-@ExperimentalAnimationApi
-@ExperimentalMaterialApi
 @Composable
 fun SelectPlayers(
     navController: NavController
@@ -217,17 +215,22 @@ fun PlayerNameSelection(
     selectPlayersViewModel: SelectPlayersViewModel
 ) {
     // Setup Observers
-    val teamDropDownsVisible = mutableListOf<State<Boolean>>(
-        selectPlayersViewModel.isTeamListVisible(0).observeAsState(false),
-        selectPlayersViewModel.isTeamListVisible(1).observeAsState(false),
-    )
+    val teamDropDownsVisible = mutableListOf<Boolean>()
 
-    val names = mutableListOf<State<String>>()
-    val playerDropDownsVisible = mutableListOf<State<Boolean>>()
+    for (i in 0..1) {
+        val listVisible by selectPlayersViewModel.teamListVisible[i]
+        teamDropDownsVisible.add(listVisible)
+    }
+
+    val names = mutableListOf<String>()
+    val playerDropDownsVisible = mutableListOf<Boolean>()
 
     for (playerId in 0..3) {
-        names.add(selectPlayersViewModel.playerNames[playerId].observeAsState(""))
-        playerDropDownsVisible.add(selectPlayersViewModel.playerListVisible[playerId].observeAsState(false))
+        val name by selectPlayersViewModel.playerNames[playerId]
+        names.add(name)
+
+        val visible by selectPlayersViewModel.playerListVisible[playerId]
+        playerDropDownsVisible.add(visible)
     }
 
     for (teamId in 0..1) {
@@ -253,22 +256,22 @@ fun PlayerNameSelection(
                     modifier = Modifier
                         .padding(bottom = 5.dp, end = 5.dp)
                         .weight(0.5F),
-                    text = names[playerId].value,
+                    text = names[playerId],
                     label = "Player ${playerId + 1}",
                     onNameChanged = { text ->
                         selectPlayersViewModel.onPlayerNameChanged(
-                            1,
+                            teamId,
                             playerId,
                             text
                         )
                     },
                     onTrailingIconClicked = {
-                        selectPlayersViewModel.onPlayerDropdownClicked(1, playerId)
+                        selectPlayersViewModel.onPlayerDropdownClicked(teamId, playerId)
                     },
                     onFocusAltered = { selectPlayersViewModel.clearAllPlayerLists() }
                 )
 
-                if (playerDropDownsVisible[playerId].value) {
+                if (playerDropDownsVisible[playerId]) {
                     PlayerNamesSelection(
                         selectPlayersViewModel,
                         teamId,

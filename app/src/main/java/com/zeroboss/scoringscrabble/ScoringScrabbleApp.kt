@@ -1,22 +1,16 @@
 package com.zeroboss.scoringscrabble
 
-import androidx.compose.animation.*
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.composable
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.zeroboss.scoringscrabble.ui.screens.*
 
-@ExperimentalMaterialApi
-@ExperimentalAnimationApi
 @Composable
 fun ScoringScrabbleApp() {
-    val navController = rememberAnimatedNavController()
+    val navController = rememberNavController()
 
-    AnimatedNavHost(
+    NavHost(
         navController = navController,
         startDestination = Navigation.Splash.route,
 

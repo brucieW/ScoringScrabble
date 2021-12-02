@@ -54,7 +54,6 @@ import org.koin.androidx.compose.get
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-@ExperimentalMaterialApi
 @Composable
 fun Home(
     navController: NavController
@@ -120,7 +119,7 @@ fun HomeAppBar(
     }
 }
 
-@ExperimentalMaterialApi
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun HomeBody(
     navController: NavController,
@@ -299,7 +298,7 @@ fun ExpandableMatchCard(
                 ) {
                     Row() {
                         Text(
-                            text = match.getWinLossRatioText(),
+                            text = "WinLoss", //match.getWinLossRatioText(),
                             style = normalText,
                             modifier = Modifier.padding(end = 5.dp)
                         )

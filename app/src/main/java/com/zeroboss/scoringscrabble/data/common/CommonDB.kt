@@ -1,8 +1,6 @@
 package com.zeroboss.scoringscrabble.data.common
 
 import android.content.Context
-import android.service.autofill.FieldClassification
-import android.service.notification.NotificationListenerService
 import android.widget.Toast
 import com.zeroboss.scoringscrabble.data.entities.*
 import com.zeroboss.scoringscrabble.ui.viewmodels.Ranking
@@ -28,13 +26,13 @@ object CommonDb : KoinComponent {
     val boxStore: BoxStore = get(BoxStore::class.java)
 
     val playersBox = boxStore.boxFor<Player>()
-    val gamesBox = boxStore.boxFor<Game>()
     val teamBox = boxStore.boxFor<Team>()
-    val scoreSheetBox = boxStore.boxFor<ScoreSheet>()
-    val matchesBox = boxStore.boxFor<Match>()
+    val gameBox = boxStore.boxFor<Game>()
+    val matchBox = boxStore.boxFor<Match>()
+    val turnBox = boxStore.boxFor<TurnData>()
 
     private var matchesQuery: Query<Match>? = null
-    private var scoreSheetQuery: Query<ScoreSheet>? = null
+    private var gameQuery: Query<Game>? = null
     private var playerQuery: Query<Player?>? = null
 
     // This clears all data from the database.
@@ -49,7 +47,7 @@ object CommonDb : KoinComponent {
 
     fun getMatchesQuery() : Query<Match> {
         if (matchesQuery == null) {
-            matchesQuery = matchesBox.query().order(Match_.lastPlayed, QueryBuilder.DESCENDING).build()
+            matchesQuery = matchBox.query().order(Match_.lastPlayed, QueryBuilder.DESCENDING).build()
         }
 
         return matchesQuery!!
@@ -59,75 +57,134 @@ object CommonDb : KoinComponent {
         return getMatchesQuery().find()
     }
 
-    fun getScoreSheetQuery() : Query<ScoreSheet> {
-        if (scoreSheetQuery == null) {
-            scoreSheetQuery = scoreSheetBox.query().build()
+    fun getGameQuery() : Query<Game> {
+        if (gameQuery == null) {
+            gameQuery = gameBox.query().build()
         }
 
-        return scoreSheetQuery!!
+        return gameQuery!!
     }
 
     /**
-     * Return all of the score sheets in the store.
+     * Return all of the games in the store.
      */
-    fun getAllScoreSheets(): MutableList<ScoreSheet> {
-        return getScoreSheetQuery().find()
+    fun getAllGames(): MutableList<Game> {
+        return getGameQuery().find()
+    }
+
+    fun createPlayersMatch(
+        playerNames: List<String>,
+        lastPlayed: LocalDateTime = LocalDateTime.now()
+    ): Match {
+        // Capitalize names.
+        val capitalNames = playerNames.map { name -> name.replaceFirstChar { it.uppercase() } }
+        val existingMatch = getMatchWithPlayers(capitalNames)
+
+        if (existingMatch != null) {
+            return existingMatch
+        }
+
+        val match = Match(lastPlayed = lastPlayed)
+        val game = Game()
+        game.match.target = match
+        capitalNames.forEach { player ->
+            match.players.add(getPlayer(player))
+        }
+
+        match.games.add(game)
+        matchBox.put(match)
+
+        setActiveMatch(match)
+
+        return match
+    }
+
+    fun getMatchWithPlayers(
+        playerNames: List<String>
+    ) : Match? {
+        val capitalNames = playerNames.map { name -> name.replaceFirstChar { it.uppercase() } }
+        matchBox.all.forEach { match ->
+            val matchBoxPlayers = match.players.map { it.name }.filter { capitalNames.contains(it) }
+
+            if (matchBoxPlayers.size == playerNames.size) {
+                return match
+            }
+        }
+
+        return null
+    }
+
+    fun createTeamsMatch(
+        playerNames: List<String>,
+        lastPlayed: LocalDateTime = LocalDateTime.now()
+    ): Match {
+        // Capitalize names.
+        val capitalNames = playerNames.map { name -> name.replaceFirstChar { it.uppercase() } }
+        val existingMatch = getMatchWithTeams(capitalNames)
+
+        if (existingMatch != null) {
+            return existingMatch
+        }
+
+        val match = Match()
+        var team = Team()
+        match.teams.add(team)
+
+        capitalNames.forEachIndexed { index, name ->
+            if (index == 2) {
+                team = Team()
+                match.teams.add(team)
+            }
+
+            team.players.add(Player(name = name))
+        }
+
+        val game = Game()
+        game.match.target = match
+        match.games.add(game)
+        match.lastPlayed = lastPlayed
+
+        matchBox.put(match)
+
+        setActiveMatch(match)
+
+        return match
+    }
+
+    fun getMatchWithTeams(
+        playerNames: List<String>
+    ) : Match? {
+        matchBox.all.forEach { match ->
+            if (match.teams[0].getTeamName() == "${playerNames[0]}/${playerNames[1]}" &&
+                match.teams[1].getTeamName() == "${playerNames[2]}/${playerNames[3]}") {
+                return match
+            }
+        }
+
+        return null
     }
 
 
-
-//    fun createScoreSheet(
-//        players: List<String>,
-//        lastPlayed: LocalDateTime = LocalDateTime.now()
-//    ): FieldClassification.Match {
-//        // Capitalize names.
-//        val capitalNames = players.map { name -> name.capitalizeWords() }
-//        val match = FieldClassification.Match()
-//
-//        // Find matching teams (if any)
-//        val matchBox = boxStore.boxFor<FieldClassification.Match>()
-//        val team1Name = buildTeamName(capitalNames)
-//        val team2Name = buildTeamName(capitalNames.subList(2, 4))
-//
-//        matchBox.all.forEach { nextMatch ->
-//            if (nextMatch.teams[0].name == team1Name &&
-//                nextMatch.teams[1].name == team2Name
-//            ) {
-//                return nextMatch
-//            }
-//        }
-//
-//        match.teams.add(createTeam(capitalNames, match))
-//        match.teams.add(createTeam(capitalNames.subList(2, 4), match))
-//        match.lastPlayed = lastPlayed
-//
-//        matchBox.put(match)
-//        setActiveMatch(match)
-//
-//        return match
-//    }
-
     fun deleteMatch(match: Match) {
-        // Remove all games and hands associated with match
+        // Remove all games associated with match
         match.games.forEach {
             deleteGame(it)
         }
 
-        matchesBox.remove(match)
+        if (match.teams.size > 0) {
+            match.teams.forEach { teamBox.remove(it) }
+        } else {
+            match.players.forEach { playersBox.remove(it) }
+        }
+
+        matchBox.remove(match)
     }
 
     fun deleteGame(game: Game) {
-//        game.hands.forEach {
-//            deleteHand(it)
-//        }
-//
-//        boxStore.boxFor<Game>().remove(game)
+        game.turnData.forEach { turnBox.remove(it) }
+        gameBox.remove(game)
     }
 
-//    fun deleteHand(hand: Hand) {
-//        boxStore.boxFor<Hand>().remove(hand)
-//    }
-//
 //    fun deleteActivePlayer() {
 //        val playerBox = boxStore.boxFor<Player>()
 //        val teamBox = boxStore.boxFor<Team>()
@@ -208,22 +265,20 @@ object CommonDb : KoinComponent {
         return playerQuery
     }
 
+    fun getPlayer(
+        name: String
+    ) : Player {
+        val players = playersBox.query().equal(Player_.name, name).build().find()
+
+        return if (players.isEmpty()) Player(name = name) else players.first()
+    }
+
     fun getPlayerCount(): Long {
         return boxStore.boxFor<Player>().count()
     }
 
     fun getTeamCount(): Long {
         return boxStore.boxFor<Team>().count()
-    }
-
-    // Returns a player with the given name or creates a new one if not found.
-    private fun getPlayer(
-        name: String
-    ): Player {
-        val player = boxStore.boxFor<Player>()
-            .query().equal(Player_.name, name).build().findFirst()
-
-        return player ?: Player(name = name)
     }
 
     fun createGame(
@@ -233,9 +288,7 @@ object CommonDb : KoinComponent {
         game.match.target = match
         match.games.add(game)
         match.lastPlayed = LocalDateTime.now()
-        gamesBox.put(game)
-        matchesBox.put(match)
-        setActiveGame(game)
+        matchBox.put(match)
 
         return game
     }
@@ -307,12 +360,6 @@ object CommonDb : KoinComponent {
         ActiveStatus.activeMatch = match
     }
 
-    fun setActiveGame(
-        game: Game
-    ) {
-        ActiveStatus.activeGame = game
-    }
-
 //    fun setExpandedMatchId(
 //        expandedMatchId: Int
 //    ) {
@@ -326,9 +373,9 @@ object CommonDb : KoinComponent {
         val playerRankings = mutableListOf<Ranking>()
 
         getAllMatches().forEach { match ->
-            val ratio = match.getWinLossRatio()
-
-            if (ratio.isNotEmpty()) {
+//            val ratio = match.getWinLossRatio()
+//
+//            if (ratio.isNotEmpty()) {
 //                val team1 = match.teams[0]
 //                val team2 = match.teams[1]
 //
@@ -339,7 +386,7 @@ object CommonDb : KoinComponent {
 //                addPlayer(playerRankings, team1.players[1].name, ratio[0], ratio[1])
 //                addPlayer(playerRankings, team2.players[0].name, ratio[1], ratio[0])
 //                addPlayer(playerRankings, team2.players[1].name, ratio[1], ratio[0])
-            }
+//            }
         }
 
         sortRankings(teamRankings)

@@ -1,6 +1,5 @@
 package com.zeroboss.scoringscrabble.data.entities
 
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import com.zeroboss.scoringscrabble.R
 
 data class Letter (

@@ -1,4 +1,4 @@
-package com.zeroboss.scoring500.data.common
+package com.zeroboss.scoringscrabble.data.common
 
 import io.objectbox.converter.PropertyConverter
 import java.time.Instant

@@ -16,7 +16,7 @@ class ScoringApplication : Application() {
             modules(listOf(
                 boxStoreModule,
                 homeViewModelModule,
-                scoringSheetModule,
+                gamesModule,
                 selectPlayersViewModel,
                 scoringViewModelModule,
             ))

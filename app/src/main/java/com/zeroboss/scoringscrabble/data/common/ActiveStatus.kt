@@ -1,6 +1,5 @@
 package com.zeroboss.scoringscrabble.data.common
 
-import com.zeroboss.scoringscrabble.R
 import com.zeroboss.scoringscrabble.data.entities.Game
 import com.zeroboss.scoringscrabble.data.entities.Match
 import com.zeroboss.scoringscrabble.data.entities.Player
