@@ -9,7 +9,6 @@ object ActiveStatus {
     var activeMatch: Match? = null
     var activeGame: Game? = null
     var isTeamGame: Boolean = false
-    var players: MutableList<Player>? = null
     var letterFrequency: MutableList<Int> = resetLetterFrequency()
 }
 

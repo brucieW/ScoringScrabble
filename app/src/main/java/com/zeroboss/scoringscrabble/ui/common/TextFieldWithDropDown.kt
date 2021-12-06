@@ -28,7 +28,6 @@ fun TextFieldWithDropDown(
 
     OutlinedTextField(
         modifier = modifier
-            .padding(top = 5.dp)
             .focusRequester(focusRequester)
             .onFocusChanged {
                 if (it.hasFocus) {

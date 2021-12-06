@@ -64,7 +64,7 @@ fun Home(
         scaffoldState = scaffoldState,
         modifier = Modifier.fillMaxSize(),
         topBar = { HomeAppBar(navController) },
-        content = { HomeBody(navController, get()) },
+        content = { Body(navController, get()) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
@@ -121,7 +121,7 @@ fun HomeAppBar(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun HomeBody(
+fun Body(
     navController: NavController,
     homeViewModel: HomeViewModel
 ) {

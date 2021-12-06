@@ -1,7 +1,6 @@
 package com.zeroboss.scoringscrabble.ui.screens
 
 import android.graphics.Paint
-import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -31,8 +30,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import androidx.navigation.NavController
 import com.zeroboss.scoringscrabble.R
+import com.zeroboss.scoringscrabble.data.common.ActiveStatus
 import com.zeroboss.scoringscrabble.data.entities.Letters
 import com.zeroboss.scoringscrabble.data.entities.Player
+import com.zeroboss.scoringscrabble.data.entities.Team
 import com.zeroboss.scoringscrabble.data.entities.TurnData
 import com.zeroboss.scoringscrabble.ui.common.TileSettings
 import com.zeroboss.scoringscrabble.ui.common.TileType
@@ -57,15 +58,16 @@ fun ScoreSheet(
                 onClickReturn = { navController.popBackStack() }
             )
         },
-        content = { HomeBody(get()) }
+        content = { Body(get()) }
     )
 }
 
 @Composable
-fun HomeBody(
+fun Body(
     scoringViewModel: ScoringSheetViewModel
 ) {
     val rowState = rememberLazyListState()
+
     LazyRow(
         modifier = Modifier.fillMaxHeight(),
         state = rowState
@@ -74,13 +76,23 @@ fun HomeBody(
             TurnsColumn()
         }
 
-        itemsIndexed(items = scoringViewModel._players, itemContent = { index, player ->
-            ScoringCard(
-                scoringViewModel,
-                player,
-                index
-            )
-        })
+        if (ActiveStatus.activeMatch!!.isTeamType()) {
+            itemsIndexed(items = scoringViewModel.teams, itemContent = { index, team ->
+                PlayerTeamCard(
+                    scoringViewModel,
+                    index,
+                    team = team
+                )
+            })
+        } else {
+            itemsIndexed(items = scoringViewModel.players, itemContent = { index, player ->
+                PlayerTeamCard(
+                    scoringViewModel,
+                    index,
+                    player = player,
+                )
+            })
+        }
 
         item {
             ScrabbleBoardLayout(scoringViewModel)
@@ -113,10 +125,11 @@ fun TurnsColumn() {
 }
 
 @Composable
-fun ScoringCard(
+fun PlayerTeamCard(
     scoringViewModel: ScoringSheetViewModel,
-    player: Player,
-    index: Int
+    index: Int,
+    player: Player? = null,
+    team: Team? = null
 ) {
     val unusedTiles by remember { scoringViewModel.unusedTiles[index] }
 
@@ -140,7 +153,7 @@ fun ScoringCard(
     ) {
         Column {
             Text(
-                text = player.name,
+                text = if (team == null) player!!.name else team.getTeamName(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(6.dp),

@@ -1,6 +1,5 @@
 package com.zeroboss.scoringscrabble.ui.screens
 
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,7 +10,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -125,91 +123,6 @@ fun SelectPlayersBody(
 }
 
 @Composable
-fun TeamNameSelection(
-    isVisible: Boolean = false,
-    selectPlayersViewModel: SelectPlayersViewModel,
-    teamId: Int
-) {
-    if (isVisible) {
-        Popup() {
-            Box(
-                modifier = Modifier
-                    .size(180.dp, 300.dp)
-                    .background(
-                        Color.LightGray,
-                        RoundedCornerShape(10.dp)
-                    )
-
-            ) {
-                Column(
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(start = 10.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Select Team",
-                            style = normalText,
-                            color = Blue800
-                        )
-
-                        IconButton(
-                            onClick = { closeTeamPopup(selectPlayersViewModel, teamId) }
-                        ) {
-                            Icon(
-                                Icons.Rounded.Close, contentDescription = "",
-                                tint = Blue800
-                            )
-                        }
-                    }
-
-                    LazyColumn(
-                        modifier = Modifier
-                            .background(
-                                Color.LightGray,
-                                RoundedCornerShape(10.dp)
-                            )
-                            .padding(start = 10.dp, end = 10.dp, bottom = 10.dp, top = 0.dp)
-                    ) {
-                        itemsIndexed(selectPlayersViewModel.getFilteredTeams()) { _, name ->
-                            ClickableText(
-                                text = AnnotatedString(name),
-                                style = normalText,
-                                onClick = {
-                                    selectPlayersViewModel.setTeamDropdownVisible(
-                                        teamId,
-                                        false
-                                    )
-
-                                    val players = name.split("/")
-                                    selectPlayersViewModel.setPlayerNames(
-                                        teamId,
-                                        players
-                                    )
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-private fun closeTeamPopup(
-    selectPlayersViewModel: SelectPlayersViewModel,
-    teamId: Int
-) {
-    selectPlayersViewModel.setTeamDropdownVisible(
-        teamId,
-        false
-    )
-}
-
-@Composable
 fun PlayerNameSelection(
     usingTeams: Boolean,
     selectPlayersViewModel: SelectPlayersViewModel
@@ -237,11 +150,14 @@ fun PlayerNameSelection(
         if (usingTeams) {
             TextWithDropDown(
                 text = "Team ${teamId + 1}",
-                modifier = Modifier.padding(top = 5.dp),
                 horizontal = Arrangement.Start,
                 onClickedDropDown = { selectPlayersViewModel.onTeamDropdownClicked(teamId) },
                 onFocusAltered = { selectPlayersViewModel.setTeamDropdownVisible(teamId, false) }
             )
+
+            if (teamDropDownsVisible[teamId]) {
+                TeamNameSelection(selectPlayersViewModel, teamId)
+            }
         }
 
         val start = if (teamId == 0) 0 else 2
@@ -254,19 +170,18 @@ fun PlayerNameSelection(
             for (playerId in start..end) {
                 TextFieldWithDropDown(
                     modifier = Modifier
-                        .padding(bottom = 5.dp, end = 5.dp)
+                        .padding(end = 10.dp)
                         .weight(0.5F),
                     text = names[playerId],
                     label = "Player ${playerId + 1}",
                     onNameChanged = { text ->
                         selectPlayersViewModel.onPlayerNameChanged(
-                            teamId,
                             playerId,
                             text
                         )
                     },
                     onTrailingIconClicked = {
-                        selectPlayersViewModel.onPlayerDropdownClicked(teamId, playerId)
+                        selectPlayersViewModel.onPlayerDropdownClicked(playerId)
                     },
                     onFocusAltered = { selectPlayersViewModel.clearAllPlayerLists() }
                 )
@@ -274,7 +189,6 @@ fun PlayerNameSelection(
                 if (playerDropDownsVisible[playerId]) {
                     PlayerNamesSelection(
                         selectPlayersViewModel,
-                        teamId,
                         playerId
                     )
                 }
@@ -286,7 +200,6 @@ fun PlayerNameSelection(
 @Composable
 fun PlayerNamesSelection(
     selectPlayersViewModel: SelectPlayersViewModel,
-    teamId: Int,
     playerId: Int
 ) {
     Popup() {
@@ -309,7 +222,7 @@ fun PlayerNamesSelection(
                 )
 
                 IconButton(
-                    onClick = { closePlayerPopup(selectPlayersViewModel, teamId, playerId) }
+                    onClick = { closePlayerPopup(selectPlayersViewModel, playerId) }
                 ) {
                     Icon(
                         Icons.Rounded.Close, contentDescription = "",
@@ -334,11 +247,10 @@ fun PlayerNamesSelection(
                         onClick = {
                             closePlayerPopup(
                                 selectPlayersViewModel,
-                                teamId,
-                                playerId)
+                                playerId
+                            )
 
                             selectPlayersViewModel.onPlayerNameChanged(
-                                teamId,
                                 playerId,
                                 name
                             )
@@ -352,12 +264,92 @@ fun PlayerNamesSelection(
 
 private fun closePlayerPopup(
     selectPlayersViewModel: SelectPlayersViewModel,
-    teamId: Int,
     playerId: Int
 ) {
     selectPlayersViewModel.setPlayerDropdownVisible(
-        teamId,
         playerId,
         false
     )
 }
+
+@Composable
+fun TeamNameSelection(
+    selectPlayersViewModel: SelectPlayersViewModel,
+    teamId: Int
+) {
+    Popup() {
+        Box(
+            modifier = Modifier
+                .size(180.dp, 300.dp)
+                .background(
+                    Color.LightGray,
+                    RoundedCornerShape(10.dp)
+                )
+
+        ) {
+            Column(
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(start = 10.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Select Team",
+                        style = normalText,
+                        color = Blue800
+                    )
+
+                    IconButton(
+                        onClick = { closeTeamPopup(selectPlayersViewModel, teamId) }
+                    ) {
+                        Icon(
+                            Icons.Rounded.Close, contentDescription = "",
+                            tint = Blue800
+                        )
+                    }
+                }
+
+                LazyColumn(
+                    modifier = Modifier
+                        .background(
+                            Color.LightGray,
+                            RoundedCornerShape(10.dp)
+                        )
+                        .padding(start = 10.dp, end = 10.dp, bottom = 10.dp, top = 0.dp)
+                ) {
+                    itemsIndexed(selectPlayersViewModel.getFilteredTeams()) { _, name ->
+                        ClickableText(
+                            text = AnnotatedString(name),
+                            style = normalText,
+                            onClick = {
+                                selectPlayersViewModel.setTeamDropdownVisible(
+                                    teamId,
+                                    false
+                                )
+
+                                val players = name.split("/")
+                                selectPlayersViewModel.setTeamPlayerNames(teamId, players)
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+private fun closeTeamPopup(
+    selectPlayersViewModel: SelectPlayersViewModel,
+    teamId: Int
+) {
+    selectPlayersViewModel.setTeamDropdownVisible(
+        teamId,
+        false
+    )
+}
+
+

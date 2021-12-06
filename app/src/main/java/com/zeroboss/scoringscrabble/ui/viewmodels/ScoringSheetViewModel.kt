@@ -3,7 +3,6 @@ package com.zeroboss.scoringscrabble.ui.viewmodels
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import com.zeroboss.scoringscrabble.data.common.ActiveStatus
 import com.zeroboss.scoringscrabble.data.entities.*
@@ -11,8 +10,12 @@ import com.zeroboss.scoringscrabble.data.entities.*
 class ScoringSheetViewModel(
 
 ) : ViewModel() {
-    val _players = mutableListOf<Player>()
+    val players = mutableListOf<Player>()
+    val teams = mutableListOf<Team>()
     private var _availableLetters = ActiveStatus.letterFrequency.map { }
+
+    private val _activeTeam = mutableStateOf(Team())
+    val activeTeam = _activeTeam
 
     private val _activePlayer = mutableStateOf(Player())
     val activePlayer = _activePlayer
@@ -91,15 +94,19 @@ class ScoringSheetViewModel(
     val turnData = mutableListOf<MutableState<TurnData>>()
 
     init {
-        for (playerId in 1..4) {
-            _players.add(Player(name = "Player $playerId"))
-//
-//            for (turn in 1..6) {
-//                turnData.add(getTurnData(playerId, turn))
-//            }
-        }
+        if (ActiveStatus.activeMatch!!.isTeamType()) {
+            ActiveStatus.activeMatch!!.teams.forEach { team ->
+                teams.add(team)
+            }
 
-        _activePlayer.value = _players[0]
+            _activeTeam.value = ActiveStatus.activeMatch!!.teams[0]
+        } else {
+            ActiveStatus.activeMatch!!.players.forEach { player ->
+                players.add(player)
+            }
+
+            _activePlayer.value = ActiveStatus.activeMatch!!.players[0]
+        }
 
         for (i in 1..16) {
             tileStartX.add(0f)
@@ -110,10 +117,6 @@ class ScoringSheetViewModel(
             _tileCounts.add(mutableStateOf(Letters.get(it).quantity))
         }
     }
-
-//    private val _matches = MutableStateFlow(currentMatchCards)
-//    val matches = _matches
-
 }
 
 //private fun getTurnData(

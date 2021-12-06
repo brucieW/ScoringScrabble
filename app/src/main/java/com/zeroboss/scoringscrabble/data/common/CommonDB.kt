@@ -127,17 +127,8 @@ object CommonDb : KoinComponent {
         }
 
         val match = Match()
-        var team = Team()
-        match.teams.add(team)
-
-        capitalNames.forEachIndexed { index, name ->
-            if (index == 2) {
-                team = Team()
-                match.teams.add(team)
-            }
-
-            team.players.add(Player(name = name))
-        }
+        addTeamPlayers(match, 0, capitalNames)
+        addTeamPlayers(match, 1, capitalNames)
 
         val game = Game()
         game.match.target = match
@@ -149,6 +140,23 @@ object CommonDb : KoinComponent {
         setActiveMatch(match)
 
         return match
+    }
+
+    private fun addTeamPlayers(
+        match: Match,
+        teamId: Int,
+        playerNames: List<String>
+    ) {
+        val team = Team()
+        val start = teamId * 2
+
+        for (playerId in start..start + 1) {
+            val player = getPlayer(playerNames[playerId])
+            team.players.add(player)
+        }
+
+        teamBox.put(team)
+        match.teams.add(team)
     }
 
     fun getMatchWithTeams(
@@ -185,69 +193,6 @@ object CommonDb : KoinComponent {
         gameBox.remove(game)
     }
 
-//    fun deleteActivePlayer() {
-//        val playerBox = boxStore.boxFor<Player>()
-//        val teamBox = boxStore.boxFor<Team>()
-//        val status = getActiveStatus()
-//        val activePlayer = status.player
-//
-//        // Remove teams associated with this player
-//        activePlayer.target.teams.forEach { team ->
-//            team.players[0].teams.remove(team)
-//            team.players[1].teams.remove(team)
-//            teamBox.remove(team.id)
-//        }
-//
-//        playerBox.remove(activePlayer.targetId)
-//        status.player.target = null
-//        boxStore.boxFor<ActiveStatus>().put(status)
-//    }
-//
-//    fun deleteActiveMatch() {
-//        val status = getActiveStatus()
-//        val matchBox = boxStore.boxFor<FieldClassification.Match>()
-//        val gameBox = boxStore.boxFor<Game>()
-//        val handBox = boxStore.boxFor<Hand>()
-//
-//        status.match.target.games.forEach { game ->
-//            game.hands.forEach { handBox.remove(it) }
-//            gameBox.remove(game)
-//        }
-//
-//        matchBox.remove(status.match.targetId)
-//
-//        status.match.target = null
-//        status.game.target = null
-//
-//        boxStore.boxFor<ActiveStatus>().put(status)
-//    }
-//
-//    fun deleteActiveGame() {
-//        val status = getActiveStatus()
-//        val gameBox = boxStore.boxFor<Game>()
-//        val handBox = boxStore.boxFor<Hand>()
-//
-//        status.game.target.hands.forEach { hand ->
-//            handBox.remove(hand)
-//        }
-//
-//        gameBox.remove(status.game.targetId)
-//
-//        status.game.target = null
-//
-//        boxStore.boxFor<ActiveStatus>().put(status)
-//    }
-//
-    fun subscribeToPlayers(
-        observer: DataObserver<MutableList<Player?>>
-    ): DataSubscription {
-        if (playerQuery == null) {
-            playerQuery = boxStore.boxFor<Player>().query().order(Player_.name).build()
-        }
-
-        return playerQuery!!.subscribe().observer(observer)
-    }
-
     /**
      * Return all of the players in the store.
      */
@@ -269,8 +214,16 @@ object CommonDb : KoinComponent {
         name: String
     ) : Player {
         val players = playersBox.query().equal(Player_.name, name).build().find()
+        val player: Player
 
-        return if (players.isEmpty()) Player(name = name) else players.first()
+        if (players.isEmpty()) {
+            player = Player(name = name)
+            playersBox.put(player)
+        } else {
+            player = players.first()
+        }
+
+        return player
     }
 
     fun getPlayerCount(): Long {

@@ -2,6 +2,8 @@ package com.zeroboss.scoringscrabble.ui.viewmodels
 
 import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
+import com.zeroboss.scoringscrabble.data.common.ActiveStatus
+import com.zeroboss.scoringscrabble.data.common.CommonDb
 import com.zeroboss.scoringscrabble.data.common.CommonDb.getFilteredPlayerNames
 import com.zeroboss.scoringscrabble.data.common.CommonDb.getFilteredTeamNames
 
@@ -12,6 +14,7 @@ class SelectPlayersViewModel() : ViewModel()  {
 
     fun changeUsingTeams() {
         _isTeamType.value = !_isTeamType.value
+        checkDataValid()
     }
 
     val teamListVisible = listOf(
@@ -60,34 +63,24 @@ class SelectPlayersViewModel() : ViewModel()  {
         return getFilteredPlayerNames(exclude.filter { name -> name.isNotEmpty() } )
     }
 
-    private fun getOffset(
-        teamId: Int,
-        playerId: Int
-    ): Int {
-        when (teamId) {
-            -1 -> return playerId
-            0 -> return (if (playerId == 0) 0 else 1)
-            1 -> return (if (playerId == 1) 2 else 3)
-            else -> return -1
-        }
-    }
-
-    fun onPlayerNameChanged(
-        teamId: Int,
-        playerId: Int,
-        text: String
-    ) {
-        playerNames[getOffset(teamId, playerId)].value = text
-
+    fun checkDataValid() {
         // Check data is valid.
 
         val itemsWithText = playerNames.filter { name -> name.value.isNotEmpty() }
 
         _dataValid.value = _isTeamType.value && itemsWithText.size == 4
-                        || !_isTeamType.value && itemsWithText.size == 2
+                || !_isTeamType.value && itemsWithText.size > 1
 
         val distinct = itemsWithText.distinctBy { it.value.uppercase() }
         _uniquePlayerNames.value = distinct.size == itemsWithText.size
+    }
+
+    fun onPlayerNameChanged(
+        playerId: Int,
+        text: String
+    ) {
+        playerNames[playerId].value = text
+        checkDataValid()
     }
 
     fun onTeamDropdownClicked(
@@ -95,23 +88,23 @@ class SelectPlayersViewModel() : ViewModel()  {
     ) {
         setTeamDropdownVisible(
             teamId,
-            !teamListVisible[teamId - 1].value
+            !teamListVisible[teamId].value
         )
     }
 
     fun onPlayerDropdownClicked(
-        teamId: Int,
         playerId: Int
     ) {
         setPlayerDropdownVisible(
-            teamId,
             playerId,
-            !playerListVisible[getOffset(teamId, playerId)].value
+            !playerListVisible[playerId].value
         )
     }
 
     fun onStartScoring() {
-
+        val players = playerNames.map { player -> player.value }.filter { player -> player.isNotEmpty() }
+        ActiveStatus.activeMatch = if (isTeamType.value) CommonDb.createTeamsMatch(players)
+                        else CommonDb.createPlayersMatch(players)
     }
 
     fun onClickSave() {
@@ -128,7 +121,7 @@ class SelectPlayersViewModel() : ViewModel()  {
         visible: Boolean
     ) {
         clearAllTeamLists()
-        teamListVisible[teamId - 1].value = visible
+        teamListVisible[teamId].value = visible
     }
 
     private fun clearAllTeamLists() {
@@ -136,12 +129,11 @@ class SelectPlayersViewModel() : ViewModel()  {
     }
 
     fun setPlayerDropdownVisible(
-        teamId: Int,
         playerId: Int,
         visible: Boolean
     ) {
         clearAllPlayerLists()
-        playerListVisible[getOffset(teamId, playerId)].value = visible
+        playerListVisible[playerId].value = visible
     }
 
     fun clearAllPlayerLists() {
@@ -152,12 +144,12 @@ class SelectPlayersViewModel() : ViewModel()  {
         playerNames.forEach { name -> name.value = "" }
     }
 
-    fun setPlayerNames(
+    fun setTeamPlayerNames(
         teamId: Int,
         players: List<String>
     ) {
         players.forEachIndexed { index, name ->
-            playerNames[getOffset(teamId, index)].value = name
+            playerNames[(teamId * 2) + index].value = name
         }
     }
 }
