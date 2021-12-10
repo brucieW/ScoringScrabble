@@ -38,6 +38,7 @@ import com.zeroboss.scoringscrabble.data.entities.TurnData
 import com.zeroboss.scoringscrabble.ui.common.TileSettings
 import com.zeroboss.scoringscrabble.ui.common.TileType
 import com.zeroboss.scoringscrabble.ui.common.TopPanel
+import com.zeroboss.scoringscrabble.ui.dialogs.FirstPlayerDialog
 import com.zeroboss.scoringscrabble.ui.dialogs.UnusedTilesDialog
 import com.zeroboss.scoringscrabble.ui.theme.*
 import com.zeroboss.scoringscrabble.ui.viewmodels.ScoringSheetViewModel
@@ -139,6 +140,14 @@ fun PlayerTeamCard(
         scoringViewModel,
         index,
         showUnusedDialog,
+        setShowDialog = { showUnusedDialog = false}
+    )
+
+    var showFirstPlayerDialog by remember { mutableStateOf(true) }
+
+    FirstPlayerDialog(
+        scoringViewModel,
+        showFirstPlayerDialog,
         setShowDialog = { showUnusedDialog = false}
     )
 

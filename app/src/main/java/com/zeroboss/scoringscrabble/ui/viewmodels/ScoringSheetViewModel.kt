@@ -12,6 +12,9 @@ class ScoringSheetViewModel(
 ) : ViewModel() {
     val players = mutableListOf<Player>()
     val teams = mutableListOf<Team>()
+
+    var firstPlayer = -1
+
     private var _availableLetters = ActiveStatus.letterFrequency.map { }
 
     private val _activeTeam = mutableStateOf(Team())
