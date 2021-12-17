@@ -1,5 +1,8 @@
 package com.zeroboss.scoringscrabble.data.common
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import com.zeroboss.scoringscrabble.data.entities.Game
 import com.zeroboss.scoringscrabble.data.entities.Match
 import com.zeroboss.scoringscrabble.data.entities.Player

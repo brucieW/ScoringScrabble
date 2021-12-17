@@ -28,6 +28,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
+import androidx.core.graphics.scaleMatrix
 import androidx.navigation.NavController
 import com.zeroboss.scoringscrabble.R
 import com.zeroboss.scoringscrabble.data.common.ActiveStatus
@@ -67,36 +68,44 @@ fun ScoreSheet(
 fun Body(
     scoringViewModel: ScoringSheetViewModel
 ) {
+    val colState = rememberLazyListState()
     val rowState = rememberLazyListState()
 
-    LazyRow(
-        modifier = Modifier.fillMaxHeight(),
-        state = rowState
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        state = colState
     ) {
         item {
-            TurnsColumn()
-        }
+            LazyRow(
+                modifier = Modifier.fillMaxHeight(),
+                state = rowState
+            ) {
+                item {
+                    TurnsColumn()
+                }
 
-        if (ActiveStatus.activeMatch!!.isTeamType()) {
-            itemsIndexed(items = scoringViewModel.teams, itemContent = { index, team ->
-                PlayerTeamCard(
-                    scoringViewModel,
-                    index,
-                    team = team
-                )
-            })
-        } else {
-            itemsIndexed(items = scoringViewModel.players, itemContent = { index, player ->
-                PlayerTeamCard(
-                    scoringViewModel,
-                    index,
-                    player = player,
-                )
-            })
-        }
+                if (ActiveStatus.activeMatch!!.isTeamType()) {
+                    itemsIndexed(items = scoringViewModel.teams, itemContent = { index, team ->
+                        PlayerTeamCard(
+                            scoringViewModel,
+                            index,
+                            team = team
+                        )
+                    })
+                } else {
+                    itemsIndexed(items = scoringViewModel.players, itemContent = { index, player ->
+                        PlayerTeamCard(
+                            scoringViewModel,
+                            index,
+                            player = player,
+                        )
+                    })
+                }
 
-        item {
-            ScrabbleBoardLayout(scoringViewModel)
+                item {
+                    ScrabbleBoardLayout(scoringViewModel)
+                }
+            }
         }
     }
 }
@@ -134,21 +143,13 @@ fun PlayerTeamCard(
 ) {
     val unusedTiles by remember { scoringViewModel.unusedTiles[index] }
 
-    var showUnusedDialog by remember { mutableStateOf(false) }
+    val (showUnusedTilesDialog, setShowUnusedTilesDialog) = remember { mutableStateOf(false) }
 
     UnusedTilesDialog(
         scoringViewModel,
         index,
-        showUnusedDialog,
-        setShowDialog = { showUnusedDialog = false}
-    )
-
-    var showFirstPlayerDialog by remember { mutableStateOf(true) }
-
-    FirstPlayerDialog(
-        scoringViewModel,
-        showFirstPlayerDialog,
-        setShowDialog = { showUnusedDialog = false}
+        showUnusedTilesDialog,
+        setShowUnusedTilesDialog
     )
 
     Card(
@@ -205,7 +206,7 @@ fun PlayerTeamCard(
                     text = "Unused Tiles",
                     fontSize = 15.sp,
                     modifier = Modifier.clickable {
-                        showUnusedDialog = true
+                        setShowUnusedTilesDialog(true)
                     }
                 )
 
@@ -213,7 +214,7 @@ fun PlayerTeamCard(
                     text = unusedTiles.toString(),
 
                     Modifier.clickable {
-                        showUnusedDialog = true
+                        setShowUnusedTilesDialog(true)
                     }
                 )
             }
@@ -256,6 +257,32 @@ fun ScrabbleBoardLayout(
 
 }
 
+object screenData {
+    var screenWidth: Int = 0
+    var screenHeight: Int = 0
+    var tileWidth: Int = 0
+}
+
+@Composable
+fun getTileWidth(): Int {
+    screenData.screenWidth =
+        with(LocalDensity.current) { LocalConfiguration.current.screenWidthDp }
+    screenData.screenHeight =
+        with(LocalDensity.current) { LocalConfiguration.current.screenHeightDp }
+    screenData.tileWidth =
+        if (screenData.screenWidth > screenData.screenHeight) 28 else (screenData.screenWidth / 16)
+
+    return screenData.tileWidth
+}
+
+@Composable
+fun isWideScreen() : Boolean {
+    getTileWidth()
+
+    return (screenData.screenWidth > screenData.screenHeight)
+}
+
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun BoardHeader(
@@ -266,11 +293,10 @@ fun BoardHeader(
     val directionSouth by scoringViewModel.directionSouth
     val firstPos by scoringViewModel.firstPos
 
-    val screenWidth = with(LocalDensity.current) { LocalConfiguration.current.screenWidthDp }
-    val tileWidth = (screenWidth / 16)
+    val tileWidth = getTileWidth()
 
     Column(
-        modifier = Modifier.padding(10.dp),
+        modifier = Modifier.padding(top = 10.dp, bottom = 5.dp),
         verticalArrangement = Arrangement.Center
     ) {
         Row {
@@ -370,9 +396,14 @@ fun BoardHeader(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        ShowTiles(scoringViewModel, 'A', 'I', tileWidth)
-        ShowTiles(scoringViewModel, 'J', 'R', tileWidth)
-        ShowTiles(scoringViewModel, 'S', '[', tileWidth)
+        if (screenData.screenWidth > screenData.screenHeight) {
+            ShowTiles(scoringViewModel, 'A', 'N', tileWidth)
+            ShowTiles(scoringViewModel, 'O', '[', tileWidth)
+        } else {
+            ShowTiles(scoringViewModel, 'A', 'I', tileWidth)
+            ShowTiles(scoringViewModel, 'J', 'R', tileWidth)
+            ShowTiles(scoringViewModel, 'S', '[', tileWidth)
+        }
 
         Spacer(modifier = Modifier.height(10.dp))
     }
@@ -478,19 +509,17 @@ fun DirectionButton(
 fun ScrabbleBoard(
     scoringViewModel: ScoringSheetViewModel
 ) {
-    val density = LocalDensity.current
-    val config = LocalConfiguration.current
-    val screenWidth = with(density) { config.screenWidthDp.dp.toPx().toInt() }
-//    val screenHeight = with(density) { config.screenHeightDp.dp.toPx().toInt() }
-    val tileWidth = (screenWidth.toFloat() / 17.5f)
+    val boardSide = if (isWideScreen()) ((screenData.tileWidth + 2) * 16).dp else screenData.screenWidth.dp - 20.dp
+    val tileWidth = (screenData.tileWidth * 2 + screenData.tileWidth / 2).toFloat()
     val star = ImageBitmap.imageResource(id = R.drawable.starting_star)
 
     Surface(
         modifier = Modifier
             .size(
-                config.screenWidthDp.dp - 5.dp,
-                config.screenWidthDp.dp - 5.dp
+                width = boardSide,
+                height = boardSide
             )
+            .padding(end = 10.dp)
             .border(BorderStroke(1.dp, Color.Black))
     ) {
         Canvas(

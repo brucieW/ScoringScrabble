@@ -3,13 +3,11 @@ package com.zeroboss.scoringscrabble.ui.dialogs
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
-import androidx.compose.material.Checkbox
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -20,8 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.zeroboss.scoringscrabble.R
 import com.zeroboss.scoringscrabble.data.common.ActiveStatus
-import com.zeroboss.scoringscrabble.ui.common.MultipleButtonBar
-import com.zeroboss.scoringscrabble.ui.common.getTwoButtons
+import com.zeroboss.scoringscrabble.ui.common.ScoringButton
 import com.zeroboss.scoringscrabble.ui.theme.*
 import com.zeroboss.scoringscrabble.ui.viewmodels.ScoringSheetViewModel
 
@@ -34,7 +31,7 @@ fun FirstPlayerDialog(
 ) {
     if (showDialog) {
         Dialog(
-            onDismissRequest = { setShowDialog(false) }
+            onDismissRequest = {}
         ) {
             Card(
                 modifier = Modifier
@@ -79,17 +76,19 @@ fun FirstPlayerDialog(
                         item {
                             Text(
                                 text = stringResource(id = R.string.first_player),
-                                style = dialogTitle
+                                style = dialogTitle,
+                                modifier = Modifier.padding(bottom = 10.dp)
                             )
                         }
 
                         itemsIndexed(items = scoringSheetViewModel.players) { index, player ->
                             Text(
                                 text = player.name,
-                                style = typography.h5,
+                                style = typography.h6,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .background(if (index == selectedIndex) Color.DarkGray else Blue50)
+                                    .padding(start = 5.dp)
+                                    .background(if (index == selectedIndex) Color.Gray else Blue50)
                                     .selectable(
                                         selected = index == selectedIndex,
                                         onClick = {
@@ -103,24 +102,22 @@ fun FirstPlayerDialog(
 
                     item {
                         Spacer(modifier = Modifier.height(20.dp))
-
-                        MultipleButtonBar(
-                            getTwoButtons(
-                                firstButtonEnabled = selectedIndex != -1,
-                                onFirstButtonClicked = {
-                                    scoringSheetViewModel.firstPlayer = selectedIndex
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            ScoringButton(
+                                text = " OK ",
+                                enabled = selectedIndex != -1,
+                                onClick = {
                                     setShowDialog(false)
-                                },
-                                onSecondButtonClicked = {
-                                    setShowDialog(false)
+                                    scoringSheetViewModel.setActivePlayer(selectedIndex)
                                 }
                             )
-                        )
+                        }
                     }
                 }
             }
         }
     }
 }
-
-

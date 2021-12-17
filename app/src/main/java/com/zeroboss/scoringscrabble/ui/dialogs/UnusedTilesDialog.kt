@@ -27,10 +27,10 @@ import com.zeroboss.scoringscrabble.ui.viewmodels.ScoringSheetViewModel
 fun UnusedTilesDialog(
     scoringSheetViewModel: ScoringSheetViewModel,
     playerId: Int,
-    showDialog: Boolean = false,
-    setShowDialog: (Boolean) -> Unit
+    showUnusedTilesDialog: Boolean,
+    setShowUnusedTilesDialog: (Boolean) -> Unit
 ) {
-    if (showDialog) {
+    if (showUnusedTilesDialog) {
         val text = scoringSheetViewModel.unusedTiles[playerId].value.toString()
 
         val unusedTiles = remember {
@@ -46,7 +46,7 @@ fun UnusedTilesDialog(
         val keyboardController = LocalSoftwareKeyboardController.current
 
         Dialog(
-            onDismissRequest = { setShowDialog(false) }
+            onDismissRequest = { }
         ) {
             Card(
                 modifier = Modifier.size(260.dp, 180.dp),
@@ -91,10 +91,10 @@ fun UnusedTilesDialog(
                                     offset = playerId,
                                     value = unusedTiles.value.text
                                 )
-                                setShowDialog(false)
+                                setShowUnusedTilesDialog(false)
                             },
                             onSecondButtonClicked = {
-                                setShowDialog(false)
+                                setShowUnusedTilesDialog(false)
                             }
                         )
                     )
@@ -103,4 +103,3 @@ fun UnusedTilesDialog(
         }
     }
 }
-

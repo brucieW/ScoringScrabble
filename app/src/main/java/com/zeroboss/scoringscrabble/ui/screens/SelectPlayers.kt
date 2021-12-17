@@ -242,6 +242,7 @@ fun PlayerNamesSelection(
             ) {
                 itemsIndexed(selectPlayersViewModel.getFilteredPlayers()) { _, name ->
                     ClickableText(
+                        modifier = Modifier.fillMaxWidth(),
                         text = AnnotatedString(name),
                         style = normalText,
                         onClick = {

@@ -13,8 +13,6 @@ class ScoringSheetViewModel(
     val players = mutableListOf<Player>()
     val teams = mutableListOf<Team>()
 
-    var firstPlayer = -1
-
     private var _availableLetters = ActiveStatus.letterFrequency.map { }
 
     private val _activeTeam = mutableStateOf(Team())
@@ -22,6 +20,10 @@ class ScoringSheetViewModel(
 
     private val _activePlayer = mutableStateOf(Player())
     val activePlayer = _activePlayer
+
+    fun setActivePlayer(index: Int) {
+        _activePlayer.value = players[index]
+    }
 
     private val _directionEast = mutableStateOf<Boolean>(true)
     val directionEast = _directionEast
@@ -107,8 +109,6 @@ class ScoringSheetViewModel(
             ActiveStatus.activeMatch!!.players.forEach { player ->
                 players.add(player)
             }
-
-            _activePlayer.value = ActiveStatus.activeMatch!!.players[0]
         }
 
         for (i in 1..16) {
