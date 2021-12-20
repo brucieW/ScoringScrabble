@@ -3,9 +3,11 @@ package com.zeroboss.scoringscrabble.ui.viewmodels
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import com.zeroboss.scoringscrabble.data.common.ActiveStatus
 import com.zeroboss.scoringscrabble.data.entities.*
+import com.zeroboss.scoringscrabble.ui.screens.screenData
 
 class ScoringSheetViewModel(
 
@@ -15,15 +17,31 @@ class ScoringSheetViewModel(
 
     private var _availableLetters = ActiveStatus.letterFrequency.map { }
 
-    private val _activeTeam = mutableStateOf(Team())
-    val activeTeam = _activeTeam
+    private val _firstPlayerSelected = mutableStateOf(false)
+    val firstPlayerSelected = _firstPlayerSelected
 
     private val _activePlayer = mutableStateOf(Player())
     val activePlayer = _activePlayer
 
-    fun setActivePlayer(index: Int) {
+    fun setActivePlayerByIndex(index: Int) {
         _activePlayer.value = players[index]
     }
+
+    fun setActivePlayer(player: Player) {
+        _activePlayer.value = player
+        _firstPlayerSelected.value = true
+    }
+
+    private val _activeTeam = mutableStateOf(Team())
+    val activeTeam = _activeTeam
+
+    fun setActiveTeam(team: Team) {
+        _activeTeam.value = team
+        _firstPlayerSelected.value = true
+    }
+
+    private val _cancelEnabled = mutableStateOf<Float>(0.4f)
+    val cancelEnabled = _cancelEnabled
 
     private val _directionEast = mutableStateOf<Boolean>(true)
     val directionEast = _directionEast
@@ -60,17 +78,25 @@ class ScoringSheetViewModel(
     var tileStartX = mutableListOf<Float>()
     var tileStartY = mutableListOf<Float>()
 
-    private val _firstPos = mutableStateOf("")
-    val firstPos = _firstPos
+    private val _isFirstPos = mutableStateOf(false)
+    val isFirstPos = _isFirstPos
+    var firstPos = Offset(0f, 0f)
+
 
     fun setFirstPos(x: Float, y: Float) {
-        _firstPos.value = ""
+        _isFirstPos.value = false
+        val centerAdjustment = screenData.tileWidth / 2 + screenData.tileWidth / 3 + 5
 
         for (col in 0..14) {
             if (x >= tileStartX[col] && x <= tileStartX[col + 1]) {
                 for (row in 0..14) {
                     if (y >= tileStartY[row] && y <= tileStartY[row + 1]) {
-                        _firstPos.value = "${'A' + col}${row + 1}"
+                        _isFirstPos.value = true
+                        firstPos = Offset(
+                            tileStartX[col] + centerAdjustment,
+                            tileStartY[row] + centerAdjustment
+                        )
+
                         return
                     }
                 }

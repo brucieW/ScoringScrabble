@@ -163,8 +163,9 @@ object CommonDb : KoinComponent {
         playerNames: List<String>
     ) : Match? {
         matchBox.all.forEach { match ->
-            if (match.teams[0].getTeamName() == "${playerNames[0]}/${playerNames[1]}" &&
-                match.teams[1].getTeamName() == "${playerNames[2]}/${playerNames[3]}") {
+            if (match.teams.isNotEmpty() &&
+                    match.teams[0].getTeamName() == "${playerNames[0]}/${playerNames[1]}" &&
+                    match.teams[1].getTeamName() == "${playerNames[2]}/${playerNames[3]}") {
                 return match
             }
         }

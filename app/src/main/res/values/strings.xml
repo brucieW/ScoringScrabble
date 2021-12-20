@@ -43,8 +43,13 @@
     <string name="close">Close</string>
     <string name="are_you_sure">Do you want to continue?</string>
 
-    <string name="first_team">Select Team to go first</string>
-    <string name="first_player">Select Player to go first</string>
+    <string name="first_team">Select Team to go first (click name)</string>
+    <string name="first_player">Select Player to go first (click name)</string>
+
+    <string name="cancel_tile">Cancel Tile</string>
+    <string name="accept">Accept</string>
+    <string name="skip_turn">Skip Turn</string>
+    <string name="cancel_word">Cancel Word</string>
 
     <string name="about">About</string>
 </resources>

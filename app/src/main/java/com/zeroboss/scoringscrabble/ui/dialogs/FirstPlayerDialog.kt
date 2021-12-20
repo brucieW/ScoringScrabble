@@ -111,7 +111,7 @@ fun FirstPlayerDialog(
                                 enabled = selectedIndex != -1,
                                 onClick = {
                                     setShowDialog(false)
-                                    scoringSheetViewModel.setActivePlayer(selectedIndex)
+                                    scoringSheetViewModel.setActivePlayerByIndex(selectedIndex)
                                 }
                             )
                         }

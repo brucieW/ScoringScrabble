@@ -25,10 +25,11 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
-import androidx.core.graphics.scaleMatrix
 import androidx.navigation.NavController
 import com.zeroboss.scoringscrabble.R
 import com.zeroboss.scoringscrabble.data.common.ActiveStatus
@@ -39,7 +40,6 @@ import com.zeroboss.scoringscrabble.data.entities.TurnData
 import com.zeroboss.scoringscrabble.ui.common.TileSettings
 import com.zeroboss.scoringscrabble.ui.common.TileType
 import com.zeroboss.scoringscrabble.ui.common.TopPanel
-import com.zeroboss.scoringscrabble.ui.dialogs.FirstPlayerDialog
 import com.zeroboss.scoringscrabble.ui.dialogs.UnusedTilesDialog
 import com.zeroboss.scoringscrabble.ui.theme.*
 import com.zeroboss.scoringscrabble.ui.viewmodels.ScoringSheetViewModel
@@ -70,11 +70,22 @@ fun Body(
 ) {
     val colState = rememberLazyListState()
     val rowState = rememberLazyListState()
+    val firstPlayerSelected by scoringViewModel.firstPlayerSelected
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         state = colState
     ) {
+        if (!firstPlayerSelected) {
+            item {
+                Text(
+                    text = stringResource(id = if (ActiveStatus.activeMatch!!.isTeamType()) R.string.first_team else R.string.first_player),
+                    style = errorText,
+                    modifier = Modifier.padding(start = 60.dp, top = 20.dp)
+                )
+            }
+        }
+
         item {
             LazyRow(
                 modifier = Modifier.fillMaxHeight(),
@@ -142,6 +153,8 @@ fun PlayerTeamCard(
     team: Team? = null
 ) {
     val unusedTiles by remember { scoringViewModel.unusedTiles[index] }
+    val activePlayer by scoringViewModel.activePlayer
+    val activeTeam by scoringViewModel.activeTeam
 
     val (showUnusedTilesDialog, setShowUnusedTilesDialog) = remember { mutableStateOf(false) }
 
@@ -152,23 +165,41 @@ fun PlayerTeamCard(
         setShowUnusedTilesDialog
     )
 
+    var borderWidth = 1.dp
+    var borderColour = Color.Black
+
+    if (team == null && player == activePlayer || team != null && team == activeTeam) {
+        borderWidth = 3.dp
+        borderColour = Color.Red
+    }
+
     Card(
         modifier = Modifier
-            .width(150.dp)
+            .width(140.dp)
             .padding(top = 20.dp, end = 10.dp),
         shape = RoundedCornerShape(20.dp),
         backgroundColor = Color.White,
-        border = BorderStroke(1.dp, Color.Black),
+        border = BorderStroke(borderWidth, borderColour),
         elevation = 10.dp
     ) {
         Column {
+            val name = if (team == null) player!!.name else team.getTeamName()
             Text(
-                text = if (team == null) player!!.name else team.getTeamName(),
+                text = name,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(6.dp),
+                    .padding(6.dp)
+                    .clickable {
+                        if (team == null) {
+                            scoringViewModel.setActivePlayer(player!!)
+                        } else {
+                            scoringViewModel.setActiveTeam(team)
+                        }
+                    },
                 textAlign = TextAlign.Center,
-                style = textTitleStyle
+                style = textTitleStyle,
+                softWrap = false,
+                overflow = TextOverflow.Ellipsis,
             )
 
             BlackDivider()
@@ -203,7 +234,7 @@ fun PlayerTeamCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Unused Tiles",
+                    text = "Unused",
                     fontSize = 15.sp,
                     modifier = Modifier.clickable {
                         setShowUnusedTilesDialog(true)
@@ -249,7 +280,8 @@ fun ScrabbleBoardLayout(
     scoringViewModel: ScoringSheetViewModel
 ) {
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         BoardHeader(scoringViewModel)
         ScrabbleBoard(scoringViewModel)
@@ -269,14 +301,13 @@ fun getTileWidth(): Int {
         with(LocalDensity.current) { LocalConfiguration.current.screenWidthDp }
     screenData.screenHeight =
         with(LocalDensity.current) { LocalConfiguration.current.screenHeightDp }
-    screenData.tileWidth =
-        if (screenData.screenWidth > screenData.screenHeight) 28 else (screenData.screenWidth / 16)
+    screenData.tileWidth = 24
 
     return screenData.tileWidth
 }
 
 @Composable
-fun isWideScreen() : Boolean {
+fun isWideScreen(): Boolean {
     getTileWidth()
 
     return (screenData.screenWidth > screenData.screenHeight)
@@ -288,167 +319,80 @@ fun isWideScreen() : Boolean {
 fun BoardHeader(
     scoringViewModel: ScoringSheetViewModel
 ) {
-    val activePlayer by scoringViewModel.activePlayer
+    val cancelEnabled by scoringViewModel.cancelEnabled
     val directionEast by scoringViewModel.directionEast
     val directionSouth by scoringViewModel.directionSouth
-    val firstPos by scoringViewModel.firstPos
 
     val tileWidth = getTileWidth()
 
-    Column(
-        modifier = Modifier.padding(top = 10.dp, bottom = 5.dp),
-        verticalArrangement = Arrangement.Center
-    ) {
-        Row {
-            Column(
-                modifier = Modifier
-                    .padding(end = 20.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = activePlayer.name,
-                    style = textTitleStyle,
-                    textAlign = TextAlign.Left,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Image(
-                    bitmap = ImageBitmap.imageResource(id = R.drawable.backspace),
-                    contentDescription = "Backspace",
-                    Modifier
-                        .clickable { scoringViewModel.clickedBackSpace() }
-                        .size(tileWidth.dp)
-                        .padding(top = 5.dp)
-                        .alpha(0.4f)
-                )
-            }
-
-            Column(
-                modifier = Modifier.padding(end = 10.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "First Pos",
-                    style = smallerText
-                )
-
-                Text(
-                    text = firstPos,
-                    style = normalText,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            Column() {
-                Text(
-                    text = "Direction ",
-                    style = smallerText
-                )
-
-                Row() {
-                    DirectionButton(
-                        directionEast,
-                        onClick = { scoringViewModel.setDirectionEast() },
-                        image = Icons.Rounded.East,
-                        description = "East Direction"
-                    )
-
-                    DirectionButton(
-                        directionSouth,
-                        onClick = { scoringViewModel.setDirectionSouth() },
-                        image = Icons.Rounded.South,
-                        description = "South Direction"
-                    )
-                }
-            }
-
-            Column(
-                modifier = Modifier.padding(end = 10.dp),
-                verticalArrangement = Arrangement.Center
-            ) {
-                Row() {
-                    TextWithIcon(
-                        text = "Accept",
-                        image = Icons.Rounded.Check,
-                        onClick = { },
-                        tint = Color.Green
-                    )
-
-                    TextWithIcon(
-                        text = "Skip",
-                        image = Icons.Rounded.CancelPresentation,
-                        onClick = { },
-                        tint = Color.Red
-                    )
-
-                    TextWithIcon(
-                        text = "Refresh",
-                        image = Icons.Rounded.Refresh,
-                        onClick = { }
-                    )
-
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        if (screenData.screenWidth > screenData.screenHeight) {
-            ShowTiles(scoringViewModel, 'A', 'N', tileWidth)
-            ShowTiles(scoringViewModel, 'O', '[', tileWidth)
-        } else {
-            ShowTiles(scoringViewModel, 'A', 'I', tileWidth)
-            ShowTiles(scoringViewModel, 'J', 'R', tileWidth)
-            ShowTiles(scoringViewModel, 'S', '[', tileWidth)
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
-    }
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun ShowTiles(
-    scoringViewModel: ScoringSheetViewModel,
-    start: Char,
-    end: Char,
-    tileWidth: Int
-) {
-    val badgeCounts = scoringViewModel.tileCounts
-
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 10.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly
+        modifier = Modifier.fillMaxWidth()
     ) {
-        for (tile in start..end) {
-            val offset = tile - 'A'
-            val alpha = if (badgeCounts[offset].value == 0) 0.6f else 1f
+        Column(
+            modifier = Modifier.padding(end = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(id = R.string.cancel_tile),
+                style = smallerText
+            )
 
-            BadgeBox(
-                badgeContent = {
-                    Text(
-                        text = badgeCounts[offset].value.toString()
-                    )
-                },
-                modifier = Modifier
-                    .padding(end = 20.dp)
-                    .alpha(alpha)
-                    .clickable {
-                        scoringViewModel.addToTileCount(offset, -1)
-                    }
+            Image(
+                bitmap = ImageBitmap.imageResource(id = R.drawable.backspace),
+                contentDescription = "Cancel",
+                Modifier
+                    .clickable { scoringViewModel.clickedBackSpace() }
+                    .size(tileWidth.dp)
+                    .alpha(cancelEnabled)
+            )
+        }
 
-            ) {
-                Image(
-                    painter = painterResource(Letters.get(tile).image),
-                    contentDescription = "",
-                    modifier = Modifier
-                        .size(tileWidth.dp)
-                        .alpha(alpha)
+        Column() {
+            Text(
+                text = "Direction ",
+                style = smallerText
+            )
+
+            Row() {
+                DirectionButton(
+                    directionEast,
+                    onClick = { scoringViewModel.setDirectionEast() },
+                    image = Icons.Rounded.East,
+                    description = "East Direction"
+                )
+
+                DirectionButton(
+                    directionSouth,
+                    onClick = { scoringViewModel.setDirectionSouth() },
+                    image = Icons.Rounded.South,
+                    description = "South Direction"
+                )
+            }
+        }
+
+        Column(
+            modifier = Modifier.padding(end = 10.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Row() {
+                TextWithIcon(
+                    text = stringResource(id = R.string.accept),
+                    image = Icons.Rounded.Check,
+                    onClick = { },
+                    tint = Color.Green
+                )
+
+                TextWithIcon(
+                    text = stringResource(id = R.string.skip_turn),
+                    image = Icons.Rounded.CancelPresentation,
+                    onClick = { },
+                    tint = Color.Red
+                )
+
+                TextWithIcon(
+                    text = stringResource(id = R.string.cancel_word),
+                    image = Icons.Rounded.Refresh,
+                    onClick = { }
                 )
             }
         }
@@ -509,93 +453,139 @@ fun DirectionButton(
 fun ScrabbleBoard(
     scoringViewModel: ScoringSheetViewModel
 ) {
-    val boardSide = if (isWideScreen()) ((screenData.tileWidth + 2) * 16).dp else screenData.screenWidth.dp - 20.dp
-    val tileWidth = (screenData.tileWidth * 2 + screenData.tileWidth / 2).toFloat()
+    val freqTileWidth = getTileWidth()
+    val tileWidth = (freqTileWidth * 2).toFloat()
+    val boardWidth = (freqTileWidth * 13).dp
+    val boardHeight = (freqTileWidth * 12 + freqTileWidth / 2).dp
     val star = ImageBitmap.imageResource(id = R.drawable.starting_star)
 
-    Surface(
-        modifier = Modifier
-            .size(
-                width = boardSide,
-                height = boardSide
-            )
-            .padding(end = 10.dp)
-            .border(BorderStroke(1.dp, Color.Black))
-    ) {
-        Canvas(
-            modifier = Modifier
-                .fillMaxSize()
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onPress = { scoringViewModel.setFirstPos(it.x, it.y) }
-                    )
-                }
+    val isFirstPos by scoringViewModel.isFirstPos
+
+    Row {
+        Column(
+            modifier = Modifier.padding(top = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            var x = tileWidth * 2 - tileWidth / 3
-            var y = tileWidth - tileWidth / 4
-
-            for (col in 0..14) {
-                drawColumnText(this, tileWidth, x, y, ('A' + col).toString())
-                x += tileWidth + 2
+            for (tile in 'A'..'Z' step 2) {
+                Row() {
+                    ShowFrequencyTile(scoringViewModel, tile, freqTileWidth)
+                    ShowFrequencyTile(scoringViewModel, tile + 1, freqTileWidth)
+                }
             }
 
-            x = tileWidth / 2
-            y = tileWidth + tileWidth * 3 / 4
+            ShowFrequencyTile(scoringViewModel, '[', freqTileWidth)
+        }
 
-            for (col in 1..15) {
-                drawColumnText(this, tileWidth, x, y, col.toString())
-                y += tileWidth + 2
-            }
-
-            y = tileWidth
-
-            for (row in 0..14) {
-                x = tileWidth + tileWidth / 3
+        Surface(
+            modifier = Modifier
+                .size(boardWidth, boardHeight)
+                .padding(end = 10.dp)
+                .border(BorderStroke(1.dp, Color.Black))
+        ) {
+            Canvas(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onPress = { scoringViewModel.setFirstPos(it.x, it.y) }
+                        )
+                    }
+            ) {
+                var x = tileWidth * 2 - tileWidth / 3
+                var y = tileWidth - tileWidth / 4
 
                 for (col in 0..14) {
-                    val position = ('A' + col).toString()
-
-                    if (row == 1) {
-                        scoringViewModel.tileStartX[col] = x
-                    }
-
-                    if (col == 1) {
-                        scoringViewModel.tileStartY[row] = y
-                    }
-
-                    drawTile(
-                        this,
-                        position + (row + 1).toString(),
-                        x,
-                        y,
-                        tileWidth,
-                        star
-                    )
-
+                    drawColumnText(this, tileWidth, x, y, ('A' + col).toString())
                     x += tileWidth + 2
                 }
 
-                y += tileWidth + 2
+                x = tileWidth / 2
+                y = tileWidth + tileWidth * 3 / 4
+
+                for (col in 1..15) {
+                    drawColumnText(this, tileWidth, x, y, col.toString())
+                    y += tileWidth + 2
+                }
+
+                y = tileWidth
+
+                for (row in 0..14) {
+                    x = tileWidth + tileWidth / 3
+
+                    for (col in 0..14) {
+                        val position = ('A' + col).toString()
+
+                        if (row == 1) {
+                            scoringViewModel.tileStartX[col] = x
+                        }
+
+                        if (col == 1) {
+                            scoringViewModel.tileStartY[row] = y
+                        }
+
+                        drawTile(
+                            this,
+                            position + (row + 1).toString(),
+                            x,
+                            y,
+                            tileWidth,
+                            star
+                        )
+
+                        x += tileWidth + 2
+                    }
+
+                    y += tileWidth + 2
+                }
+
+                scoringViewModel.adjustLastStartItems(tileWidth)
+
+                if (isFirstPos) {
+                    drawCircle(
+                        color = Color.Red,
+                        radius = tileWidth - tileWidth / 4,
+                        center = scoringViewModel.firstPos,
+                        alpha = 0.3f
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun ShowFrequencyTile(
+    scoringViewModel: ScoringSheetViewModel,
+    tile: Char,
+    tileWidth: Int
+) {
+    val badgeCounts = scoringViewModel.tileCounts
+
+    val offset = tile - 'A'
+    val alpha = if (badgeCounts[offset].value == 0) 0.6f else 1f
+
+    BadgeBox(
+        badgeContent = {
+            Text(
+                text = badgeCounts[offset].value.toString()
+            )
+        },
+        modifier = Modifier
+            .padding(end = 20.dp, bottom = 10.dp)
+            .alpha(alpha)
+            .clickable {
+                scoringViewModel.addToTileCount(offset, -1)
             }
 
-            scoringViewModel.adjustLastStartItems(tileWidth)
-//            val tileWidthInt = tileWidth.toInt()
-//
-//            for (turn in scoringViewModel.turnData) {
-//                for (letter in turn.value.letters) {
-//                    val xPos =
-//                        scoringViewModel.tileStartX[letter.position.column].toInt() - tileWidthInt - 1
-//                    val yPos =
-//                        scoringViewModel.tileStartY[letter.position.row].toInt() - tileWidthInt - 1
-//
-//                    drawImage(
-//                        image = scoringViewModel.tileImages[letter.letter.letter - 'A'],
-//                        dstOffset = IntOffset(xPos, yPos),
-//                        dstSize = IntSize(tileWidthInt, tileWidthInt)
-//                    )
-//                }
-//            }
-        }
+    ) {
+        Image(
+            painter = painterResource(Letters.get(tile).image),
+            contentDescription = "",
+            modifier = Modifier
+                .size(tileWidth.dp)
+                .alpha(alpha)
+        )
     }
 }
 
