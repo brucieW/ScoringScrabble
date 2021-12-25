@@ -1,6 +1,9 @@
 package com.zeroboss.scoringscrabble.ui.screens
 
 import android.graphics.Paint
+import android.util.FloatProperty
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -33,16 +36,16 @@ import androidx.compose.ui.unit.*
 import androidx.navigation.NavController
 import com.zeroboss.scoringscrabble.R
 import com.zeroboss.scoringscrabble.data.common.ActiveStatus
-import com.zeroboss.scoringscrabble.data.entities.Letters
-import com.zeroboss.scoringscrabble.data.entities.Player
-import com.zeroboss.scoringscrabble.data.entities.Team
-import com.zeroboss.scoringscrabble.data.entities.TurnData
+import com.zeroboss.scoringscrabble.data.entities.*
 import com.zeroboss.scoringscrabble.ui.common.TileSettings
 import com.zeroboss.scoringscrabble.ui.common.TileType
 import com.zeroboss.scoringscrabble.ui.common.TopPanel
+import com.zeroboss.scoringscrabble.ui.dialogs.BlankTileDialog
 import com.zeroboss.scoringscrabble.ui.dialogs.UnusedTilesDialog
 import com.zeroboss.scoringscrabble.ui.theme.*
 import com.zeroboss.scoringscrabble.ui.viewmodels.ScoringSheetViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 
 @Composable
@@ -170,7 +173,7 @@ fun PlayerTeamCard(
 
     if (team == null && player == activePlayer || team != null && team == activeTeam) {
         borderWidth = 3.dp
-        borderColour = Color.Red
+        borderColour = Color.Blue
     }
 
     Card(
@@ -205,7 +208,7 @@ fun PlayerTeamCard(
             BlackDivider()
 
             (0..21).forEach { item ->
-                val data = scoringViewModel.turnData
+//                val data = scoringViewModel.turnData
 
                 Row(
                     modifier = Modifier
@@ -214,13 +217,7 @@ fun PlayerTeamCard(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (item < data.size) {
-                        Text("50")
-                        Text("+")
-                        Text("100")
-                    } else {
-                        Text("")
-                    }
+                    Text("")
                 }
             }
 
@@ -313,7 +310,6 @@ fun isWideScreen(): Boolean {
     return (screenData.screenWidth > screenData.screenHeight)
 }
 
-
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun BoardHeader(
@@ -399,54 +395,10 @@ fun BoardHeader(
     }
 }
 
-@Composable
-fun TextWithIcon(
-    text: String,
-    image: ImageVector,
-    onClick: () -> Unit,
-    tint: Color = Color.Black,
-) {
-    Column(
-        Modifier.padding(end = 10.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = text,
-            style = smallerText
-        )
-
-        IconButton(
-            modifier = Modifier.size(32.dp),
-            onClick = { onClick() }
-        ) {
-            Icon(
-                image,
-                contentDescription = "",
-                tint = tint
-            )
-        }
-
-    }
-}
-
-@Composable
-fun DirectionButton(
-    direction: Boolean,
-    onClick: () -> Unit,
-    image: ImageVector,
-    description: String
-) {
-    IconButton(
-        modifier = Modifier.size(32.dp),
-        onClick = { onClick() }
-    ) {
-        Icon(
-            image,
-            contentDescription = description,
-            tint = if (direction) Color.Green else Color.Gray
-        )
-    }
+enum class PulseState {
+    None,
+    GrowStart,
+    GrowEnd
 }
 
 @Composable
@@ -455,11 +407,34 @@ fun ScrabbleBoard(
 ) {
     val freqTileWidth = getTileWidth()
     val tileWidth = (freqTileWidth * 2).toFloat()
+    val radius = tileWidth - tileWidth / 4
     val boardWidth = (freqTileWidth * 13).dp
     val boardHeight = (freqTileWidth * 12 + freqTileWidth / 2).dp
     val star = ImageBitmap.imageResource(id = R.drawable.starting_star)
 
     val isFirstPos by scoringViewModel.isFirstPos
+    var currentState by remember { mutableStateOf(PulseState.None) }
+    val transition = updateTransition(targetState = currentState, label = "radius")
+    val growRadius by transition.animateFloat(
+        label = "radius"
+    ) { state ->
+        when (state) {
+            PulseState.None -> 0f
+            PulseState.GrowStart -> radius * 2.5f
+            PulseState.GrowEnd -> radius
+        }
+    }
+
+    val scope = rememberCoroutineScope()
+
+    val (showBlankTileDialog, setShowBlankTileDialog) = remember { mutableStateOf(false) }
+
+    BlankTileDialog(
+        scoringViewModel,
+        showBlankTileDialog,
+        setShowBlankTileDialog,
+        {}
+    )
 
     Row {
         Column(
@@ -476,6 +451,7 @@ fun ScrabbleBoard(
             ShowFrequencyTile(scoringViewModel, '[', freqTileWidth)
         }
 
+
         Surface(
             modifier = Modifier
                 .size(boardWidth, boardHeight)
@@ -487,7 +463,14 @@ fun ScrabbleBoard(
                     .fillMaxSize()
                     .pointerInput(Unit) {
                         detectTapGestures(
-                            onPress = { scoringViewModel.setFirstPos(it.x, it.y) }
+                            onPress = {
+                                scoringViewModel.setFirstPos(it.x, it.y)
+                                currentState = PulseState.GrowStart
+                                scope.launch {
+                                    delay(300)
+                                    currentState = PulseState.GrowEnd
+                                }
+                            }
                         )
                     }
             ) {
@@ -543,13 +526,63 @@ fun ScrabbleBoard(
                 if (isFirstPos) {
                     drawCircle(
                         color = Color.Red,
-                        radius = tileWidth - tileWidth / 4,
-                        center = scoringViewModel.firstPos,
-                        alpha = 0.3f
+                        radius = growRadius,
+                        center = scoringViewModel.currentPos,
+                        alpha = 0.2f
                     )
                 }
             }
         }
+    }
+}
+
+@Composable
+fun TextWithIcon(
+    text: String,
+    image: ImageVector,
+    onClick: () -> Unit,
+    tint: Color = Color.Black,
+) {
+    Column(
+        Modifier.padding(end = 10.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = text,
+            style = smallerText
+        )
+
+        IconButton(
+            modifier = Modifier.size(32.dp),
+            onClick = { onClick() }
+        ) {
+            Icon(
+                image,
+                contentDescription = "",
+                tint = tint
+            )
+        }
+
+    }
+}
+
+@Composable
+fun DirectionButton(
+    direction: Boolean,
+    onClick: () -> Unit,
+    image: ImageVector,
+    description: String
+) {
+    IconButton(
+        modifier = Modifier.size(32.dp),
+        onClick = { onClick() }
+    ) {
+        Icon(
+            image,
+            contentDescription = description,
+            tint = if (direction) Color.Green else Color.Gray
+        )
     }
 }
 
@@ -560,6 +593,8 @@ fun ShowFrequencyTile(
     tile: Char,
     tileWidth: Int
 ) {
+    val gameStarted by scoringViewModel.gameStarted
+
     val badgeCounts = scoringViewModel.tileCounts
 
     val offset = tile - 'A'
@@ -575,7 +610,10 @@ fun ShowFrequencyTile(
             .padding(end = 20.dp, bottom = 10.dp)
             .alpha(alpha)
             .clickable {
-                scoringViewModel.addToTileCount(offset, -1)
+                if (gameStarted && scoringViewModel.currentPos.isValid()) {
+                    scoringViewModel.addToTurnData(Letters.get(tile))
+                    scoringViewModel.addToTileCount(offset, -1)
+                }
             }
 
     ) {
@@ -650,12 +688,12 @@ fun drawTile(
 
 @Composable
 fun TurnData(
-    turnData: TurnData
+    playerTurnData: PlayerTurnData
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(if (turnData.turn % 2 == 0) lightGreen else Color.White),
+            .background(if (playerTurnData.turnId % 2 == 0) lightGreen else Color.White),
     ) {
         ScoreText("20")
         ScoreText("+")

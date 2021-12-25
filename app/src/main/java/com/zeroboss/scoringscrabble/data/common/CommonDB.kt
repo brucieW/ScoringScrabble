@@ -9,8 +9,6 @@ import io.objectbox.BoxStore
 import io.objectbox.kotlin.boxFor
 import io.objectbox.query.Query
 import io.objectbox.query.QueryBuilder
-import io.objectbox.reactive.DataObserver
-import io.objectbox.reactive.DataSubscription
 import org.koin.core.component.KoinComponent
 import org.koin.java.KoinJavaComponent.get
 import java.io.File
@@ -29,7 +27,7 @@ object CommonDb : KoinComponent {
     val teamBox = boxStore.boxFor<Team>()
     val gameBox = boxStore.boxFor<Game>()
     val matchBox = boxStore.boxFor<Match>()
-    val turnBox = boxStore.boxFor<TurnData>()
+    val playerTurnBox = boxStore.boxFor<PlayerTurnData>()
 
     private var matchesQuery: Query<Match>? = null
     private var gameQuery: Query<Game>? = null
@@ -190,7 +188,7 @@ object CommonDb : KoinComponent {
     }
 
     fun deleteGame(game: Game) {
-        game.turnData.forEach { turnBox.remove(it) }
+        game.playerTurnData.forEach { playerTurnBox.remove(it) }
         gameBox.remove(game)
     }
 

@@ -9,13 +9,13 @@ import io.objectbox.annotation.Id
 @Entity
 data class LetterAndPosition(
     @Convert(converter = LetterConverter::class, dbType = String::class)
-    val letter: Letter,
+    val letter: Letter = Letters.get('A'),
 
     @Convert(converter = PositionConverter::class, dbType = String::class)
-    val position: Position,
+    val position: Position = Position(0, 0),
 
     @Convert(converter = LetterConverter::class, dbType = String::class)
-    val blankValue: Letter?,
+    val blankValue: Letter? = null,
 
     @Id
     var id: Long = 0

@@ -40,6 +40,9 @@ class ScoringSheetViewModel(
         _firstPlayerSelected.value = true
     }
 
+    private val _gameStarted = mutableStateOf(false)
+    val gameStarted = _gameStarted
+
     private val _cancelEnabled = mutableStateOf<Float>(0.4f)
     val cancelEnabled = _cancelEnabled
 
@@ -80,8 +83,10 @@ class ScoringSheetViewModel(
 
     private val _isFirstPos = mutableStateOf(false)
     val isFirstPos = _isFirstPos
-    var firstPos = Offset(0f, 0f)
+    var currentPos = Offset(0f, 0f)
 
+    var currentLetterPos = Position()
+    var currentLetterAndPosition = LetterAndPosition()
 
     fun setFirstPos(x: Float, y: Float) {
         _isFirstPos.value = false
@@ -92,11 +97,11 @@ class ScoringSheetViewModel(
                 for (row in 0..14) {
                     if (y >= tileStartY[row] && y <= tileStartY[row + 1]) {
                         _isFirstPos.value = true
-                        firstPos = Offset(
+                        currentPos = Offset(
                             tileStartX[col] + centerAdjustment,
                             tileStartY[row] + centerAdjustment
                         )
-
+                        currentLetterPos = Position(col, row)
                         return
                     }
                 }
@@ -119,10 +124,30 @@ class ScoringSheetViewModel(
         _tileCounts[index].value += count
     }
 
-    fun clickedBackSpace() {
+    var currentTurnId = 1
+    var currentTurn = PlayerTurnData()
+
+    val gameTurnData = mutableStateListOf<PlayerTurnData>()
+
+    fun addToTurnData(
+        letter: Letter,
+        blankLetter: Letter? = null
+    ) {
+        if (currentTurn.turnId == 0) {
+            currentTurn.turnId = currentTurnId
+
+            if (activeTeam.value.id == 0L) {
+                currentTurn.player.target = activePlayer.value
+            } else {
+                currentTurn.team.target = activeTeam.value
+            }
+        }
+
+        currentTurn.letters.add(LetterAndPosition(letter, currentLetterPos, blankLetter))
     }
 
-    val turnData = mutableListOf<MutableState<TurnData>>()
+    fun clickedBackSpace() {
+    }
 
     init {
         if (ActiveStatus.activeMatch!!.isTeamType()) {

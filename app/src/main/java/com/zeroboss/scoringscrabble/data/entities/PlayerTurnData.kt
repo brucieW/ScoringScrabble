@@ -5,15 +5,18 @@ import io.objectbox.annotation.Convert
 import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id
 import io.objectbox.relation.ToMany
+import io.objectbox.relation.ToOne
 
 @Entity
-data class TurnData(
+data class PlayerTurnData(
     @Id
     var id: Long = 0,
 
-    var playerId: Int = 0,
-    var turn: Int = 0,
+    var turnId: Int = 0,
 ) {
+    lateinit var player: ToOne<Player>
+    lateinit var team: ToOne<Team>
+
     @Convert(converter = LetterAndPositionConverter::class, dbType = String::class)
     lateinit var letters: ToMany<LetterAndPosition>
 }
