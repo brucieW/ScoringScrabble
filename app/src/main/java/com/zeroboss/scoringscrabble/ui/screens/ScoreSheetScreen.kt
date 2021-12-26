@@ -1,8 +1,6 @@
 package com.zeroboss.scoringscrabble.ui.screens
 
 import android.graphics.Paint
-import android.util.FloatProperty
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -40,7 +38,6 @@ import com.zeroboss.scoringscrabble.data.entities.*
 import com.zeroboss.scoringscrabble.ui.common.TileSettings
 import com.zeroboss.scoringscrabble.ui.common.TileType
 import com.zeroboss.scoringscrabble.ui.common.TopPanel
-import com.zeroboss.scoringscrabble.ui.dialogs.BlankTileDialog
 import com.zeroboss.scoringscrabble.ui.dialogs.UnusedTilesDialog
 import com.zeroboss.scoringscrabble.ui.theme.*
 import com.zeroboss.scoringscrabble.ui.viewmodels.ScoringSheetViewModel
@@ -427,109 +424,118 @@ fun ScrabbleBoard(
 
     val scope = rememberCoroutineScope()
 
-    val (showBlankTileDialog, setShowBlankTileDialog) = remember { mutableStateOf(false) }
+    val error by scoringViewModel.errorText
 
-    BlankTileDialog(
-        scoringViewModel,
-        showBlankTileDialog,
-        setShowBlankTileDialog,
-        {}
-    )
-
-    Row {
-        Column(
-            modifier = Modifier.padding(top = 10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            for (tile in 'A'..'Z' step 2) {
-                Row() {
-                    ShowFrequencyTile(scoringViewModel, tile, freqTileWidth)
-                    ShowFrequencyTile(scoringViewModel, tile + 1, freqTileWidth)
-                }
-            }
-
-            ShowFrequencyTile(scoringViewModel, '[', freqTileWidth)
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (error.isNotEmpty()) {
+            Text(
+                modifier = Modifier
+                    .padding(bottom = 5.dp)
+                    .fillMaxWidth(),
+                text = error,
+                style = errorText,
+                textAlign = TextAlign.Center
+            )
         }
 
-
-        Surface(
-            modifier = Modifier
-                .size(boardWidth, boardHeight)
-                .padding(end = 10.dp)
-                .border(BorderStroke(1.dp, Color.Black))
-        ) {
-            Canvas(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onPress = {
-                                scoringViewModel.setFirstPos(it.x, it.y)
-                                currentState = PulseState.GrowStart
-                                scope.launch {
-                                    delay(300)
-                                    currentState = PulseState.GrowEnd
-                                }
-                            }
-                        )
-                    }
+        Row {
+            Column(
+                modifier = Modifier.padding(top = 10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                var x = tileWidth * 2 - tileWidth / 3
-                var y = tileWidth - tileWidth / 4
-
-                for (col in 0..14) {
-                    drawColumnText(this, tileWidth, x, y, ('A' + col).toString())
-                    x += tileWidth + 2
+                for (tile in 'A'..'Z' step 2) {
+                    Row() {
+                        ShowFrequencyTile(scoringViewModel, tile, freqTileWidth)
+                        ShowFrequencyTile(scoringViewModel, tile + 1, freqTileWidth)
+                    }
                 }
 
-                x = tileWidth / 2
-                y = tileWidth + tileWidth * 3 / 4
+                ShowFrequencyTile(scoringViewModel, '[', freqTileWidth)
+            }
 
-                for (col in 1..15) {
-                    drawColumnText(this, tileWidth, x, y, col.toString())
-                    y += tileWidth + 2
-                }
 
-                y = tileWidth
-
-                for (row in 0..14) {
-                    x = tileWidth + tileWidth / 3
+            Surface(
+                modifier = Modifier
+                    .size(boardWidth, boardHeight)
+                    .padding(end = 10.dp)
+                    .border(BorderStroke(1.dp, Color.Black))
+            ) {
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onPress = {
+                                    scoringViewModel.setFirstPos(it.x, it.y)
+                                    currentState = PulseState.GrowStart
+                                    scope.launch {
+                                        delay(300)
+                                        currentState = PulseState.GrowEnd
+                                    }
+                                }
+                            )
+                        }
+                ) {
+                    var x = tileWidth * 2 - tileWidth / 3
+                    var y = tileWidth - tileWidth / 4
 
                     for (col in 0..14) {
-                        val position = ('A' + col).toString()
-
-                        if (row == 1) {
-                            scoringViewModel.tileStartX[col] = x
-                        }
-
-                        if (col == 1) {
-                            scoringViewModel.tileStartY[row] = y
-                        }
-
-                        drawTile(
-                            this,
-                            position + (row + 1).toString(),
-                            x,
-                            y,
-                            tileWidth,
-                            star
-                        )
-
+                        drawColumnText(this, tileWidth, x, y, ('A' + col).toString())
                         x += tileWidth + 2
                     }
 
-                    y += tileWidth + 2
-                }
+                    x = tileWidth / 2
+                    y = tileWidth + tileWidth * 3 / 4
 
-                scoringViewModel.adjustLastStartItems(tileWidth)
+                    for (col in 1..15) {
+                        drawColumnText(this, tileWidth, x, y, col.toString())
+                        y += tileWidth + 2
+                    }
 
-                if (isFirstPos) {
-                    drawCircle(
-                        color = Color.Red,
-                        radius = growRadius,
-                        center = scoringViewModel.currentPos,
-                        alpha = 0.2f
-                    )
+                    y = tileWidth
+
+                    for (row in 0..14) {
+                        x = tileWidth + tileWidth / 3
+
+                        for (col in 0..14) {
+                            val position = ('A' + col).toString()
+
+                            if (row == 1) {
+                                scoringViewModel.tileStartX[col] = x
+                            }
+
+                            if (col == 1) {
+                                scoringViewModel.tileStartY[row] = y
+                            }
+
+                            drawTile(
+                                this,
+                                position + (row + 1).toString(),
+                                x,
+                                y,
+                                tileWidth,
+                                star
+                            )
+
+                            x += tileWidth + 2
+                        }
+
+                        y += tileWidth + 2
+                    }
+
+                    scoringViewModel.adjustLastStartItems(tileWidth)
+
+                    if (isFirstPos) {
+                        drawCircle(
+                            color = Color.Red,
+                            radius = growRadius,
+                            center = scoringViewModel.currentPos,
+                            alpha = 0.2f
+                        )
+                    }
                 }
             }
         }

@@ -30,8 +30,24 @@ data class Position(
         val maxColumns = 15
     }
 
-    fun isValid() : Boolean {
-        return column > 0 && row > 0
+    fun isValidFirstMove(isDown: Boolean) : String {
+        val errorText = StringBuilder("First move must be from ")
+
+        if (isDown) {
+            if (column == 7 && row in 1..7) {
+                return ""
+            }
+
+            errorText.append("H2 to H8")
+        } else {
+            if (row == 7 && column in 2..7) {
+                return ""
+            }
+
+            errorText.append("B8 to H8")
+        }
+
+        return errorText.toString()
     }
 }
 

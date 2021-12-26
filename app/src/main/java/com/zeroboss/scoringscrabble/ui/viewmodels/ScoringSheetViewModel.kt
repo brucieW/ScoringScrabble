@@ -3,6 +3,7 @@ package com.zeroboss.scoringscrabble.ui.viewmodels
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import com.zeroboss.scoringscrabble.data.common.ActiveStatus
@@ -102,6 +103,14 @@ class ScoringSheetViewModel(
                             tileStartY[row] + centerAdjustment
                         )
                         currentLetterPos = Position(col, row)
+
+                        if (gameTurnData.isEmpty()) {
+                            // This is first move. If direction of move is down, then only valid
+                            // positions are from H2 to H8. If direction is across, only valid
+                            // positions are from B8 to H8.
+                            _errorText.value = currentLetterPos.isValidFirstMove(directionSouth.value)
+                        }
+
                         return
                     }
                 }
@@ -128,6 +137,9 @@ class ScoringSheetViewModel(
     var currentTurn = PlayerTurnData()
 
     val gameTurnData = mutableStateListOf<PlayerTurnData>()
+
+    private val _errorText = mutableStateOf("")
+    val errorText = _errorText
 
     fun addToTurnData(
         letter: Letter,
