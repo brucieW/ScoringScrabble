@@ -20,6 +20,8 @@ class ScoringApplication : Application() {
                 gamesModule,
                 selectPlayersViewModel,
                 scoringViewModelModule,
+                dictionaryApiModule,
+                wordInfoViewModule
             ))
         }
     }

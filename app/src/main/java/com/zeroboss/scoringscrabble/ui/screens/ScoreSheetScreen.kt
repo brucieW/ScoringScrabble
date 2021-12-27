@@ -35,6 +35,7 @@ import androidx.navigation.NavController
 import com.zeroboss.scoringscrabble.R
 import com.zeroboss.scoringscrabble.data.common.ActiveStatus
 import com.zeroboss.scoringscrabble.data.entities.*
+import com.zeroboss.scoringscrabble.presentation.WordInfoViewModel
 import com.zeroboss.scoringscrabble.ui.common.TileSettings
 import com.zeroboss.scoringscrabble.ui.common.TileType
 import com.zeroboss.scoringscrabble.ui.common.TopPanel
@@ -278,7 +279,7 @@ fun ScrabbleBoardLayout(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         BoardHeader(scoringViewModel)
-        ScrabbleBoard(scoringViewModel)
+        ScrabbleBoard(scoringViewModel, get())
     }
 
 }
@@ -298,13 +299,6 @@ fun getTileWidth(): Int {
     screenData.tileWidth = 24
 
     return screenData.tileWidth
-}
-
-@Composable
-fun isWideScreen(): Boolean {
-    getTileWidth()
-
-    return (screenData.screenWidth > screenData.screenHeight)
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -400,7 +394,8 @@ enum class PulseState {
 
 @Composable
 fun ScrabbleBoard(
-    scoringViewModel: ScoringSheetViewModel
+    scoringViewModel: ScoringSheetViewModel,
+    wordInfoViewModel: WordInfoViewModel
 ) {
     val freqTileWidth = getTileWidth()
     val tileWidth = (freqTileWidth * 2).toFloat()
@@ -456,86 +451,139 @@ fun ScrabbleBoard(
                 ShowFrequencyTile(scoringViewModel, '[', freqTileWidth)
             }
 
-
             Surface(
                 modifier = Modifier
                     .size(boardWidth, boardHeight)
                     .padding(end = 10.dp)
                     .border(BorderStroke(1.dp, Color.Black))
             ) {
-                Canvas(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .pointerInput(Unit) {
-                            detectTapGestures(
-                                onPress = {
-                                    scoringViewModel.setFirstPos(it.x, it.y)
-                                    currentState = PulseState.GrowStart
-                                    scope.launch {
-                                        delay(300)
-                                        currentState = PulseState.GrowEnd
-                                    }
-                                }
-                            )
-                        }
+                Column(
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    var x = tileWidth * 2 - tileWidth / 3
-                    var y = tileWidth - tileWidth / 4
-
-                    for (col in 0..14) {
-                        drawColumnText(this, tileWidth, x, y, ('A' + col).toString())
-                        x += tileWidth + 2
-                    }
-
-                    x = tileWidth / 2
-                    y = tileWidth + tileWidth * 3 / 4
-
-                    for (col in 1..15) {
-                        drawColumnText(this, tileWidth, x, y, col.toString())
-                        y += tileWidth + 2
-                    }
-
-                    y = tileWidth
-
-                    for (row in 0..14) {
-                        x = tileWidth + tileWidth / 3
+                    Canvas(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .pointerInput(Unit) {
+                                detectTapGestures(
+                                    onPress = {
+                                        scoringViewModel.setFirstPos(it.x, it.y)
+                                        currentState = PulseState.GrowStart
+                                        scope.launch {
+                                            delay(300)
+                                            currentState = PulseState.GrowEnd
+                                        }
+                                    }
+                                )
+                            }
+                    ) {
+                        var x = tileWidth * 2 - tileWidth / 3
+                        var y = tileWidth - tileWidth / 4
 
                         for (col in 0..14) {
-                            val position = ('A' + col).toString()
-
-                            if (row == 1) {
-                                scoringViewModel.tileStartX[col] = x
-                            }
-
-                            if (col == 1) {
-                                scoringViewModel.tileStartY[row] = y
-                            }
-
-                            drawTile(
-                                this,
-                                position + (row + 1).toString(),
-                                x,
-                                y,
-                                tileWidth,
-                                star
-                            )
-
+                            drawColumnText(this, tileWidth, x, y, ('A' + col).toString())
                             x += tileWidth + 2
                         }
 
-                        y += tileWidth + 2
+                        x = tileWidth / 2
+                        y = tileWidth + tileWidth * 3 / 4
+
+                        for (col in 1..15) {
+                            drawColumnText(this, tileWidth, x, y, col.toString())
+                            y += tileWidth + 2
+                        }
+
+                        y = tileWidth
+
+                        for (row in 0..14) {
+                            x = tileWidth + tileWidth / 3
+
+                            for (col in 0..14) {
+                                val position = ('A' + col).toString()
+
+                                if (row == 1) {
+                                    scoringViewModel.tileStartX[col] = x
+                                }
+
+                                if (col == 1) {
+                                    scoringViewModel.tileStartY[row] = y
+                                }
+
+                                drawTile(
+                                    this,
+                                    position + (row + 1).toString(),
+                                    x,
+                                    y,
+                                    tileWidth,
+                                    star
+                                )
+
+                                x += tileWidth + 2
+                            }
+
+                            y += tileWidth + 2
+                        }
+
+                        scoringViewModel.adjustLastStartItems(tileWidth)
+
+                        if (isFirstPos) {
+                            drawCircle(
+                                color = Color.Red,
+                                radius = growRadius,
+                                center = scoringViewModel.currentPos,
+                                alpha = 0.2f
+                            )
+                        }
                     }
 
-                    scoringViewModel.adjustLastStartItems(tileWidth)
+                    Dictionary(get())
+                }
+            }
+        }
+    }
+}
 
-                    if (isFirstPos) {
-                        drawCircle(
-                            color = Color.Red,
-                            radius = growRadius,
-                            center = scoringViewModel.currentPos,
-                            alpha = 0.2f
-                        )
-                    }
+@Composable
+fun Dictionary(
+    wordInfoViewModel: WordInfoViewModel
+) {
+    val activeWords = mutableListOf<String>()
+    val selectedWords = mutableListOf<Boolean>()
+
+    wordInfoViewModel.wordList.forEach {
+        val word by it
+        activeWords.add(word)
+    }
+
+    wordInfoViewModel.selectedWords.forEach {
+        val selected by it
+        selectedWords.add(selected)
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(100.dp)
+            .border(BorderStroke(1.dp, Color.Black)),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            activeWords.forEachIndexed { index, word ->
+                Card(
+                    modifier = Modifier
+                        .padding(top = 10.dp, start = 10.dp)
+                        .clickable {
+                            selectedWords.forEachIndexed { selectedIndex, selected ->
+                                selectedWords[selectedIndex] = selectedIndex == index
+                            }
+                        }
+                        .border(BorderStroke(if (selectedWords[index]) 3.dp else 1.dp, Color.Black)),
+                    elevation = 10.dp
+                ) {
+                    Text(
+                        text = word,
+                        style = normalText
+                    )
                 }
             }
         }
