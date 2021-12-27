@@ -21,7 +21,9 @@ class ScoringApplication : Application() {
                 selectPlayersViewModel,
                 scoringViewModelModule,
                 dictionaryApiModule,
-                wordInfoViewModule
+                wordInfoViewModule,
+                wordInfoUseCaseModule,
+                wordInfoRepositoryModule
             ))
         }
     }
