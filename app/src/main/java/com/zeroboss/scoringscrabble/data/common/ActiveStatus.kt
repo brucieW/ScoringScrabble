@@ -1,16 +1,16 @@
 package com.zeroboss.scoringscrabble.data.common
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import com.zeroboss.scoringscrabble.data.entities.Game
 import com.zeroboss.scoringscrabble.data.entities.Match
 import com.zeroboss.scoringscrabble.data.entities.Player
+import com.zeroboss.scoringscrabble.data.entities.Team
 
 object ActiveStatus {
     var expandedMatch: Match? = null
     var activeMatch: Match? = null
     var activeGame: Game? = null
+    var activePlayer: Player? = null
+    var activeTeam: Team? = null
     var isTeamGame: Boolean = false
     var letterFrequency: MutableList<Int> = resetLetterFrequency()
 }

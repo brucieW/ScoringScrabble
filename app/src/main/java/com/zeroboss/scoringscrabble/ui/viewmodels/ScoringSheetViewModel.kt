@@ -17,10 +17,11 @@ class ScoringSheetViewModel(
 
     private var _availableLetters = ActiveStatus.letterFrequency.map { }
 
-    private val _firstPlayerSelected = mutableStateOf(false)
+    private val _firstPlayerSelected = mutableStateOf(
+        ActiveStatus.activePlayer != null || ActiveStatus.activeTeam != null)
     val firstPlayerSelected = _firstPlayerSelected
 
-    private val _activePlayer = mutableStateOf(Player())
+    private val _activePlayer = mutableStateOf(ActiveStatus.activePlayer)
     val activePlayer = _activePlayer
 
     fun setActivePlayerByIndex(index: Int) {
@@ -28,14 +29,16 @@ class ScoringSheetViewModel(
     }
 
     fun setActivePlayer(player: Player) {
+        ActiveStatus.activePlayer = player
         _activePlayer.value = player
         _firstPlayerSelected.value = true
     }
 
-    private val _activeTeam = mutableStateOf(Team())
+    private val _activeTeam = mutableStateOf(ActiveStatus.activeTeam)
     val activeTeam = _activeTeam
 
     fun setActiveTeam(team: Team) {
+        ActiveStatus.activeTeam = team
         _activeTeam.value = team
         _firstPlayerSelected.value = true
     }
@@ -147,7 +150,7 @@ class ScoringSheetViewModel(
         if (currentTurn.turnId == 0) {
             currentTurn.turnId = currentTurnId
 
-            if (activeTeam.value.id == 0L) {
+            if (activeTeam.value!!.id == 0L) {
                 currentTurn.player.target = activePlayer.value
             } else {
                 currentTurn.team.target = activeTeam.value

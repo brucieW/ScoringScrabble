@@ -14,22 +14,22 @@ class WordInfoRepositoryImpl(
 ) : WordInfoRepository {
     override fun getWordInfo(word: String): Flow<Resource<List<WordInfo>>> = flow {
         emit(Resource.Loading())
-        var wordInfos = emptyList<WordInfo>()
+        val wordInfoList = emptyList<WordInfo>()
 
         try {
             emit(Resource.Success(api.getWordInfo(word).map { it.toWordInfo() }))
         } catch (e: HttpException) {
             emit(
-                Resource.Errror(
+                Resource.Error(
                     message = "HTTP error: ${e.message()}",
-                    data = wordInfos
+                    data = wordInfoList
                 )
             )
         } catch (e: IOException) {
             emit(
-                Resource.Errror(
+                Resource.Error(
                     message = "Couldn't reach server, check internet connection.}",
-                    data = wordInfos
+                    data = wordInfoList
                 )
             )
         }

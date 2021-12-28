@@ -44,28 +44,14 @@ import com.zeroboss.scoringscrabble.ui.dialogs.UnusedTilesDialog
 import com.zeroboss.scoringscrabble.ui.theme.*
 import com.zeroboss.scoringscrabble.ui.viewmodels.ScoringSheetViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 
 @Composable
 fun ScoreSheet(
-    navController: NavController,
-    wordInfoViewModel: WordInfoViewModel
+    navController: NavController
 ) {
     val scaffoldState = rememberScaffoldState()
-
-    LaunchedEffect(key1 = true) {
-        wordInfoViewModel.eventFlow.collectLatest { event ->
-            when(event) {
-                is WordInfoViewModel.UIEvent.ShowSnackbar -> {
-                    scaffoldState.snackbarHostState.showSnackbar(
-                        message = event.message
-                    )
-                }
-            }
-        }
-    }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -561,6 +547,7 @@ fun Dictionary(
 ) {
     val activeWords = mutableListOf<String>()
     val selectedWords = mutableListOf<Boolean>()
+    val errorMessage by wordInfoViewModel.errorText
 
     wordInfoViewModel.wordList.forEach {
         val word by it
@@ -593,11 +580,17 @@ fun Dictionary(
                         modifier = Modifier
                             .padding(top = 10.dp, start = 10.dp)
                             .clickable {
-                                selectedWords.forEachIndexed { index, _ ->
+                                if (selectedWords[index]) {
+                                    wordInfoViewModel.clearSearch()
                                     selectedWords[index] = false
+                                } else {
+                                    selectedWords.forEachIndexed { index, _ ->
+                                        selectedWords[index] = false
+                                    }
+
+                                    selectedWords[index] = true
+                                    wordInfoViewModel.onSearch(activeWords[index])
                                 }
-                                selectedWords[index] = true
-                                wordInfoViewModel.onSearch(activeWords[index])
                             }
                             .border(
                                 BorderStroke(
@@ -630,6 +623,13 @@ fun Dictionary(
                 }
 
                 WordInfoItem(wordInfo)
+            }
+
+            if (errorMessage.isNotEmpty()) {
+                Text(
+                    text = errorMessage,
+                    style = errorText
+                )
             }
         }
     }

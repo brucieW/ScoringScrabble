@@ -1,15 +1,11 @@
 package com.zeroboss.scoringscrabble.presentation
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zeroboss.scoringscrabble.core.util.Resource
 import com.zeroboss.scoringscrabble.domain.use_case.GetWordInfo
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -34,10 +30,19 @@ class WordInfoViewModel(
     private val _state = mutableStateOf(WordInfoState())
     val state = _state
 
-    private val _eventFlow = MutableSharedFlow<UIEvent>()
-    val eventFlow = _eventFlow.asSharedFlow()
+    private val _errorText = mutableStateOf("")
+    val errorText = _errorText
 
     private var searchJob: Job? = null
+
+    fun clearSearch() {
+        _state.value = state.value.copy(
+            wordInfoItems = emptyList(),
+            isLoading = false
+        )
+
+        _errorText.value = ""
+    }
 
     fun onSearch(query: String) {
         _searchQuery.value = query
@@ -51,15 +56,16 @@ class WordInfoViewModel(
                                 wordInfoItems = result.data ?: emptyList(),
                                 isLoading = false
                             )
+                            _errorText.value = ""
                         }
 
-                        is Resource.Errror -> {
+                        is Resource.Error -> {
                             _state.value = state.value.copy(
                                 wordInfoItems = result.data ?: emptyList(),
                                 isLoading = false
                             )
 
-                            _eventFlow.emit(UIEvent.ShowSnackbar(result.message ?: "Unknown error"))
+                            _errorText.value = result.message ?: "Unknown error"
                         }
 
                         is Resource.Loading -> {
@@ -67,6 +73,8 @@ class WordInfoViewModel(
                                 wordInfoItems = result.data ?: emptyList(),
                                 isLoading = true
                             )
+
+                            _errorText.value = ""
                         }
                     }
                 }.launchIn(this)

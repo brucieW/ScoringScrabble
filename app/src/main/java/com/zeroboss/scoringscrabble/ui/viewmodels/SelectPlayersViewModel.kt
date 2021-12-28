@@ -105,15 +105,8 @@ class SelectPlayersViewModel() : ViewModel()  {
         val players = playerNames.map { player -> player.value }.filter { player -> player.isNotEmpty() }
         ActiveStatus.activeMatch = if (isTeamType.value) CommonDb.createTeamsMatch(players)
                         else CommonDb.createPlayersMatch(players)
-    }
-
-    fun onClickSave() {
-//        val match = createMatch(
-//            players = playerNames.map { it.value!! }
-//        )
-//
-//        activeGame = createGame(match)
-//        activeMatch = match
+        ActiveStatus.activePlayer = null
+        ActiveStatus.activeTeam = null
     }
 
     fun setTeamDropdownVisible(
