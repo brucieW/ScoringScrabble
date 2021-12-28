@@ -6,6 +6,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 val navigationTitle = TextStyle(
@@ -73,6 +74,34 @@ val textTitleStyle = TextStyle(
     fontSize = 18.sp,
     fontWeight = FontWeight.Bold,
     color = Blue800
+)
+
+val wordInfoTitleStyle = TextStyle(
+    fontFamily = FontFamily.Default,
+    fontSize = 16.sp,
+    fontWeight = FontWeight.Bold,
+    color = Color.Black
+)
+
+val wordInfoBoldStyle = TextStyle(
+    fontFamily = FontFamily.Default,
+    fontSize = 14.sp,
+    fontWeight = FontWeight.Bold,
+    color = Color.Black
+)
+
+val wordInfoStyle = TextStyle(
+    fontFamily = FontFamily.Default,
+    fontSize = 14.sp,
+    fontWeight = FontWeight.Normal,
+    color = Color.Black
+)
+
+val wordInfoLightStyle = TextStyle(
+    fontFamily = FontFamily.Default,
+    fontSize = 14.sp,
+    fontWeight = FontWeight.Light,
+    color = Color.Black
 )
 
 val typography = Typography(

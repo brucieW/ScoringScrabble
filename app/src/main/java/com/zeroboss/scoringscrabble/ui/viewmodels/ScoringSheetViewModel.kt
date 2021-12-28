@@ -3,12 +3,11 @@ package com.zeroboss.scoringscrabble.ui.viewmodels
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import com.zeroboss.scoringscrabble.data.common.ActiveStatus
 import com.zeroboss.scoringscrabble.data.entities.*
-import com.zeroboss.scoringscrabble.ui.screens.screenData
+import com.zeroboss.scoringscrabble.ui.screens.ScreenData
 
 class ScoringSheetViewModel(
 
@@ -91,7 +90,7 @@ class ScoringSheetViewModel(
 
     fun setFirstPos(x: Float, y: Float) {
         _isFirstPos.value = false
-        val centerAdjustment = screenData.tileWidth / 2 + screenData.tileWidth / 3 + 5
+        val centerAdjustment = ScreenData.tileWidth / 2 + ScreenData.tileWidth / 3 + 5
 
         for (col in 0..14) {
             if (x >= tileStartX[col] && x <= tileStartX[col + 1]) {

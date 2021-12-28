@@ -19,7 +19,7 @@ class WordInfoViewModel(
 ) : ViewModel() {
 
     val wordList = mutableListOf(
-        mutableStateOf("BEAUTY"),
+        mutableStateOf("BANK"),
         mutableStateOf("ALIVE")
     )
 
@@ -58,6 +58,7 @@ class WordInfoViewModel(
                                 wordInfoItems = result.data ?: emptyList(),
                                 isLoading = false
                             )
+
                             _eventFlow.emit(UIEvent.ShowSnackbar(result.message ?: "Unknown error"))
                         }
 
@@ -66,7 +67,6 @@ class WordInfoViewModel(
                                 wordInfoItems = result.data ?: emptyList(),
                                 isLoading = true
                             )
-
                         }
                     }
                 }.launchIn(this)

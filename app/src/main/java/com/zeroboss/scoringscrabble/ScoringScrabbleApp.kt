@@ -5,6 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.zeroboss.scoringscrabble.ui.screens.*
+import org.koin.androidx.compose.get
 
 @Composable
 fun ScoringScrabbleApp() {
@@ -32,7 +33,7 @@ fun ScoringScrabbleApp() {
         }
 
         composable(Navigation.ScoreSheet.route) {
-            ScoreSheet(navController)
+            ScoreSheet(navController, get())
         }
     }
 }

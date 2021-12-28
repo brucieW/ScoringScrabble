@@ -35,6 +35,7 @@ import androidx.navigation.NavController
 import com.zeroboss.scoringscrabble.R
 import com.zeroboss.scoringscrabble.data.common.ActiveStatus
 import com.zeroboss.scoringscrabble.data.entities.*
+import com.zeroboss.scoringscrabble.domain.model.WordInfoItem
 import com.zeroboss.scoringscrabble.presentation.WordInfoViewModel
 import com.zeroboss.scoringscrabble.ui.common.TileSettings
 import com.zeroboss.scoringscrabble.ui.common.TileType
@@ -43,14 +44,28 @@ import com.zeroboss.scoringscrabble.ui.dialogs.UnusedTilesDialog
 import com.zeroboss.scoringscrabble.ui.theme.*
 import com.zeroboss.scoringscrabble.ui.viewmodels.ScoringSheetViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 
 @Composable
 fun ScoreSheet(
-    navController: NavController
+    navController: NavController,
+    wordInfoViewModel: WordInfoViewModel
 ) {
     val scaffoldState = rememberScaffoldState()
+
+    LaunchedEffect(key1 = true) {
+        wordInfoViewModel.eventFlow.collectLatest { event ->
+            when(event) {
+                is WordInfoViewModel.UIEvent.ShowSnackbar -> {
+                    scaffoldState.snackbarHostState.showSnackbar(
+                        message = event.message
+                    )
+                }
+            }
+        }
+    }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -279,12 +294,12 @@ fun ScrabbleBoardLayout(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         BoardHeader(scoringViewModel)
-        ScrabbleBoard(scoringViewModel, get())
+        ScrabbleBoard(scoringViewModel)
     }
 
 }
 
-object screenData {
+object ScreenData {
     var screenWidth: Int = 0
     var screenHeight: Int = 0
     var tileWidth: Int = 0
@@ -292,13 +307,13 @@ object screenData {
 
 @Composable
 fun getTileWidth(): Int {
-    screenData.screenWidth =
+    ScreenData.screenWidth =
         with(LocalDensity.current) { LocalConfiguration.current.screenWidthDp }
-    screenData.screenHeight =
+    ScreenData.screenHeight =
         with(LocalDensity.current) { LocalConfiguration.current.screenHeightDp }
-    screenData.tileWidth = 24
+    ScreenData.tileWidth = 24
 
-    return screenData.tileWidth
+    return ScreenData.tileWidth
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -394,8 +409,7 @@ enum class PulseState {
 
 @Composable
 fun ScrabbleBoard(
-    scoringViewModel: ScoringSheetViewModel,
-    wordInfoViewModel: WordInfoViewModel
+    scoringViewModel: ScoringSheetViewModel
 ) {
     val freqTileWidth = getTileWidth()
     val tileWidth = (freqTileWidth * 2).toFloat()
@@ -451,14 +465,12 @@ fun ScrabbleBoard(
                 ShowFrequencyTile(scoringViewModel, '[', freqTileWidth)
             }
 
-            Surface(
-                modifier = Modifier
-                    .size(boardWidth, boardHeight)
-                    .padding(end = 10.dp)
-                    .border(BorderStroke(1.dp, Color.Black))
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth()
+            Column() {
+                Surface(
+                    modifier = Modifier
+                        .size(boardWidth, boardHeight)
+                        .padding(end = 10.dp)
+                        .border(BorderStroke(1.dp, Color.Black))
                 ) {
                     Canvas(
                         modifier = Modifier
@@ -534,9 +546,9 @@ fun ScrabbleBoard(
                             )
                         }
                     }
-
-                    Dictionary(get())
                 }
+
+                Dictionary(boardWidth, get())
             }
         }
     }
@@ -544,6 +556,7 @@ fun ScrabbleBoard(
 
 @Composable
 fun Dictionary(
+    width: Dp,
     wordInfoViewModel: WordInfoViewModel
 ) {
     val activeWords = mutableListOf<String>()
@@ -559,32 +572,64 @@ fun Dictionary(
         selectedWords.add(selected)
     }
 
-    Box(
+    val state by wordInfoViewModel.state
+
+    Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .height(100.dp)
-            .border(BorderStroke(1.dp, Color.Black)),
+            .width(width)
+            .padding(top = 10.dp, end = 10.dp),
+        elevation = 10.dp
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth()
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(5.dp)
         ) {
-            activeWords.forEachIndexed { index, word ->
-                Card(
-                    modifier = Modifier
-                        .padding(top = 10.dp, start = 10.dp)
-                        .clickable {
-                            selectedWords.forEachIndexed { selectedIndex, selected ->
-                                selectedWords[selectedIndex] = selectedIndex == index
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                activeWords.forEachIndexed { index, word ->
+                    Box(
+                        modifier = Modifier
+                            .padding(top = 10.dp, start = 10.dp)
+                            .clickable {
+                                selectedWords.forEachIndexed { index, _ ->
+                                    selectedWords[index] = false
+                                }
+                                selectedWords[index] = true
+                                wordInfoViewModel.onSearch(activeWords[index])
                             }
-                        }
-                        .border(BorderStroke(if (selectedWords[index]) 3.dp else 1.dp, Color.Black)),
-                    elevation = 10.dp
-                ) {
-                    Text(
-                        text = word,
-                        style = normalText
-                    )
+                            .border(
+                                BorderStroke(
+                                    if (selectedWords[index]) 3.dp else 1.dp,
+                                    Color.Black
+                                )
+                            ),
+                    ) {
+                        Text(
+                            text = word,
+                            style = smallerText,
+                            modifier = Modifier.padding(10.dp),
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            if (state.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.padding(top = 20.dp, start = 50.dp)
+                )
+            }
+
+            state.wordInfoItems.forEachIndexed { i, wordInfo ->
+                if (i > 0) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                WordInfoItem(wordInfo)
             }
         }
     }
