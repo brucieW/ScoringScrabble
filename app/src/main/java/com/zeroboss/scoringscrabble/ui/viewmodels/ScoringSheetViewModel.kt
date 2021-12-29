@@ -7,7 +7,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import com.zeroboss.scoringscrabble.data.common.ActiveStatus
 import com.zeroboss.scoringscrabble.data.entities.*
-import com.zeroboss.scoringscrabble.ui.screens.ScreenData
+import com.zeroboss.scoringscrabble.ui.screens.scoresheet.ScreenData
 
 class ScoringSheetViewModel(
 

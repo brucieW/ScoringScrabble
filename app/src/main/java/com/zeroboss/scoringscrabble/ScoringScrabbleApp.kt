@@ -5,6 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.zeroboss.scoringscrabble.ui.screens.*
+import com.zeroboss.scoringscrabble.ui.screens.scoresheet.ScoreSheet
 import org.koin.androidx.compose.get
 
 @Composable
