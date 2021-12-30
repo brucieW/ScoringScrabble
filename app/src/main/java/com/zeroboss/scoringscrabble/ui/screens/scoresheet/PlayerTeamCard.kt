@@ -21,16 +21,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zeroboss.scoringscrabble.data.common.ActiveStatus
 import com.zeroboss.scoringscrabble.data.entities.Player
 import com.zeroboss.scoringscrabble.data.entities.PlayerTurnData
 import com.zeroboss.scoringscrabble.data.entities.Team
+import com.zeroboss.scoringscrabble.ui.common.Direction
+import com.zeroboss.scoringscrabble.ui.common.NumberPicker
 import com.zeroboss.scoringscrabble.ui.dialogs.UnusedTilesDialog
-import com.zeroboss.scoringscrabble.ui.theme.lightGreen
-import com.zeroboss.scoringscrabble.ui.theme.lightSalmon
-import com.zeroboss.scoringscrabble.ui.theme.normalText
-import com.zeroboss.scoringscrabble.ui.theme.textTitleStyle
+import com.zeroboss.scoringscrabble.ui.theme.*
 import com.zeroboss.scoringscrabble.ui.viewmodels.ScoringSheetViewModel
-
 
 @Composable
 fun PlayerTeamCard(
@@ -39,18 +38,9 @@ fun PlayerTeamCard(
     player: Player? = null,
     team: Team? = null
 ) {
-    val unusedTiles by remember { scoringViewModel.unusedTiles[index] }
+    val unusedTiles = remember { scoringViewModel.unusedTiles[index] }
     val activePlayer by scoringViewModel.activePlayer
     val activeTeam by scoringViewModel.activeTeam
-
-    val (showUnusedTilesDialog, setShowUnusedTilesDialog) = remember { mutableStateOf(false) }
-
-    UnusedTilesDialog(
-        scoringViewModel,
-        index,
-        showUnusedTilesDialog,
-        setShowUnusedTilesDialog
-    )
 
     var borderWidth = 1.dp
     var borderColour = Color.Black
@@ -70,7 +60,8 @@ fun PlayerTeamCard(
         elevation = 10.dp
     ) {
         Column {
-            val name = if (team == null) player!!.name else team.getTeamName()
+            val name = team?.getTeamName() ?: player!!.name
+
             Text(
                 text = name,
                 modifier = Modifier
@@ -91,9 +82,9 @@ fun PlayerTeamCard(
 
             BlackDivider()
 
-            (0..21).forEach { item ->
-//                val data = scoringViewModel.turnData
+//            val gameData = ActiveStatus.gameTurnData
 
+            (0..21).forEachIndexed { index, item ->
                 Row(
                     modifier = Modifier
                         .background(if (item % 2 == 0) lightGreen else Color.White)
@@ -116,18 +107,16 @@ fun PlayerTeamCard(
             ) {
                 Text(
                     text = "Unused",
-                    fontSize = 15.sp,
-                    modifier = Modifier.clickable {
-                        setShowUnusedTilesDialog(true)
-                    }
+                    fontSize = 15.sp
                 )
 
-                Text(
-                    text = unusedTiles.toString(),
-
-                    Modifier.clickable {
-                        setShowUnusedTilesDialog(true)
-                    }
+                NumberPicker(
+                    state = unusedTiles,
+                    modifier = Modifier,
+                    Direction.Left,
+                    0..30,
+                    textStyle = smallerText,
+                    onStateChanged = { }
                 )
             }
 
@@ -153,23 +142,6 @@ fun PlayerTeamCard(
             }
         }
     }
-}
-
-@Composable
-fun TurnData(
-    playerTurnData: PlayerTurnData
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(if (playerTurnData.turnId % 2 == 0) lightGreen else Color.White),
-    ) {
-        ScoreText("20")
-        ScoreText("+")
-        ScoreText("40")
-    }
-
-    Divider()
 }
 
 @Composable

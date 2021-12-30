@@ -1,14 +1,15 @@
 package com.zeroboss.scoringscrabble.data.common
 
-import com.zeroboss.scoringscrabble.data.entities.Game
-import com.zeroboss.scoringscrabble.data.entities.Match
-import com.zeroboss.scoringscrabble.data.entities.Player
-import com.zeroboss.scoringscrabble.data.entities.Team
+import com.zeroboss.scoringscrabble.data.entities.*
 
 object ActiveStatus {
     var expandedMatch: Match? = null
     var activeMatch: Match? = null
     var activeGame: Game? = null
+    var activeTurnId: Int = 1
+    var activePlayerTurnData: PlayerTurnData? = null
+    var activeTeamTurnData: TeamTurnData? = null
+    var gameTurnData: List<List<PlayerTurnData>> = emptyList()
     var activePlayer: Player? = null
     var activeTeam: Team? = null
     var isTeamGame: Boolean = false

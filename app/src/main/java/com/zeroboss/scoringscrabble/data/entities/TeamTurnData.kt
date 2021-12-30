@@ -8,11 +8,11 @@ import io.objectbox.relation.ToMany
 import io.objectbox.relation.ToOne
 
 @Entity
-data class PlayerTurnData(
+data class TeamTurnData(
     @Id
     var id: Long = 0,
 ) {
-    lateinit var player: ToOne<Player>
+    lateinit var team: ToOne<Team>
 
     @Convert(converter = LetterAndPositionConverter::class, dbType = String::class)
     lateinit var letters: ToMany<LetterAndPosition>

@@ -24,14 +24,13 @@ class ScoringSheetViewModel(
     private val _activePlayer = mutableStateOf(ActiveStatus.activePlayer)
     val activePlayer = _activePlayer
 
-    fun setActivePlayerByIndex(index: Int) {
-        _activePlayer.value = players[index]
-    }
-
     fun setActivePlayer(player: Player) {
         ActiveStatus.activePlayer = player
         _activePlayer.value = player
         _firstPlayerSelected.value = true
+
+        val turnData = PlayerTurnData()
+        turnData.player.target = player
     }
 
     private val _activeTeam = mutableStateOf(ActiveStatus.activeTeam)
@@ -41,10 +40,14 @@ class ScoringSheetViewModel(
         ActiveStatus.activeTeam = team
         _activeTeam.value = team
         _firstPlayerSelected.value = true
+
+        val turnData = TeamTurnData()
+        turnData.team.target = team
     }
 
-    private val _gameStarted = mutableStateOf(false)
-    val gameStarted = _gameStarted
+    fun isGameStarted() : Boolean {
+        return _activePlayer.value != null || _activeTeam.value != null
+    }
 
     private val _cancelEnabled = mutableStateOf<Float>(0.4f)
     val cancelEnabled = _cancelEnabled
@@ -86,7 +89,15 @@ class ScoringSheetViewModel(
 
     private val _isFirstPos = mutableStateOf(false)
     val isFirstPos = _isFirstPos
-    var currentPos = Offset(0f, 0f)
+
+    private val _currentPos = mutableStateOf(Offset(-1f, -1f))
+    val currentPos = _currentPos
+
+    fun isCurrentPosSet() : Boolean {
+        val pos = _currentPos.value
+
+        return (pos.x != -1f && pos.y != -1f)
+    }
 
     var currentLetterPos = Position()
     var currentLetterAndPosition = LetterAndPosition()
@@ -100,7 +111,7 @@ class ScoringSheetViewModel(
                 for (row in 0..14) {
                     if (y >= tileStartY[row] && y <= tileStartY[row + 1]) {
                         _isFirstPos.value = true
-                        currentPos = Offset(
+                        _currentPos.value = Offset(
                             tileStartX[col] + centerAdjustment,
                             tileStartY[row] + centerAdjustment
                         )
@@ -135,29 +146,30 @@ class ScoringSheetViewModel(
         _tileCounts[index].value += count
     }
 
-    var currentTurnId = 1
-    var currentTurn = PlayerTurnData()
-
-    val gameTurnData = mutableStateListOf<PlayerTurnData>()
+    private val _gameTurnData = mutableStateListOf<PlayerTurnData>()
+    val gameTurnData = _gameTurnData
 
     private val _errorText = mutableStateOf("")
     val errorText = _errorText
 
-    fun addToTurnData(
+    fun addToPlayerTurnData(
         letter: Letter,
         blankLetter: Letter? = null
     ) {
-        if (currentTurn.turnId == 0) {
-            currentTurn.turnId = currentTurnId
+        val turnData = PlayerTurnData()
+        turnData.player.target = _activePlayer.value
+        ActiveStatus.activePlayerTurnData = turnData
+        turnData.letters.add(LetterAndPosition(letter, currentLetterPos, blankLetter))
+    }
 
-            if (activeTeam.value!!.id == 0L) {
-                currentTurn.player.target = activePlayer.value
-            } else {
-                currentTurn.team.target = activeTeam.value
-            }
-        }
-
-        currentTurn.letters.add(LetterAndPosition(letter, currentLetterPos, blankLetter))
+    fun addToTeamTurnData(
+        letter: Letter,
+        blankLetter: Letter? = null
+    ) {
+        val turnData = TeamTurnData()
+        turnData.team.target = _activeTeam.value
+        ActiveStatus.activeTeamTurnData = turnData
+        turnData.letters.add(LetterAndPosition(letter, currentLetterPos, blankLetter))
     }
 
     fun clickedBackSpace() {

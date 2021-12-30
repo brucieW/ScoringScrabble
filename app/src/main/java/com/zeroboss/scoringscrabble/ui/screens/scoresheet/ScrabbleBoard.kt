@@ -50,8 +50,11 @@ fun ScrabbleBoard(
     val star = ImageBitmap.imageResource(id = R.drawable.starting_star)
 
     val isFirstPos by scoringViewModel.isFirstPos
+    val currentPos by scoringViewModel.currentPos
+
     var currentState by remember { mutableStateOf(PulseState.None) }
     val transition = updateTransition(targetState = currentState, label = "radius")
+
     val growRadius by transition.animateFloat(
         label = "radius"
     ) { state ->
@@ -172,7 +175,7 @@ fun ScrabbleBoard(
                             drawCircle(
                                 color = Color.Red,
                                 radius = growRadius,
-                                center = scoringViewModel.currentPos,
+                                center = currentPos,
                                 alpha = 0.2f
                             )
                         }
@@ -192,8 +195,6 @@ fun ShowFrequencyTile(
     tile: Char,
     tileWidth: Int
 ) {
-    val gameStarted by scoringViewModel.gameStarted
-
     val badgeCounts = scoringViewModel.tileCounts
 
     val offset = tile - 'A'
@@ -209,8 +210,9 @@ fun ShowFrequencyTile(
             .padding(end = 20.dp, bottom = 10.dp)
             .alpha(alpha)
             .clickable {
-                if (gameStarted && scoringViewModel.currentPos.isValid()) {
-                    scoringViewModel.addToTurnData(Letters.get(tile))
+                if (scoringViewModel.isGameStarted() &&
+                        scoringViewModel.isCurrentPosSet()) {
+                    scoringViewModel.addToPlayerTurnData(Letters.get(tile))
                     scoringViewModel.addToTileCount(offset, -1)
                 }
             }

@@ -14,7 +14,6 @@ import com.zeroboss.scoringscrabble.data.common.ActiveStatus
 import com.zeroboss.scoringscrabble.ui.common.TopPanel
 import com.zeroboss.scoringscrabble.ui.theme.*
 import com.zeroboss.scoringscrabble.ui.viewmodels.ScoringSheetViewModel
-import org.koin.androidx.compose.get
 
 @Composable
 fun ScoreSheet(

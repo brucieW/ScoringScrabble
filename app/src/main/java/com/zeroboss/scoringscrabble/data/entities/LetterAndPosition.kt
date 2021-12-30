@@ -26,8 +26,8 @@ data class Position(
     val row: Int = 0
 ) {
     companion object {
-        val maxRows = 15
-        val maxColumns = 15
+        const val maxRows = 15
+        const val maxColumns = 15
     }
 
     fun isValidFirstMove(isDown: Boolean) : String {
