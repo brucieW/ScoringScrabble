@@ -9,6 +9,7 @@ import io.objectbox.BoxStore
 import io.objectbox.kotlin.boxFor
 import io.objectbox.query.Query
 import io.objectbox.query.QueryBuilder
+import io.objectbox.query.QueryBuilder.StringOrder
 import org.koin.core.component.KoinComponent
 import org.koin.java.KoinJavaComponent.get
 import java.io.File
@@ -212,7 +213,7 @@ object CommonDb : KoinComponent {
     fun getPlayer(
         name: String
     ) : Player {
-        val players = playersBox.query().equal(Player_.name, name).build().find()
+        val players = playersBox.query().equal(Player_.name, name, StringOrder.CASE_INSENSITIVE).build().find()
         val player: Player
 
         if (players.isEmpty()) {

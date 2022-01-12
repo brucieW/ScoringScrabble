@@ -1,5 +1,6 @@
 package com.zeroboss.scoringscrabble.ui.screens.scoresheet
 
+import android.widget.ImageButton
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,8 +21,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.res.ResourcesCompat
 import com.zeroboss.scoringscrabble.R
 import com.zeroboss.scoringscrabble.ui.theme.smallerText
 import com.zeroboss.scoringscrabble.ui.viewmodels.ScoringSheetViewModel
@@ -83,19 +86,27 @@ fun BoardHeader(
             )
 
             Row() {
-                DirectionButton(
-                    directionEast,
-                    onClick = { scoringViewModel.setDirectionEast() },
-                    image = Icons.Rounded.East,
-                    description = "East Direction"
-                )
+                IconButton(
+                    modifier = Modifier.size(32.dp),
+                    onClick = { scoringViewModel.setDirectionEast() }
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.ArrowForward,
+                        contentDescription = "East",
+                        tint = if (directionEast) Color.Green else Color.Gray
+                    )
+                }
 
-                DirectionButton(
-                    directionSouth,
-                    onClick = { scoringViewModel.setDirectionSouth() },
-                    image = Icons.Rounded.South,
-                    description = "South Direction"
-                )
+                IconButton(
+                    modifier = Modifier.size(32.dp),
+                    onClick = { scoringViewModel.setDirectionSouth() }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_arrow_downward),
+                        contentDescription = "South",
+                        tint = if (directionSouth) Color.Green else Color.Gray
+                    )
+                }
             }
         }
 
@@ -113,7 +124,7 @@ fun BoardHeader(
 
                 TextWithIcon(
                     text = stringResource(id = R.string.skip_turn),
-                    image = Icons.Rounded.CancelPresentation,
+                    image = Icons.Rounded.Clear,
                     onClick = { },
                     tint = Color.Red
                 )
@@ -156,25 +167,6 @@ fun TextWithIcon(
             )
         }
 
-    }
-}
-
-@Composable
-fun DirectionButton(
-    direction: Boolean,
-    onClick: () -> Unit,
-    image: ImageVector,
-    description: String
-) {
-    IconButton(
-        modifier = Modifier.size(32.dp),
-        onClick = { onClick() }
-    ) {
-        Icon(
-            image,
-            contentDescription = description,
-            tint = if (direction) Color.Green else Color.Gray
-        )
     }
 }
 
