@@ -1,6 +1,5 @@
 package com.zeroboss.scoringscrabble.ui.screens.scoresheet
 
-import android.widget.ImageButton
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -24,7 +23,6 @@ import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.res.ResourcesCompat
 import com.zeroboss.scoringscrabble.R
 import com.zeroboss.scoringscrabble.ui.theme.smallerText
 import com.zeroboss.scoringscrabble.ui.viewmodels.ScoringSheetViewModel
@@ -37,11 +35,13 @@ object ScreenData {
 
 @Composable
 fun getTileWidth(): Int {
-    ScreenData.screenWidth =
-        with(LocalDensity.current) { LocalConfiguration.current.screenWidthDp }
-    ScreenData.screenHeight =
-        with(LocalDensity.current) { LocalConfiguration.current.screenHeightDp }
-    ScreenData.tileWidth = 24
+    if (ScreenData.screenWidth == 0) {
+        ScreenData.screenWidth =
+            with(LocalDensity.current) { LocalConfiguration.current.screenWidthDp }
+        ScreenData.screenHeight =
+            with(LocalDensity.current) { LocalConfiguration.current.screenHeightDp }
+        ScreenData.tileWidth = 24
+    }
 
     return ScreenData.tileWidth
 }
@@ -73,6 +73,7 @@ fun BoardHeader(
                 bitmap = ImageBitmap.imageResource(id = R.drawable.backspace),
                 contentDescription = "Cancel",
                 Modifier
+                    .padding(top = 5.dp)
                     .clickable { scoringViewModel.clickedBackSpace() }
                     .size(tileWidth.dp)
                     .alpha(cancelEnabled)

@@ -13,21 +13,26 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.zeroboss.scoringscrabble.R
+import com.zeroboss.scoringscrabble.ui.screens.destinations.HomeDestination
 import com.zeroboss.scoringscrabble.ui.theme.Blue50
 import kotlinx.coroutines.delay
 
+@Destination(start = true)
 @Composable
 fun Splash(
-    navController: NavController
+    navigator: DestinationsNavigator
 ) {
     SplashScreenContent()
     LaunchedEffect(
         key1 = "JumpToHome",
         block = {
             delay(1000)
-            navController.popBackStack()
-            navController.navigate(Navigation.Home.route)
+            navigator.navigate(
+                HomeDestination()
+            )
         }
     )
 }

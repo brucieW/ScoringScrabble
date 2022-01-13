@@ -29,7 +29,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.zeroboss.scoringscrabble.ui.dialogs.ClearBackupsDialog
 import com.zeroboss.scoring500.ui.dialogs.ClearDataDialog
 import com.zeroboss.scoringscrabble.ui.dialogs.RestoreDataDialog
@@ -48,27 +49,32 @@ import com.zeroboss.scoringscrabble.ui.dialogs.AboutDialog
 import com.zeroboss.scoringscrabble.ui.dialogs.BackupDataDialog
 import com.zeroboss.scoringscrabble.ui.dialogs.DeleteGameDialog
 import com.zeroboss.scoringscrabble.ui.dialogs.DeleteMatchDialog
+import com.zeroboss.scoringscrabble.ui.screens.destinations.ManagePlayersDestination
+import com.zeroboss.scoringscrabble.ui.screens.destinations.ScoreSheetDestination
+import com.zeroboss.scoringscrabble.ui.screens.destinations.SelectPlayersDestination
+import com.zeroboss.scoringscrabble.ui.screens.destinations.StatisticsDestination
 import com.zeroboss.scoringscrabble.ui.theme.*
 import com.zeroboss.scoringscrabble.ui.viewmodels.HomeViewModel
 import org.koin.androidx.compose.get
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
+@Destination
 @Composable
 fun Home(
-    navController: NavController
+    navigator: DestinationsNavigator
 ) {
     val scaffoldState = rememberScaffoldState()
 
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier.fillMaxSize(),
-        topBar = { HomeAppBar(navController) },
-        content = { Body(navController, get()) },
+        topBar = { HomeAppBar(navigator) },
+        content = { Body(navigator, get()) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    navController.navigate("select_players")
+                    navigator.navigate(SelectPlayersDestination())
                 },
                 contentColor = Color.White,
                 backgroundColor = Blue800,
@@ -83,7 +89,7 @@ fun Home(
 
 @Composable
 fun HomeAppBar(
-    navController: NavController
+    navigator: DestinationsNavigator
 ) {
     Row(
         modifier = Modifier
@@ -104,7 +110,7 @@ fun HomeAppBar(
             modifier = Modifier.weight(1f)
         )
 
-        DropDownMenu(navController)
+        DropDownMenu(navigator)
 
         IconButton(
             onClick = { Runtime.getRuntime().exit(0) }
@@ -122,7 +128,7 @@ fun HomeAppBar(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun Body(
-    navController: NavController,
+    navigator: DestinationsNavigator,
     homeViewModel: HomeViewModel
 ) {
     val matches = homeViewModel.matches.collectAsState()
@@ -206,7 +212,9 @@ fun Body(
                             onNewGameClicked = {
                                 ActiveStatus.activeMatch = matchCard
                                 createGame(matchCard)
-                                navController.navigate("new_hand")
+                                navigator.navigate(
+                                    ScoreSheetDestination()
+                                )
                             },
 
                             onDeleteMatchClicked = {
@@ -215,14 +223,19 @@ fun Body(
                             },
 
                             onGameClicked = { game ->
-//                                ActiveStatus.activeMatch = matchCard
-//                                ActiveStatus.activeGame = game
-//                                navController.navigate( if (game.hands.isEmpty()) "new_hand" else "game")
+                                ActiveStatus.activeMatch = matchCard
+                                ActiveStatus.activeGame = game
+
+                                if (game.playerTurnData.isEmpty()) {
+                                    navigator.navigate(SelectPlayersDestination())
+                                } else {
+                                    navigator.navigate(ScoreSheetDestination())
+                                }
                             },
 
                             onEditGamesClicked = {
                                 ActiveStatus.activeMatch = matchCard
-                                navController.navigate("game")
+                                navigator.navigate(ScoreSheetDestination())
                             },
 
                             onDeleteGameClicked = {
@@ -499,7 +512,7 @@ fun CardArrow(
 
 @Composable
 fun DropDownMenu(
-    navController: NavController
+    navigator: DestinationsNavigator
 ) {
     var expanded by remember { mutableStateOf(false) }
     val (showAbout, setShowAbout) = remember { mutableStateOf(false) }
@@ -526,7 +539,7 @@ fun DropDownMenu(
                 DropdownMenuItemExt(
                     onClick = {
                         expanded = false
-//                        navController.navigate(Screen.ManagePlayers.route)
+                        navigator.navigate(ManagePlayersDestination())
                     }
                 ) {
                     Text("Fix") //stringResource(R.string.manage_players))
@@ -544,7 +557,7 @@ fun DropDownMenu(
                 DropdownMenuItemExt(
                     onClick = {
                         expanded = false
-                        navController.navigate(Navigation.Statistics.route)
+                        navigator.navigate(StatisticsDestination())
                     }
                 ) {
                     Text(stringResource(R.string.statistics))

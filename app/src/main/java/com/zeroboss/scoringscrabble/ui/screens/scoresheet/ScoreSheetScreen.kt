@@ -9,17 +9,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.*
 import androidx.navigation.NavController
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.zeroboss.scoringscrabble.R
 import com.zeroboss.scoringscrabble.data.common.ActiveStatus
 import com.zeroboss.scoringscrabble.ui.common.TopPanel
 import com.zeroboss.scoringscrabble.ui.theme.*
 import com.zeroboss.scoringscrabble.ui.viewmodels.ScoringSheetViewModel
+import org.koin.androidx.compose.viewModel
 
+@Destination
 @Composable
 fun ScoreSheet(
-    navController: NavController,
-    scoringViewModel: ScoringSheetViewModel
+    navigator: DestinationsNavigator
 ) {
+    val scoringViewModel by viewModel<ScoringSheetViewModel>()
     val scaffoldState = rememberScaffoldState()
     val colState = rememberLazyListState()
     val rowState = rememberLazyListState()
@@ -31,7 +35,7 @@ fun ScoreSheet(
         topBar = {
             TopPanel(
                 R.string.score_sheet,
-                onClickReturn = { navController.popBackStack() }
+                onClickReturn = {  navigator.popBackStack() }
             )
         },
         content = {
@@ -95,4 +99,3 @@ fun ScoreSheet(
         }
     )
 }
-

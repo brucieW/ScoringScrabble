@@ -3,15 +3,26 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-parcelize'
     id 'kotlin-kapt'
+    id 'com.google.devtools.ksp' version '1.6.10-1.0.2'
 }
 
+kotlin {
+    sourceSets {
+        debug {
+            kotlin.srcDir("build/generated/ksp/debug/kotlin")
+        }
+        release {
+            kotlin.srcDir("build/generated/ksp/release/kotlin")
+        }
+    }
+}
 android {
-    compileSdk 31
+    compileSdk 32
 
     defaultConfig {
         applicationId "com.zeroboss.scoringscrabble"
         minSdk 26
-        targetSdk 31
+        targetSdk 32
         versionCode 1
         versionName "1.0"
 
@@ -151,6 +162,11 @@ dependencies {
     testImplementation "io.objectbox:objectbox-windows:$objectboxVersion"
     testImplementation "org.mockito.kotlin:mockito-kotlin:4.0.0"
 //    androidTestImplementation 'org.mockito:mockito-android:4.0.0'
+
+    implementation 'io.github.raamcosta.compose-destinations:core:1.1.2-beta'
+    ksp 'io.github.raamcosta.compose-destinations:ksp:1.1.2-beta'
+
+    implementation 'androidx.work:work-runtime-ktx:2.7.1'
 }
 
 apply plugin: 'io.objectbox'

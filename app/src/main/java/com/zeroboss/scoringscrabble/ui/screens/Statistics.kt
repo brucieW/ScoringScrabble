@@ -19,6 +19,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.zeroboss.scoringscrabble.R
 import com.zeroboss.scoringscrabble.ui.common.TopPanel
 import com.zeroboss.scoringscrabble.ui.theme.Blue50
@@ -28,9 +30,10 @@ import com.zeroboss.scoringscrabble.ui.viewmodels.Ranking
 import com.zeroboss.scoringscrabble.ui.viewmodels.StatisticsViewModel
 import org.koin.androidx.compose.get
 
+@Destination
 @Composable
 fun Statistics(
-    navController: NavController
+    navigator: DestinationsNavigator
 ) {
     val scaffoldState = rememberScaffoldState()
 
@@ -41,8 +44,7 @@ fun Statistics(
             TopPanel(
                 R.string.statistics,
                 onClickReturn = {
-                    navController.popBackStack()
-                    navController.navigate("home")
+                    navigator.popBackStack()
                 }
             )
         },

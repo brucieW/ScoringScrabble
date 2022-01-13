@@ -20,16 +20,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.navigation.NavController
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.zeroboss.scoring500.ui.common.TextWithDropDown
 import com.zeroboss.scoringscrabble.ui.viewmodels.SelectPlayersViewModel
 import com.zeroboss.scoringscrabble.R
 import com.zeroboss.scoringscrabble.ui.common.*
+import com.zeroboss.scoringscrabble.ui.screens.destinations.ScoreSheetDestination
 import com.zeroboss.scoringscrabble.ui.theme.*
 import org.koin.androidx.compose.get
 
+@Destination
 @Composable
 fun SelectPlayers(
-    navController: NavController
+    navigator: DestinationsNavigator
 ) {
     val scaffoldState = rememberScaffoldState()
 
@@ -40,14 +44,14 @@ fun SelectPlayers(
             TopPanel(
                 R.string.select_players,
                 onClickReturn = {
-                    navController.popBackStack()
+                    navigator.popBackStack()
                 }
             )
         },
 
         content = {
             SelectPlayersBody(
-                navController,
+                navigator,
                 get()
             )
         }
@@ -56,7 +60,7 @@ fun SelectPlayers(
 
 @Composable
 fun SelectPlayersBody(
-    navController: NavController,
+    navigator: DestinationsNavigator,
     selectPlayersViewModel: SelectPlayersViewModel
 ) {
     val usingTeams by selectPlayersViewModel.isTeamType
@@ -108,8 +112,7 @@ fun SelectPlayersBody(
                     firstButtonEnabled = enabled && uniqueNames,
                     onFirstButtonClicked = {
                         selectPlayersViewModel.onStartScoring()
-                        navController.popBackStack()
-                        navController.navigate("score_sheet")
+                        navigator.navigate(ScoreSheetDestination())
                     },
 
                     secondButtonText = "Cancel",
