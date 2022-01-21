@@ -165,7 +165,7 @@ fun Body(
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Match Items",
+                text = "Match List",
                 style = typography.h5
             )
         }
@@ -202,7 +202,7 @@ fun Body(
                     contentPadding = PaddingValues(10.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    itemsIndexed(matches.value) { _, matchCard ->
+                    itemsIndexed(matches.value) { index, matchCard ->
                         ExpandableMatchCard(
                             matchCard,
                             onCardArrowClicked = {
@@ -290,7 +290,7 @@ fun ExpandableMatchCard(
         ) {
             Row(
                 Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 CardArrow(
@@ -298,32 +298,11 @@ fun ExpandableMatchCard(
                     onClick = onCardArrowClicked
                 )
 
-                Text(
-                    text = "Fix Name", //match.teams[0].name,
-                    style = normalText,
-                    modifier = Modifier.weight(0.33F)
-                )
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.weight(0.33F)
-                ) {
-                    Row() {
-                        Text(
-                            text = "WinLoss", //match.getWinLossRatioText(),
-                            style = normalText,
-                            modifier = Modifier.padding(end = 5.dp)
-                        )
-
-//                        if (match.gameIsActive()) {
-//                            Image(
-//                                painterResource(id = R.drawable.star),
-//                                contentDescription = "",
-//                                modifier = Modifier.size(20.dp)
-//                            )
-//                        }
-                    }
+                Column() {
+                    Text(
+                        text = if (match.isTeamType()) "Teams:" else "Players:",
+                        style = dialogTitle
+                    )
 
                     Text(
                         text = match.lastPlayed.format(
@@ -336,12 +315,44 @@ fun ExpandableMatchCard(
                     )
                 }
 
-                Text(
-                    text = "Fix name", //match.teams[1].name,
-                    style = normalText,
-                    textAlign = TextAlign.Right,
-                    modifier = Modifier.weight(0.33F)
-                )
+                Column() {
+                    if (match.isTeamType()) {
+                        match.teams.forEach { team ->
+                            Text(
+                                text = team.getTeamName(),
+                                style = normalText
+                            )
+                        }
+                    } else {
+                        match.players.forEach { player ->
+                            Text(
+                                text = player.name,
+                                style = normalText
+                            )
+                        }
+                    }
+                }
+
+//                Column(
+//                    horizontalAlignment = Alignment.CenterHorizontally,
+//                    verticalArrangement = Arrangement.Center,
+//                    modifier = Modifier.weight(0.33F)
+//                ) {
+//                    Row() {
+//                        Text(
+//                            text = "WinLoss", //match.getWinLossRatioText(),
+//                            style = normalText,
+//                            modifier = Modifier.padding(end = 5.dp)
+//                        )
+//
+////                        if (match.gameIsActive()) {
+////                            Image(
+////                                painterResource(id = R.drawable.star),
+////                                contentDescription = "",
+////                                modifier = Modifier.size(20.dp)
+////                            )
+////                        }
+//                    }
 
                 DeleteIcon(
                     onClick = onDeleteMatchClicked

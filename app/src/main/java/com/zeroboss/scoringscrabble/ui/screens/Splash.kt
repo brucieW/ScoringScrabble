@@ -12,7 +12,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.zeroboss.scoringscrabble.R
@@ -30,9 +29,7 @@ fun Splash(
         key1 = "JumpToHome",
         block = {
             delay(1000)
-            navigator.navigate(
-                HomeDestination()
-            )
+            navigator.navigate(HomeDestination())
         }
     )
 }

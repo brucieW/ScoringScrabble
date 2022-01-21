@@ -23,4 +23,7 @@ data class Match(
         return teams.size > 0
     }
 
+    fun getPlayerTeamName(index: Int) : String {
+        return if (isTeamType()) teams[index].getTeamName() else players[index].name
+    }
 }

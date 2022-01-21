@@ -3,10 +3,7 @@ package com.zeroboss.scoringscrabble
 import android.app.Application
 import android.content.Context
 import com.zeroboss.scoringscrabble.data.common.CommonDb.testFile
-import com.zeroboss.scoringscrabble.data.entities.Game
-import com.zeroboss.scoringscrabble.data.entities.Match
-import com.zeroboss.scoringscrabble.data.entities.Player
-import com.zeroboss.scoringscrabble.data.entities.Team
+import com.zeroboss.scoringscrabble.data.entities.*
 import com.zeroboss.scoringscrabble.di.boxStoreTestModule
 import io.objectbox.Box
 import io.objectbox.BoxStore
@@ -15,6 +12,7 @@ import org.junit.After
 import org.junit.Before
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
 import org.koin.test.KoinTest
 import org.mockito.Mock
 import org.mockito.Mockito.mock
@@ -42,14 +40,19 @@ open class BaseBoxStoreTest : KoinTest {
         return testStore.boxFor(Game::class)
     }
 
+    fun getLetterAndPositionBox() : Box<LetterAndPosition> {
+        return testStore.boxFor(LetterAndPosition::class)
+    }
 
     @Before
     fun createDatabase() {
         startKoin {
             androidContext(mock(Context::class.java))
-            modules(listOf(
-                boxStoreTestModule,
-            ))
+            modules(
+                listOf(
+                    boxStoreTestModule,
+                )
+            )
         }
 
         testStore = get(io.objectbox.BoxStore::class.java)
@@ -59,5 +62,6 @@ open class BaseBoxStoreTest : KoinTest {
     fun tearDownDatabase() {
         testStore.close()
         BoxStore.deleteAllFiles(testFile)
+        stopKoin()
     }
 }

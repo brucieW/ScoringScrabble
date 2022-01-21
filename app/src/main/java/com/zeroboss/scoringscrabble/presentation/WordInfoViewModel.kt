@@ -1,5 +1,6 @@
 package com.zeroboss.scoringscrabble.presentation
 
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,15 +15,11 @@ class WordInfoViewModel(
     private val getWordInfo: GetWordInfo
 ) : ViewModel() {
 
-    val wordList = mutableListOf(
-        mutableStateOf("BANK"),
-        mutableStateOf("ALIVE")
-    )
+    private val _wordList = mutableStateListOf<String>()
+    val wordList = _wordList
 
-    val selectedWords = mutableListOf(
-        mutableStateOf(false),
-        mutableStateOf(false)
-    )
+    private val _selectedWords = mutableStateListOf<Boolean>()
+    val selectedWords = _selectedWords
 
     private val _searchQuery = mutableStateOf("")
     val searchQuery = _searchQuery

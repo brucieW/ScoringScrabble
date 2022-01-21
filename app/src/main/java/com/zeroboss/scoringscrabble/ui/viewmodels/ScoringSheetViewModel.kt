@@ -6,8 +6,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import com.zeroboss.scoringscrabble.data.common.ActiveStatus
+import com.zeroboss.scoringscrabble.data.common.CommonDb
 import com.zeroboss.scoringscrabble.data.entities.*
 import com.zeroboss.scoringscrabble.ui.screens.scoresheet.ScreenData
+import kotlinx.coroutines.flow.MutableStateFlow
 
 class ScoringSheetViewModel(
 
@@ -23,6 +25,9 @@ class ScoringSheetViewModel(
 
     private val _activePlayer = mutableStateOf(ActiveStatus.activePlayer)
     val activePlayer = _activePlayer
+
+    private val _activeGame = mutableStateOf(ActiveStatus.activeGame)
+    val activeGame = _activeGame
 
     fun setActivePlayer(player: Player) {
         ActiveStatus.activePlayer = player
@@ -77,12 +82,31 @@ class ScoringSheetViewModel(
 
     val unusedTiles = _unusedTiles
 
-    fun setUnusedTiles(
-        offset: Int,
-        value: String
+    fun setUnused(
+        index: Int,
+        unused: Int
     ) {
-        _unusedTiles[offset].value = if (value.isEmpty()) 0 else value.toInt()
+        _unusedTiles[index].value = unused
+        _totalMinusUnused[index].value = _total[index].value - unused
     }
+
+    private val _total = mutableStateListOf(
+        mutableStateOf(0),
+        mutableStateOf(0),
+        mutableStateOf(0),
+        mutableStateOf(0)
+    )
+
+    val total = _total
+
+    private val _totalMinusUnused = mutableStateListOf(
+        mutableStateOf(0),
+        mutableStateOf(0),
+        mutableStateOf(0),
+        mutableStateOf(0)
+    )
+
+    val totalMinusUnused = _totalMinusUnused
 
     var tileStartX = mutableListOf<Float>()
     var tileStartY = mutableListOf<Float>()
@@ -117,7 +141,7 @@ class ScoringSheetViewModel(
                         )
                         currentLetterPos = Position(col, row)
 
-                        if (gameTurnData.isEmpty()) {
+                        if (gameTurnData.value.isEmpty()) {
                             // This is first move. If direction of move is down, then only valid
                             // positions are from H2 to H8. If direction is across, only valid
                             // positions are from B8 to H8.
@@ -146,7 +170,10 @@ class ScoringSheetViewModel(
         _tileCounts[index].value += count
     }
 
-    private val _gameTurnData = mutableStateListOf<PlayerTurnData>()
+    private val currentTurnData = CommonDb.getPlayerTurnData(
+        activePlayer.value,
+        activeGame.value)
+    private val _gameTurnData = MutableStateFlow(currentTurnData)
     val gameTurnData = _gameTurnData
 
     private val _errorText = mutableStateOf("")

@@ -1,5 +1,6 @@
 package com.zeroboss.scoringscrabble.ui.screens.scoresheet
 
+import androidx.compose.material.Surface
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,16 +19,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zeroboss.scoringscrabble.data.common.ActiveStatus
 import com.zeroboss.scoringscrabble.data.entities.Player
-import com.zeroboss.scoringscrabble.data.entities.PlayerTurnData
 import com.zeroboss.scoringscrabble.data.entities.Team
 import com.zeroboss.scoringscrabble.ui.common.Direction
 import com.zeroboss.scoringscrabble.ui.common.NumberPicker
-import com.zeroboss.scoringscrabble.ui.dialogs.UnusedTilesDialog
 import com.zeroboss.scoringscrabble.ui.theme.*
 import com.zeroboss.scoringscrabble.ui.viewmodels.ScoringSheetViewModel
 
@@ -39,6 +38,9 @@ fun PlayerTeamCard(
     team: Team? = null
 ) {
     val unusedTiles = remember { scoringViewModel.unusedTiles[index] }
+    val total = remember { scoringViewModel.total[index] }
+    val totalMinusUnused = remember { scoringViewModel.totalMinusUnused[index] }
+
     val activePlayer by scoringViewModel.activePlayer
     val activeTeam by scoringViewModel.activeTeam
 
@@ -116,7 +118,9 @@ fun PlayerTeamCard(
                     Direction.Left,
                     0..30,
                     textStyle = smallerText,
-                    onStateChanged = { }
+                    onStateChanged = {
+                        scoringViewModel.setUnused(index, it)
+                    }
                 )
             }
 
@@ -136,7 +140,7 @@ fun PlayerTeamCard(
                 )
 
                 Text(
-                    text = "240",
+                    text = "${totalMinusUnused.value}",
                     fontSize = 20.sp,
                 )
             }
@@ -165,3 +169,4 @@ fun ScoreText(
         modifier = Modifier.padding(5.dp)
     )
 }
+

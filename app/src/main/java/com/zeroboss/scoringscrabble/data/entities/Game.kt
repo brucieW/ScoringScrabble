@@ -22,5 +22,7 @@ data class Game(
     var finished: LocalDateTime? = null
 ) {
     lateinit var match: ToOne<Match>
+
     lateinit var playerTurnData: ToMany<PlayerTurnData>
+    lateinit var teamTurnData: ToMany<TeamTurnData>
 }

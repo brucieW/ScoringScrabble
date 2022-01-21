@@ -34,16 +34,47 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 
-
 @Composable
 fun ScrabbleBoard(
     scoringViewModel: ScoringSheetViewModel
 ) {
+    val gameTurnData = scoringViewModel.gameTurnData.collectAsState()
+
     val freqTileWidth = getTileWidth()
     val tileWidth = (freqTileWidth * 2).toFloat()
     val radius = tileWidth - tileWidth / 4
     val boardWidth = (freqTileWidth * 13).dp
     val boardHeight = (freqTileWidth * 12 + freqTileWidth / 2).dp
+
+    val images = listOf(
+        ImageBitmap.imageResource(R.drawable.letter_a),
+        ImageBitmap.imageResource(R.drawable.letter_b),
+        ImageBitmap.imageResource(R.drawable.letter_c),
+        ImageBitmap.imageResource(R.drawable.letter_d),
+        ImageBitmap.imageResource(R.drawable.letter_e),
+        ImageBitmap.imageResource(R.drawable.letter_f),
+        ImageBitmap.imageResource(R.drawable.letter_g),
+        ImageBitmap.imageResource(R.drawable.letter_h),
+        ImageBitmap.imageResource(R.drawable.letter_i),
+        ImageBitmap.imageResource(R.drawable.letter_j),
+        ImageBitmap.imageResource(R.drawable.letter_k),
+        ImageBitmap.imageResource(R.drawable.letter_l),
+        ImageBitmap.imageResource(R.drawable.letter_m),
+        ImageBitmap.imageResource(R.drawable.letter_n),
+        ImageBitmap.imageResource(R.drawable.letter_o),
+        ImageBitmap.imageResource(R.drawable.letter_p),
+        ImageBitmap.imageResource(R.drawable.letter_q),
+        ImageBitmap.imageResource(R.drawable.letter_r),
+        ImageBitmap.imageResource(R.drawable.letter_s),
+        ImageBitmap.imageResource(R.drawable.letter_t),
+        ImageBitmap.imageResource(R.drawable.letter_u),
+        ImageBitmap.imageResource(R.drawable.letter_v),
+        ImageBitmap.imageResource(R.drawable.letter_w),
+        ImageBitmap.imageResource(R.drawable.letter_x),
+        ImageBitmap.imageResource(R.drawable.letter_y),
+        ImageBitmap.imageResource(R.drawable.letter_z),
+    )
+
     val star = ImageBitmap.imageResource(id = R.drawable.starting_star)
 
     val isFirstPos by scoringViewModel.isFirstPos
@@ -176,6 +207,15 @@ fun ScrabbleBoard(
                                 alpha = 0.2f
                             )
                         }
+
+                        gameTurnData.value.forEach { turn ->
+                            turn.letters.forEach { letter ->
+                                drawImage(
+                                    image = images[letter.letter.value],
+                                    topLeft = Offset(100f, 100f)
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -208,7 +248,8 @@ fun ShowFrequencyTile(
             .alpha(alpha)
             .clickable {
                 if (scoringViewModel.isGameStarted() &&
-                        scoringViewModel.isCurrentPosSet()) {
+                    scoringViewModel.isCurrentPosSet()
+                ) {
                     scoringViewModel.addToPlayerTurnData(Letters.get(tile))
                     scoringViewModel.addToTileCount(offset, -1)
                 }
@@ -283,5 +324,4 @@ fun drawTile(
         )
     }
 }
-
 
