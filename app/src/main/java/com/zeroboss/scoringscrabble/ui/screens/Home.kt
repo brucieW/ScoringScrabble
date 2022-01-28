@@ -1,6 +1,7 @@
 package com.zeroboss.scoringscrabble.ui.screens
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
@@ -165,7 +166,7 @@ fun Body(
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Match List",
+                text = "Match History",
                 style = typography.h5
             )
         }
@@ -285,7 +286,9 @@ fun ExpandableMatchCard(
         elevation = 10.dp,
     ) {
         Column(
-            modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
+            modifier = Modifier
+                .padding(top = 10.dp, bottom = 10.dp)
+                .animateContentSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(

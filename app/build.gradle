@@ -168,6 +168,8 @@ dependencies {
     ksp 'io.github.raamcosta.compose-destinations:ksp:1.1.3-beta'
 
     implementation 'androidx.work:work-runtime-ktx:2.7.1'
+
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.8.1'
 }
 
 apply plugin: 'io.objectbox'
