@@ -11,8 +11,8 @@ class LetterAndPositionConverter : PropertyConverter<LetterAndPosition?, String?
             val index = it.indexOf(',')
             val letter = Letters.get(it.first())
             val position = convertPosition(it.substring(1, index))
-            val blank = if (index == it.length - 1) null else Letters.get(it.last())
-            LetterAndPosition(letter, position, blank)
+            val isBlank = index != it.length - 1
+            LetterAndPosition(letter, position, isBlank)
         }
     }
 
@@ -22,10 +22,7 @@ class LetterAndPositionConverter : PropertyConverter<LetterAndPosition?, String?
         sb.append('A' + lp.position.column)
         sb.append(lp.position.row)
         sb.append(',')
-
-        if (lp.blankValue != null) {
-            sb.append(lp.blankValue.letter)
-        }
+        sb.append(if (lp.isBlank) 1 else 0)
 
         return sb.toString()
     }

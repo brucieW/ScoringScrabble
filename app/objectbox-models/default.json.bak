@@ -20,7 +20,18 @@
           "type": 9
         }
       ],
-      "relations": []
+      "relations": [
+        {
+          "id": "24:7433846207343403292",
+          "name": "matches",
+          "targetId": "6:8381004590358789489"
+        },
+        {
+          "id": "25:3472500605109302650",
+          "name": "teams",
+          "targetId": "3:1225666462574276763"
+        }
+      ]
     },
     {
       "id": "3:1225666462574276763",
@@ -155,6 +166,11 @@
           "id": "19:1804496962905782391",
           "name": "playerTurnData",
           "targetId": "12:1087286987644772663"
+        },
+        {
+          "id": "23:866819229395269749",
+          "name": "teamTurnData",
+          "targetId": "13:3382396683626141024"
         }
       ]
     },
@@ -196,7 +212,7 @@
     },
     {
       "id": "13:3382396683626141024",
-      "lastPropertyId": "2:225963693853713584",
+      "lastPropertyId": "3:6713941844454709634",
       "name": "TeamTurnData",
       "properties": [
         {
@@ -212,6 +228,14 @@
           "type": 11,
           "flags": 520,
           "relationTarget": "Team"
+        },
+        {
+          "id": "3:6713941844454709634",
+          "name": "gameId",
+          "indexId": "16:4815777698574578202",
+          "type": 11,
+          "flags": 520,
+          "relationTarget": "Game"
         }
       ],
       "relations": [
@@ -224,8 +248,8 @@
     }
   ],
   "lastEntityId": "13:3382396683626141024",
-  "lastIndexId": "15:793641551152005681",
-  "lastRelationId": "22:4046968105604946696",
+  "lastIndexId": "16:4815777698574578202",
+  "lastRelationId": "25:3472500605109302650",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,

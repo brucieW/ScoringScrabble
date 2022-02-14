@@ -2,6 +2,7 @@ package com.zeroboss.scoringscrabble.ui.screens.scoresheet
 
 import android.graphics.Paint
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateIntOffset
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -16,6 +17,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.imageResource
@@ -41,44 +43,17 @@ fun ScrabbleBoard(
     val gameTurnData = scoringViewModel.gameTurnData.collectAsState()
 
     val freqTileWidth = getTileWidth()
-    val tileWidth = (freqTileWidth * 2).toFloat()
+    val iTileWidth = freqTileWidth * 2
+    val tileWidth = iTileWidth.toFloat()
     val radius = tileWidth - tileWidth / 4
     val boardWidth = (freqTileWidth * 13).dp
     val boardHeight = (freqTileWidth * 12 + freqTileWidth / 2).dp
-
-    val images = listOf(
-        ImageBitmap.imageResource(R.drawable.letter_a),
-        ImageBitmap.imageResource(R.drawable.letter_b),
-        ImageBitmap.imageResource(R.drawable.letter_c),
-        ImageBitmap.imageResource(R.drawable.letter_d),
-        ImageBitmap.imageResource(R.drawable.letter_e),
-        ImageBitmap.imageResource(R.drawable.letter_f),
-        ImageBitmap.imageResource(R.drawable.letter_g),
-        ImageBitmap.imageResource(R.drawable.letter_h),
-        ImageBitmap.imageResource(R.drawable.letter_i),
-        ImageBitmap.imageResource(R.drawable.letter_j),
-        ImageBitmap.imageResource(R.drawable.letter_k),
-        ImageBitmap.imageResource(R.drawable.letter_l),
-        ImageBitmap.imageResource(R.drawable.letter_m),
-        ImageBitmap.imageResource(R.drawable.letter_n),
-        ImageBitmap.imageResource(R.drawable.letter_o),
-        ImageBitmap.imageResource(R.drawable.letter_p),
-        ImageBitmap.imageResource(R.drawable.letter_q),
-        ImageBitmap.imageResource(R.drawable.letter_r),
-        ImageBitmap.imageResource(R.drawable.letter_s),
-        ImageBitmap.imageResource(R.drawable.letter_t),
-        ImageBitmap.imageResource(R.drawable.letter_u),
-        ImageBitmap.imageResource(R.drawable.letter_v),
-        ImageBitmap.imageResource(R.drawable.letter_w),
-        ImageBitmap.imageResource(R.drawable.letter_x),
-        ImageBitmap.imageResource(R.drawable.letter_y),
-        ImageBitmap.imageResource(R.drawable.letter_z),
-    )
 
     val star = ImageBitmap.imageResource(id = R.drawable.starting_star)
 
     val isFirstPos by scoringViewModel.isFirstPos
     val currentPos by scoringViewModel.currentPos
+    val isNewLetter by scoringViewModel.isNewLetter
 
     var currentState by remember { mutableStateOf(PulseState.None) }
     val transition = updateTransition(targetState = currentState, label = "radius")
@@ -90,6 +65,19 @@ fun ScrabbleBoard(
             PulseState.None -> 0f
             PulseState.GrowStart -> radius * 2.5f
             PulseState.GrowEnd -> radius
+        }
+    }
+
+    var currentTileState by remember { mutableStateOf(MoveTileState.None) }
+    val tileMoveTransition = updateTransition(targetState = currentTileState, label = "moveTile")
+
+    val tileOffset by tileMoveTransition.animateIntOffset(
+        label = "moveTile"
+    ) { state ->
+        when (state) {
+            MoveTileState.None -> IntOffset(0, 0)
+            MoveTileState.Start -> IntOffset(0, 0)
+            MoveTileState.End -> state.letter.position.getIntOffset()
         }
     }
 
@@ -208,14 +196,35 @@ fun ScrabbleBoard(
                             )
                         }
 
-                        gameTurnData.value.forEach { turn ->
-                            turn.letters.forEach { letter ->
-                                drawImage(
-                                    image = images[letter.letter.value],
-                                    topLeft = Offset(100f, 100f)
-                                )
-                            }
+                        if (isNewLetter) {
+
                         }
+
+//                        gameTurnData.value.forEach { turn ->
+//                            turn.letters.forEach { tile ->
+//                                drawImage(
+//                                    image = images[tile.letter.letter - 'A'],
+//                                    dstOffset = IntOffset(
+//                                        scoringViewModel.tileStartX[tile.position.column].toInt(),
+//                                        scoringViewModel.tileStartY[tile.position.row].toInt()),
+//                                    dstSize = IntSize(iTileWidth, iTileWidth)
+//                                )
+//
+//                                if (tile.isBlank) {
+//                                    drawRect(
+//                                        color = Color.Red,
+//                                        topLeft = Offset(
+//                                            scoringViewModel.tileStartX[tile.position.column],
+//                                            scoringViewModel.tileStartY[tile.position.row],
+//                                        ),
+//                                        size = Size(tileWidth, tileWidth),
+//                                        style = Stroke(
+//                                            width = 1.dp.toPx()
+//                                        )
+//                                    )
+//                                }
+//                            }
+//                        }
                     }
                 }
 

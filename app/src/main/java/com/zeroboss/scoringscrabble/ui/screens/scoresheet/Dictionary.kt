@@ -15,16 +15,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.zeroboss.scoringscrabble.data.entities.LetterAndPosition
 import com.zeroboss.scoringscrabble.domain.model.WordInfoItem
 import com.zeroboss.scoringscrabble.presentation.WordInfoViewModel
 import com.zeroboss.scoringscrabble.ui.theme.errorText
 import com.zeroboss.scoringscrabble.ui.theme.smallerText
 
-
 enum class PulseState {
     None,
     GrowStart,
     GrowEnd
+}
+
+enum class MoveTileState(val letter: LetterAndPosition = LetterAndPosition()) {
+    None(),
+    Start(),
+    End()
 }
 
 @Composable

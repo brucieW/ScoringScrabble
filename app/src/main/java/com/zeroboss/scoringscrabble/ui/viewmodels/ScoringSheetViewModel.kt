@@ -123,6 +123,9 @@ class ScoringSheetViewModel(
         return (pos.x != -1f && pos.y != -1f)
     }
 
+    private val _isNewLetter = mutableStateOf(false)
+    val isNewLetter = _isNewLetter
+
     var currentLetterPos = Position()
     var currentLetterAndPosition = LetterAndPosition()
 
@@ -181,22 +184,22 @@ class ScoringSheetViewModel(
 
     fun addToPlayerTurnData(
         letter: Letter,
-        blankLetter: Letter? = null
+        isBlank: Boolean = false
     ) {
         val turnData = PlayerTurnData()
         turnData.player.target = _activePlayer.value
         ActiveStatus.activePlayerTurnData = turnData
-        turnData.letters.add(LetterAndPosition(letter, currentLetterPos, blankLetter))
+        turnData.letters.add(LetterAndPosition(letter, currentLetterPos, isBlank))
     }
 
     fun addToTeamTurnData(
         letter: Letter,
-        blankLetter: Letter? = null
+        isBlank: Boolean = false
     ) {
         val turnData = TeamTurnData()
         turnData.team.target = _activeTeam.value
         ActiveStatus.activeTeamTurnData = turnData
-        turnData.letters.add(LetterAndPosition(letter, currentLetterPos, blankLetter))
+        turnData.letters.add(LetterAndPosition(letter, currentLetterPos, isBlank))
     }
 
     fun clickedBackSpace() {

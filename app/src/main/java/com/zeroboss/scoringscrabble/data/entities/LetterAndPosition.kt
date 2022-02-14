@@ -1,5 +1,6 @@
 package com.zeroboss.scoringscrabble.data.entities
 
+import androidx.compose.ui.unit.IntOffset
 import com.zeroboss.scoringscrabble.data.common.LetterConverter
 import com.zeroboss.scoringscrabble.data.common.PositionConverter
 import io.objectbox.annotation.Convert
@@ -14,8 +15,7 @@ data class LetterAndPosition(
     @Convert(converter = PositionConverter::class, dbType = String::class)
     val position: Position = Position(0, 0),
 
-    @Convert(converter = LetterConverter::class, dbType = String::class)
-    val blankValue: Letter? = null,
+    val isBlank: Boolean = false,
 
     @Id
     var id: Long = 0
@@ -28,6 +28,10 @@ data class Position(
     companion object {
         const val maxRows = 15
         const val maxColumns = 15
+    }
+
+    fun getIntOffset() : IntOffset {
+        return IntOffset(column, row)
     }
 
     fun isValidFirstMove(isDown: Boolean) : String {

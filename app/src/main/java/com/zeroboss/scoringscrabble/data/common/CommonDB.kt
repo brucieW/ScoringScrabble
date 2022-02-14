@@ -336,10 +336,24 @@ object CommonDb : KoinComponent {
         game: Game?
     ) : MutableList<PlayerTurnData> {
         if (player == null || game == null) {
-            return mutableListOf()
+            val data = PlayerTurnData()
+            data.letters.add(LetterAndPosition(Letters.get('B'), Position(7, 4)))
+            data.letters.add(LetterAndPosition(Letters.get('A'), Position(7, 5)))
+            data.letters.add(LetterAndPosition(Letters.get('I'), Position(7, 6)))
+            data.letters.add(LetterAndPosition(Letters.get('T'), Position(7, 7)))
+            data.letters.add(LetterAndPosition(Letters.get('A'), Position(8, 7)))
+            data.letters.add(LetterAndPosition(Letters.get('N'), Position(9, 7)))
+            data.letters.add(LetterAndPosition(Letters.get('H'), Position(0, 0)))
+            data.letters.add(LetterAndPosition(Letters.get('O'), Position(1,0)))
+            data.letters.add(LetterAndPosition(Letters.get('M'), Position(2,0), true))
+            data.letters.add(LetterAndPosition(Letters.get('E'), Position(3,0)))
+            data.letters.add(LetterAndPosition(Letters.get('C'), Position(12,14)))
+            data.letters.add(LetterAndPosition(Letters.get('A'), Position(13,14)))
+            data.letters.add(LetterAndPosition(Letters.get('T'), Position(14,14), true))
+            return mutableListOf(data)
         }
 
-        val builder = playerTurnBox.query().equal(PlayerTurnData_.gameId, game!!.id)
+        val builder = playerTurnBox.query().equal(PlayerTurnData_.gameId, game.id)
         builder.backlink(PlayerTurnData_.player).equal(PlayerTurnData_.playerId, player.id)
 
         return builder.build().find()
