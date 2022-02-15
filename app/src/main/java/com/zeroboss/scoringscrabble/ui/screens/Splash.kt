@@ -1,5 +1,7 @@
 package com.zeroboss.scoringscrabble.ui.screens
 
+import android.util.Log
+import android.util.Log.INFO
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateIntOffsetAsState
 import androidx.compose.animation.core.tween
@@ -17,11 +19,13 @@ import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.zeroboss.scoringscrabble.R
+import com.zeroboss.scoringscrabble.data.entities.Letter
+import com.zeroboss.scoringscrabble.data.entities.Letters
 import com.zeroboss.scoringscrabble.ui.screens.destinations.HomeDestination
 import com.zeroboss.scoringscrabble.ui.theme.Blue50
 import kotlinx.coroutines.delay
 import java.util.*
-import kotlin.concurrent.schedule
+import kotlin.concurrent.scheduleAtFixedRate
 
 @Destination(start = true)
 @Composable
@@ -43,7 +47,8 @@ fun Splash(
 
 @Composable
 fun SplashScreenContent() {
-    val doAnimation = remember { mutableStateOf(false) }
+    val animations = Array<MutableState<Boolean>>(17) { mutableStateOf(false) }
+    val doAnimations = remember { animations.toMutableList()}
 
     Box(
         modifier = Modifier
@@ -52,95 +57,104 @@ fun SplashScreenContent() {
             .padding(bottom = 5.dp)
     ) {
         Letter(
-            painterResource(id = R.drawable.letter_s),
+            'S',
             IntOffset(50, 200),
-            doAnimation
+            doAnimations[0]
         )
         Letter(
-            painterResource(id = R.drawable.letter_c),
+            'C',
             IntOffset(85, 205),
-            doAnimation
+            doAnimations[1]
         )
         Letter(
-            painterResource(id = R.drawable.letter_r),
+            'R',
             IntOffset(120, 200),
-            doAnimation
+            doAnimations[2]
         )
         Letter(
-            painterResource(id = R.drawable.letter_a),
+            'A',
             IntOffset(155, 205),
-            doAnimation
+            doAnimations[3]
         )
         Letter(
-            painterResource(id = R.drawable.letter_b),
+            'B',
             IntOffset(190, 200),
-            doAnimation
+            doAnimations[4]
         )
         Letter(
-            painterResource(id = R.drawable.letter_b),
+            'B',
             IntOffset(225, 205),
-            doAnimation
+            doAnimations[5]
         )
         Letter(
-            painterResource(id = R.drawable.letter_l),
+            'L',
             IntOffset(260, 200),
-            doAnimation
+            doAnimations[6]
         )
         Letter(
-            painterResource(id = R.drawable.letter_e),
+            'E',
             IntOffset(295, 205),
-            doAnimation
+            doAnimations[7]
         )
 
         Letter(
-            painterResource(id = R.drawable.letter_s),
+            'S',
             IntOffset(155, 260),
-            doAnimation
+            doAnimations[8]
         )
         Letter(
-            painterResource(id = R.drawable.letter_c),
+            'C',
             IntOffset(155, 300),
-            doAnimation
+            doAnimations[9]
         )
         Letter(
-            painterResource(id = R.drawable.letter_o),
+            'O',
             IntOffset(155, 340),
-            doAnimation
+            doAnimations[10]
         )
         Letter(
-            painterResource(id = R.drawable.letter_r),
+            'R',
             IntOffset(155, 380),
-            doAnimation
+            doAnimations[11]
         )
         Letter(
-            painterResource(id = R.drawable.letter_e),
+            'E',
             IntOffset(155, 420),
-            doAnimation
+            doAnimations[12]
         )
 
         Letter(
-            painterResource(id = R.drawable.letter_s),
+            'S',
             IntOffset(85, 420),
-            doAnimation
+            doAnimations[13]
         )
         Letter(
-            painterResource(id = R.drawable.letter_h),
+            'H',
             IntOffset(120, 420),
-            doAnimation
+            doAnimations[14]
         )
         Letter(
-            painterResource(id = R.drawable.letter_e),
+            'E',
             IntOffset(190, 420),
-            doAnimation
+            doAnimations[15]
         )
         Letter(
-            painterResource(id = R.drawable.letter_t),
+            'T',
             IntOffset(225, 420),
-            doAnimation
+            doAnimations[16]
         )
 
-        Timer("Wait", false).schedule(100) {
-            doAnimation.value = true
+        var offset = 0
+
+        Timer("Wait").scheduleAtFixedRate(
+            delay = 100,
+            period = 100,
+        ) {
+            doAnimations[offset++].value = true
+
+            if (offset == 17) {
+                cancel()
+            }
         }
     }
 }
@@ -148,14 +162,14 @@ fun SplashScreenContent() {
 
 @Composable
 fun Letter(
-    image: Painter,
+    tile: Char,
     offset: IntOffset,
     doAnimation: MutableState<Boolean>
 ) {
     val target: IntOffset by animateIntOffsetAsState(
         targetValue = if (doAnimation.value) offset else IntOffset(0, 0),
         animationSpec = tween(
-            durationMillis = 1000,
+            durationMillis = 500,
             easing = FastOutSlowInEasing
         )
     )
@@ -166,7 +180,7 @@ fun Letter(
         elevation = 20.dp
     ) {
         Image(
-            image,
+            painterResource(id = Letters.get(tile).image),
             "",
             contentScale = ContentScale.Fit
         )
