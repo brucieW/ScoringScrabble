@@ -13,6 +13,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -22,6 +24,7 @@ import com.zeroboss.scoringscrabble.R
 import com.zeroboss.scoringscrabble.data.entities.Letter
 import com.zeroboss.scoringscrabble.data.entities.Letters
 import com.zeroboss.scoringscrabble.ui.screens.destinations.HomeDestination
+import com.zeroboss.scoringscrabble.ui.screens.scoresheet.ScreenData
 import com.zeroboss.scoringscrabble.ui.theme.Blue50
 import kotlinx.coroutines.delay
 import java.util.*
@@ -48,101 +51,60 @@ fun Splash(
 @Composable
 fun SplashScreenContent() {
     val animations = Array<MutableState<Boolean>>(17) { mutableStateOf(false) }
-    val doAnimations = remember { animations.toMutableList()}
+    val doAnimations = remember { animations.toMutableList() }
+
+    val screenWidth = with(LocalDensity.current) { LocalConfiguration.current.screenWidthDp }
+    val screenHeight = with(LocalDensity.current) { LocalConfiguration.current.screenHeightDp }
+    var left = 50
+    var top = 200
+
+    if (screenWidth > screenHeight) {
+        left = 200
+        top = 50
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Blue50)
-            .padding(bottom = 5.dp)
     ) {
-        Letter(
-            'S',
-            IntOffset(50, 200),
-            doAnimations[0]
-        )
-        Letter(
-            'C',
-            IntOffset(85, 205),
-            doAnimations[1]
-        )
-        Letter(
-            'R',
-            IntOffset(120, 200),
-            doAnimations[2]
-        )
-        Letter(
-            'A',
-            IntOffset(155, 205),
-            doAnimations[3]
-        )
-        Letter(
-            'B',
-            IntOffset(190, 200),
-            doAnimations[4]
-        )
-        Letter(
-            'B',
-            IntOffset(225, 205),
-            doAnimations[5]
-        )
-        Letter(
-            'L',
-            IntOffset(260, 200),
-            doAnimations[6]
-        )
-        Letter(
-            'E',
-            IntOffset(295, 205),
-            doAnimations[7]
-        )
+        var x = left
+        var y = top
 
-        Letter(
-            'S',
-            IntOffset(155, 260),
-            doAnimations[8]
-        )
-        Letter(
-            'C',
-            IntOffset(155, 300),
-            doAnimations[9]
-        )
-        Letter(
-            'O',
-            IntOffset(155, 340),
-            doAnimations[10]
-        )
-        Letter(
-            'R',
-            IntOffset(155, 380),
-            doAnimations[11]
-        )
-        Letter(
-            'E',
-            IntOffset(155, 420),
-            doAnimations[12]
-        )
+        "SCRABBLE".forEachIndexed { index, tile ->
+            Letter(
+                tile,
+                IntOffset(x, y),
+                doAnimations[index]
+            )
 
-        Letter(
-            'S',
-            IntOffset(85, 420),
-            doAnimations[13]
-        )
-        Letter(
-            'H',
-            IntOffset(120, 420),
-            doAnimations[14]
-        )
-        Letter(
-            'E',
-            IntOffset(190, 420),
-            doAnimations[15]
-        )
-        Letter(
-            'T',
-            IntOffset(225, 420),
-            doAnimations[16]
-        )
+            x += 35
+            y = if (y == top) top + 5 else top
+        }
+
+        x = left + 105
+        y = top + 60
+
+        "SCORE".forEachIndexed { index, tile ->
+            Letter(
+                tile,
+                IntOffset(x, y) ,
+                doAnimations[index + 8])
+            y += 40
+        }
+
+        x = left + 35
+        y = top + 220
+
+        "SHEET".forEachIndexed { index, tile ->
+            Letter(
+                tile,
+                IntOffset(x, y),
+                doAnimations[index + 12]
+            )
+
+            x += 35
+        }
 
         var offset = 0
 
