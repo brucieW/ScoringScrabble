@@ -44,7 +44,7 @@ fun ScrabbleBoard(
     val gameTurnData = scoringViewModel.gameTurnData.collectAsState()
 
     val tileWidth = getTileWidth()
-    val fTileWidth = tileWidth.toFloat()
+    val fTileWidth = tileWidth.toFloat() * 2
     val radius = fTileWidth - fTileWidth / 4
     val boardWidth = ((tileWidth * 13) + tileWidth / 2).dp
     val boardHeight = (tileWidth * 13).dp
@@ -237,7 +237,7 @@ fun ScrabbleBoard(
                                     dstOffset = IntOffset(
                                         scoringViewModel.tileStartX[tile.position.column].toInt(),
                                         scoringViewModel.tileStartY[tile.position.row].toInt()),
-                                    dstSize = IntSize(tileWidth, tileWidth)
+                                    dstSize = IntSize(tileWidth * 2, tileWidth * 2)
                                 )
 
                                 if (tile.isBlank) {
