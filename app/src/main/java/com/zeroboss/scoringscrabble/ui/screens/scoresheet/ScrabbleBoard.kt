@@ -30,6 +30,7 @@ import com.zeroboss.scoringscrabble.R
 import com.zeroboss.scoringscrabble.data.entities.Letters
 import com.zeroboss.scoringscrabble.ui.common.TileSettings
 import com.zeroboss.scoringscrabble.ui.common.TileType
+import com.zeroboss.scoringscrabble.ui.common.getTileWidth
 import com.zeroboss.scoringscrabble.ui.theme.errorText
 import com.zeroboss.scoringscrabble.ui.viewmodels.ScoringSheetViewModel
 import kotlinx.coroutines.delay
@@ -42,12 +43,41 @@ fun ScrabbleBoard(
 ) {
     val gameTurnData = scoringViewModel.gameTurnData.collectAsState()
 
-    val freqTileWidth = getTileWidth()
-    val iTileWidth = freqTileWidth * 2
-    val tileWidth = iTileWidth.toFloat()
-    val radius = tileWidth - tileWidth / 4
-    val boardWidth = (freqTileWidth * 13).dp
-    val boardHeight = (freqTileWidth * 12 + freqTileWidth / 2).dp
+    val tileWidth = getTileWidth()
+    val fTileWidth = tileWidth.toFloat()
+    val radius = fTileWidth - fTileWidth / 4
+    val boardWidth = ((tileWidth * 13) + tileWidth / 2).dp
+    val boardHeight = (tileWidth * 13).dp
+
+    val images = listOf(
+        ImageBitmap.imageResource(R.drawable.letter_a),
+        ImageBitmap.imageResource(R.drawable.letter_b),
+        ImageBitmap.imageResource(R.drawable.letter_c),
+        ImageBitmap.imageResource(R.drawable.letter_d),
+        ImageBitmap.imageResource(R.drawable.letter_e),
+        ImageBitmap.imageResource(R.drawable.letter_f),
+        ImageBitmap.imageResource(R.drawable.letter_g),
+        ImageBitmap.imageResource(R.drawable.letter_h),
+        ImageBitmap.imageResource(R.drawable.letter_i),
+        ImageBitmap.imageResource(R.drawable.letter_j),
+        ImageBitmap.imageResource(R.drawable.letter_k),
+        ImageBitmap.imageResource(R.drawable.letter_l),
+        ImageBitmap.imageResource(R.drawable.letter_m),
+        ImageBitmap.imageResource(R.drawable.letter_n),
+        ImageBitmap.imageResource(R.drawable.letter_o),
+        ImageBitmap.imageResource(R.drawable.letter_p),
+        ImageBitmap.imageResource(R.drawable.letter_q),
+        ImageBitmap.imageResource(R.drawable.letter_r),
+        ImageBitmap.imageResource(R.drawable.letter_s),
+        ImageBitmap.imageResource(R.drawable.letter_t),
+        ImageBitmap.imageResource(R.drawable.letter_u),
+        ImageBitmap.imageResource(R.drawable.letter_v),
+        ImageBitmap.imageResource(R.drawable.letter_w),
+        ImageBitmap.imageResource(R.drawable.letter_x),
+        ImageBitmap.imageResource(R.drawable.letter_y),
+        ImageBitmap.imageResource(R.drawable.letter_z),
+    )
+
 
     val star = ImageBitmap.imageResource(id = R.drawable.starting_star)
 
@@ -106,16 +136,16 @@ fun ScrabbleBoard(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 for (tile in 'A'..'Z' step 2) {
-                    Row() {
-                        ShowFrequencyTile(scoringViewModel, tile, freqTileWidth)
-                        ShowFrequencyTile(scoringViewModel, tile + 1, freqTileWidth)
+                    Row {
+                        ShowFrequencyTile(scoringViewModel, tile, tileWidth)
+                        ShowFrequencyTile(scoringViewModel, tile + 1, tileWidth)
                     }
                 }
 
-                ShowFrequencyTile(scoringViewModel, '[', freqTileWidth)
+                ShowFrequencyTile(scoringViewModel, '[', tileWidth)
             }
 
-            Column() {
+            Column {
                 Surface(
                     modifier = Modifier
                         .size(boardWidth, boardHeight)
@@ -138,26 +168,26 @@ fun ScrabbleBoard(
                                 )
                             }
                     ) {
-                        var x = tileWidth * 2 - tileWidth / 3
-                        var y = tileWidth - tileWidth / 4
+                        var x = fTileWidth * 2 - fTileWidth / 3
+                        var y = fTileWidth - fTileWidth / 4
 
                         for (col in 0..14) {
-                            drawColumnText(this, tileWidth, x, y, ('A' + col).toString())
+                            drawColumnText(this, tileWidth.toFloat(), x, y, ('A' + col).toString())
                             x += tileWidth + 2
                         }
 
-                        x = tileWidth / 2
-                        y = tileWidth + tileWidth * 3 / 4
+                        x = fTileWidth / 2
+                        y = fTileWidth + fTileWidth * 3 / 4
 
                         for (col in 1..15) {
-                            drawColumnText(this, tileWidth, x, y, col.toString())
-                            y += tileWidth + 2
+                            drawColumnText(this, fTileWidth, x, y, col.toString())
+                            y += fTileWidth + 2
                         }
 
-                        y = tileWidth
+                        y = fTileWidth
 
                         for (row in 0..14) {
-                            x = tileWidth + tileWidth / 3
+                            x = fTileWidth + fTileWidth / 3
 
                             for (col in 0..14) {
                                 val position = ('A' + col).toString()
@@ -175,17 +205,17 @@ fun ScrabbleBoard(
                                     position + (row + 1).toString(),
                                     x,
                                     y,
-                                    tileWidth,
+                                    fTileWidth,
                                     star
                                 )
 
-                                x += tileWidth + 2
+                                x += fTileWidth + 2
                             }
 
-                            y += tileWidth + 2
+                            y += fTileWidth + 2
                         }
 
-                        scoringViewModel.adjustLastStartItems(tileWidth)
+                        scoringViewModel.adjustLastStartItems(fTileWidth)
 
                         if (isFirstPos) {
                             drawCircle(
@@ -200,31 +230,31 @@ fun ScrabbleBoard(
 
                         }
 
-//                        gameTurnData.value.forEach { turn ->
-//                            turn.letters.forEach { tile ->
-//                                drawImage(
-//                                    image = images[tile.letter.letter - 'A'],
-//                                    dstOffset = IntOffset(
-//                                        scoringViewModel.tileStartX[tile.position.column].toInt(),
-//                                        scoringViewModel.tileStartY[tile.position.row].toInt()),
-//                                    dstSize = IntSize(iTileWidth, iTileWidth)
-//                                )
-//
-//                                if (tile.isBlank) {
-//                                    drawRect(
-//                                        color = Color.Red,
-//                                        topLeft = Offset(
-//                                            scoringViewModel.tileStartX[tile.position.column],
-//                                            scoringViewModel.tileStartY[tile.position.row],
-//                                        ),
-//                                        size = Size(tileWidth, tileWidth),
-//                                        style = Stroke(
-//                                            width = 1.dp.toPx()
-//                                        )
-//                                    )
-//                                }
-//                            }
-//                        }
+                        gameTurnData.value.forEach { turn ->
+                            turn.letters.forEach { tile ->
+                                drawImage(
+                                    image = images[tile.letter.letter - 'A'],
+                                    dstOffset = IntOffset(
+                                        scoringViewModel.tileStartX[tile.position.column].toInt(),
+                                        scoringViewModel.tileStartY[tile.position.row].toInt()),
+                                    dstSize = IntSize(tileWidth, tileWidth)
+                                )
+
+                                if (tile.isBlank) {
+                                    drawRect(
+                                        color = Color.Red,
+                                        topLeft = Offset(
+                                            scoringViewModel.tileStartX[tile.position.column],
+                                            scoringViewModel.tileStartY[tile.position.row],
+                                        ),
+                                        size = Size(fTileWidth, fTileWidth),
+                                        style = Stroke(
+                                            width = 1.dp.toPx()
+                                        )
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
 

@@ -17,34 +17,14 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zeroboss.scoringscrabble.R
+import com.zeroboss.scoringscrabble.ui.common.getTileWidth
 import com.zeroboss.scoringscrabble.ui.theme.smallerText
 import com.zeroboss.scoringscrabble.ui.viewmodels.ScoringSheetViewModel
-
-object ScreenData {
-    var screenWidth: Int = 0
-    var screenHeight: Int = 0
-    var tileWidth: Int = 0
-}
-
-@Composable
-fun getTileWidth(): Int {
-    if (ScreenData.screenWidth == 0) {
-        ScreenData.screenWidth =
-            with(LocalDensity.current) { LocalConfiguration.current.screenWidthDp }
-        ScreenData.screenHeight =
-            with(LocalDensity.current) { LocalConfiguration.current.screenHeightDp }
-        ScreenData.tileWidth = 24
-    }
-
-    return ScreenData.tileWidth
-}
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable

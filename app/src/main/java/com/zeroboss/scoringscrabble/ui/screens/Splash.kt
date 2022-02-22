@@ -1,7 +1,5 @@
 package com.zeroboss.scoringscrabble.ui.screens
 
-import android.util.Log
-import android.util.Log.INFO
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateIntOffsetAsState
 import androidx.compose.animation.core.tween
@@ -11,20 +9,17 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.zeroboss.scoringscrabble.R
-import com.zeroboss.scoringscrabble.data.entities.Letter
 import com.zeroboss.scoringscrabble.data.entities.Letters
+import com.zeroboss.scoringscrabble.ui.common.ScreenData
+import com.zeroboss.scoringscrabble.ui.common.ScreenType
+import com.zeroboss.scoringscrabble.ui.common.getTileWidth
 import com.zeroboss.scoringscrabble.ui.screens.destinations.HomeDestination
-import com.zeroboss.scoringscrabble.ui.screens.scoresheet.ScreenData
 import com.zeroboss.scoringscrabble.ui.theme.Blue50
 import kotlinx.coroutines.delay
 import java.util.*
@@ -36,8 +31,6 @@ fun Splash(
     navigator: DestinationsNavigator
 ) {
     SplashScreenContent()
-//    val splashViewModel by viewModel<SplashViewModel>()
-//    splashViewModel.isAnimate.value = true
 
     LaunchedEffect(
         key1 = "JumpToHome",
@@ -53,14 +46,11 @@ fun SplashScreenContent() {
     val animations = Array<MutableState<Boolean>>(17) { mutableStateOf(false) }
     val doAnimations = remember { animations.toMutableList() }
 
-    val screenWidth = with(LocalDensity.current) { LocalConfiguration.current.screenWidthDp }
-    val screenHeight = with(LocalDensity.current) { LocalConfiguration.current.screenHeightDp }
-    var left = 50
-    var top = 200
+    var tileWidth = getTileWidth()
+    val spacer = tileWidth + (tileWidth / 5)
 
-    if (screenWidth > screenHeight) {
-        left = 200
-        top = 50
+    if (ScreenData.screenType != ScreenType.SMALL) {
+        tileWidth *= 2
     }
 
     Box(
@@ -68,42 +58,45 @@ fun SplashScreenContent() {
             .fillMaxSize()
             .background(Blue50)
     ) {
-        var x = left
+        var x = (ScreenData.screenWidth - (spacer * 8)) / 2
+        val top = (ScreenData.screenHeight - (spacer * 7)) / 2
         var y = top
 
         "SCRABBLE".forEachIndexed { index, tile ->
             Letter(
                 tile,
+                tileWidth,
                 IntOffset(x, y),
                 doAnimations[index]
             )
 
-            x += 35
+            x += spacer
             y = if (y == top) top + 5 else top
         }
 
-        x = left + 105
-        y = top + 60
+        x -= spacer * 5
+        y += (spacer * 2) - (spacer / 2)
 
         "SCORE".forEachIndexed { index, tile ->
             Letter(
                 tile,
+                tileWidth,
                 IntOffset(x, y) ,
                 doAnimations[index + 8])
-            y += 40
+            y += spacer
         }
 
-        x = left + 35
-        y = top + 220
+        x -= spacer * 2
 
         "SHEET".forEachIndexed { index, tile ->
             Letter(
                 tile,
+                tileWidth,
                 IntOffset(x, y),
                 doAnimations[index + 12]
             )
 
-            x += 35
+            x += spacer
         }
 
         var offset = 0
@@ -125,6 +118,7 @@ fun SplashScreenContent() {
 @Composable
 fun Letter(
     tile: Char,
+    tileWidth: Int,
     offset: IntOffset,
     doAnimation: MutableState<Boolean>
 ) {
@@ -138,7 +132,8 @@ fun Letter(
 
     Card(
         modifier = Modifier
-            .offset(target.x.dp, target.y.dp),
+            .offset(target.x.dp, target.y.dp)
+            .size(ScreenData.tileWidth.dp, ScreenData.tileWidth.dp),
         elevation = 20.dp
     ) {
         Image(

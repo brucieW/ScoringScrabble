@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import com.zeroboss.scoringscrabble.data.common.ActiveStatus
 import com.zeroboss.scoringscrabble.data.common.CommonDb
 import com.zeroboss.scoringscrabble.data.entities.*
-import com.zeroboss.scoringscrabble.ui.screens.scoresheet.ScreenData
+import com.zeroboss.scoringscrabble.ui.common.ScreenData
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class ScoringSheetViewModel(
@@ -131,7 +131,7 @@ class ScoringSheetViewModel(
 
     fun setFirstPos(x: Float, y: Float) {
         _isFirstPos.value = false
-        val centerAdjustment = ScreenData.tileWidth / 2 + ScreenData.tileWidth / 3 + 5
+        val centerAdjustment = ScreenData.tileWidth / 2
 
         for (col in 0..14) {
             if (x >= tileStartX[col] && x <= tileStartX[col + 1]) {
