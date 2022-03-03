@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.zeroboss.scoringscrabble.data.entities.Letter
 import com.zeroboss.scoringscrabble.data.entities.Letters
 import com.zeroboss.scoringscrabble.ui.common.ScreenData
 import com.zeroboss.scoringscrabble.ui.common.ScreenType
@@ -46,26 +47,26 @@ fun SplashScreenContent() {
     val animations = Array<MutableState<Boolean>>(17) { mutableStateOf(false) }
     val doAnimations = remember { animations.toMutableList() }
 
-    var tileWidth = getTileWidth()
-    val spacer = tileWidth + (tileWidth / 5)
+    val tileWidth = getTileWidth()
+    val spacer = tileWidth * 2
 
-    if (ScreenData.screenType != ScreenType.SMALL) {
-        tileWidth *= 2
-    }
+//    if (ScreenData.screenType == ScreenType.SMALL) {
+//        tileWidth += (tileWidth / 2)
+//        spacer += (tileWidth / 2)
+//    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Blue50)
     ) {
-        var x = (ScreenData.screenWidth - (spacer * 8)) / 2
-        val top = (ScreenData.screenHeight - (spacer * 7)) / 2
+        var x = (ScreenData.screenWidth - (tileWidth * 15)) / 2
+        val top = (ScreenData.screenHeight - (spacer * 8)) / 2
         var y = top
 
         "SCRABBLE".forEachIndexed { index, tile ->
             Letter(
                 tile,
-                tileWidth,
                 IntOffset(x, y),
                 doAnimations[index]
             )
@@ -80,7 +81,6 @@ fun SplashScreenContent() {
         "SCORE".forEachIndexed { index, tile ->
             Letter(
                 tile,
-                tileWidth,
                 IntOffset(x, y) ,
                 doAnimations[index + 8])
             y += spacer
@@ -91,7 +91,6 @@ fun SplashScreenContent() {
         "SHEET".forEachIndexed { index, tile ->
             Letter(
                 tile,
-                tileWidth,
                 IntOffset(x, y),
                 doAnimations[index + 12]
             )
@@ -118,7 +117,6 @@ fun SplashScreenContent() {
 @Composable
 fun Letter(
     tile: Char,
-    tileWidth: Int,
     offset: IntOffset,
     doAnimation: MutableState<Boolean>
 ) {
@@ -130,10 +128,12 @@ fun Letter(
         )
     )
 
+    val size = (ScreenData.tileWidth * 2).dp
+
     Card(
         modifier = Modifier
             .offset(target.x.dp, target.y.dp)
-            .size(ScreenData.tileWidth.dp, ScreenData.tileWidth.dp),
+            .size(size),
         elevation = 20.dp
     ) {
         Image(

@@ -35,8 +35,6 @@ fun BoardHeader(
     val directionEast by scoringViewModel.directionEast
     val directionSouth by scoringViewModel.directionSouth
 
-    val tileWidth = getTileWidth()
-
     Row(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -53,9 +51,9 @@ fun BoardHeader(
                 bitmap = ImageBitmap.imageResource(id = R.drawable.backspace),
                 contentDescription = "Cancel",
                 Modifier
-                    .padding(top = 5.dp)
                     .clickable { scoringViewModel.clickedBackSpace() }
-                    .size(tileWidth.dp)
+                    .padding(top = 5.dp)
+                    .size(24.dp)
                     .alpha(cancelEnabled)
             )
         }

@@ -8,6 +8,7 @@ import androidx.compose.ui.platform.LocalDensity
 
 enum class ScreenType {
     SMALL,
+    SMALL_SIDEWAYS,
     MEDIUM,
     LARGE
 }
@@ -28,22 +29,29 @@ object ScreenData {
     var screenHeight: Int = 0
     var tileWidth: Int = 0
     var screenType: ScreenType = ScreenType.SMALL
+    var isScreenSideways: Boolean = false
 }
 
 @Composable
 fun getTileWidth(): Int {
     ScreenData.screenWidth = LocalConfiguration.current.screenWidthDp
     ScreenData.screenHeight = LocalConfiguration.current.screenHeightDp
-    ScreenData.tileWidth = ScreenData.screenWidth / 18
 
     if (ScreenData.screenWidth < 480) {
         ScreenData.screenType = ScreenType.SMALL
     } else if (ScreenData.screenWidth in 481..900) {
-        ScreenData.screenType = ScreenType.MEDIUM
+        ScreenData.screenType = if (ScreenData.screenHeight < 480) ScreenType.SMALL_SIDEWAYS else ScreenType.MEDIUM
     } else {
         ScreenData.screenType = ScreenType.LARGE
     }
 
+    ScreenData.isScreenSideways = ScreenData.screenWidth > ScreenData.screenHeight
+
+    if (ScreenData.isScreenSideways) {
+        ScreenData.tileWidth = ScreenData.screenHeight / 18
+    } else {
+        ScreenData.tileWidth = ScreenData.screenWidth / 18
+    }
 
     return ScreenData.tileWidth
 }

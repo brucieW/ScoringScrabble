@@ -9,6 +9,7 @@ import com.zeroboss.scoringscrabble.data.common.ActiveStatus
 import com.zeroboss.scoringscrabble.data.common.CommonDb
 import com.zeroboss.scoringscrabble.data.entities.*
 import com.zeroboss.scoringscrabble.ui.common.ScreenData
+import com.zeroboss.scoringscrabble.ui.common.ScreenType
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class ScoringSheetViewModel(
@@ -131,12 +132,13 @@ class ScoringSheetViewModel(
 
     fun setFirstPos(x: Float, y: Float) {
         _isFirstPos.value = false
-        val centerAdjustment = (ScreenData.tileWidth * 2) / 2
+        val centerAdjustment = if (ScreenData.screenType == ScreenType.SMALL) ((ScreenData.tileWidth * 2) / 2) else ScreenData.tileWidth / 2
 
         for (col in 0..14) {
             if (x >= tileStartX[col] && x <= tileStartX[col + 1]) {
                 for (row in 0..14) {
                     if (y >= tileStartY[row] && y <= tileStartY[row + 1]) {
+
                         _isFirstPos.value = true
                         _currentPos.value = Offset(
                             tileStartX[col] + centerAdjustment,
@@ -144,11 +146,13 @@ class ScoringSheetViewModel(
                         )
                         currentLetterPos = Position(col, row)
 
-                        if (gameTurnData.value.isEmpty()) {
+                        if (gameTurnData.value == null || gameTurnData.value!!.isEmpty()) {
                             // This is first move. If direction of move is down, then only valid
                             // positions are from H2 to H8. If direction is across, only valid
                             // positions are from B8 to H8.
                             _errorText.value = currentLetterPos.isValidFirstMove(directionSouth.value)
+                        } else {
+                            _errorText.value = ""
                         }
 
                         return

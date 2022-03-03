@@ -28,9 +28,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.zeroboss.scoringscrabble.R
 import com.zeroboss.scoringscrabble.data.entities.Letters
-import com.zeroboss.scoringscrabble.ui.common.TileSettings
-import com.zeroboss.scoringscrabble.ui.common.TileType
-import com.zeroboss.scoringscrabble.ui.common.getTileWidth
+import com.zeroboss.scoringscrabble.ui.common.*
 import com.zeroboss.scoringscrabble.ui.theme.errorText
 import com.zeroboss.scoringscrabble.ui.viewmodels.ScoringSheetViewModel
 import kotlinx.coroutines.delay
@@ -44,10 +42,13 @@ fun ScrabbleBoard(
     val gameTurnData = scoringViewModel.gameTurnData.collectAsState()
 
     val tileWidth = getTileWidth()
-    val fTileWidth = tileWidth.toFloat() * 2
+    var fTileWidth = tileWidth.toFloat()
+
     val radius = fTileWidth - fTileWidth / 4
     val boardWidth = ((tileWidth * 13) + tileWidth / 2).dp
     val boardHeight = (tileWidth * 13).dp
+
+    val isSmallScreen = ScreenData.screenType == ScreenType.SMALL || ScreenData.screenType == ScreenType.SMALL_SIDEWAYS
 
     val images = listOf(
         ImageBitmap.imageResource(R.drawable.letter_a),
@@ -98,7 +99,7 @@ fun ScrabbleBoard(
         }
     }
 
-    var currentTileState by remember { mutableStateOf(MoveTileState.None) }
+    val currentTileState by remember { mutableStateOf(MoveTileState.None) }
     val tileMoveTransition = updateTransition(targetState = currentTileState, label = "moveTile")
 
     val tileOffset by tileMoveTransition.animateIntOffset(
@@ -137,12 +138,12 @@ fun ScrabbleBoard(
             ) {
                 for (tile in 'A'..'Z' step 2) {
                     Row {
-                        ShowFrequencyTile(scoringViewModel, tile, tileWidth)
-                        ShowFrequencyTile(scoringViewModel, tile + 1, tileWidth)
+                        ShowFrequencyTile(scoringViewModel, tile, fTileWidth)
+                        ShowFrequencyTile(scoringViewModel, tile + 1, fTileWidth)
                     }
                 }
 
-                ShowFrequencyTile(scoringViewModel, '[', tileWidth)
+                ShowFrequencyTile(scoringViewModel, '[', fTileWidth)
             }
 
             Column {
@@ -168,12 +169,16 @@ fun ScrabbleBoard(
                                 )
                             }
                     ) {
+                        if (isSmallScreen) {
+                            fTileWidth *= 2
+                        }
+
                         var x = fTileWidth * 2 - fTileWidth / 3
                         var y = fTileWidth - fTileWidth / 4
 
                         for (col in 0..14) {
-                            drawColumnText(this, tileWidth.toFloat(), x, y, ('A' + col).toString())
-                            x += tileWidth + 2
+                            drawColumnText(this, fTileWidth, x, y, ('A' + col).toString())
+                            x += fTileWidth + 2
                         }
 
                         x = fTileWidth / 2
@@ -230,28 +235,31 @@ fun ScrabbleBoard(
 
                         }
 
-                        gameTurnData.value.forEach { turn ->
-                            turn.letters.forEach { tile ->
-                                drawImage(
-                                    image = images[tile.letter.letter - 'A'],
-                                    dstOffset = IntOffset(
-                                        scoringViewModel.tileStartX[tile.position.column].toInt(),
-                                        scoringViewModel.tileStartY[tile.position.row].toInt()),
-                                    dstSize = IntSize(tileWidth * 2, tileWidth * 2)
-                                )
-
-                                if (tile.isBlank) {
-                                    drawRect(
-                                        color = Color.Red,
-                                        topLeft = Offset(
-                                            scoringViewModel.tileStartX[tile.position.column],
-                                            scoringViewModel.tileStartY[tile.position.row],
+                        if (gameTurnData.value != null) {
+                            gameTurnData.value!!.forEach { turn ->
+                                turn.letters.forEach { tile ->
+                                    drawImage(
+                                        image = images[tile.letter.letter - 'A'],
+                                        dstOffset = IntOffset(
+                                            scoringViewModel.tileStartX[tile.position.column].toInt(),
+                                            scoringViewModel.tileStartY[tile.position.row].toInt()
                                         ),
-                                        size = Size(fTileWidth, fTileWidth),
-                                        style = Stroke(
-                                            width = 1.dp.toPx()
-                                        )
+                                        dstSize = IntSize(tileWidth, tileWidth)
                                     )
+
+                                    if (tile.isBlank) {
+                                        drawRect(
+                                            color = Color.Red,
+                                            topLeft = Offset(
+                                                scoringViewModel.tileStartX[tile.position.column],
+                                                scoringViewModel.tileStartY[tile.position.row],
+                                            ),
+                                            size = Size(fTileWidth, fTileWidth),
+                                            style = Stroke(
+                                                width = 1.dp.toPx()
+                                            )
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -269,7 +277,7 @@ fun ScrabbleBoard(
 fun ShowFrequencyTile(
     scoringViewModel: ScoringSheetViewModel,
     tile: Char,
-    tileWidth: Int
+    tileWidth: Float
 ) {
     val badgeCounts = scoringViewModel.tileCounts
 
