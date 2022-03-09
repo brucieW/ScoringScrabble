@@ -48,14 +48,14 @@ fun SplashScreenContent() {
     val doAnimations = remember { animations.toMutableList() }
 
     val tileWidth = getTileWidth()
-    val spacer = tileWidth * 2
+    val spacer = tileWidth * 2 - 2
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Blue50)
     ) {
-        var x = (ScreenData.screenWidth - (tileWidth * 15)) / 2
+        var x = if (ScreenData.isScreenSideways) (ScreenData.screenWidth - (tileWidth * 14)) / 2 else 5
         val top = (ScreenData.screenHeight - (spacer * 8)) / 2
         var y = top
 

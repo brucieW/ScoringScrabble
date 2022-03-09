@@ -30,6 +30,10 @@ object ScreenData {
     var tileWidth: Int = 0
     var screenType: ScreenType = ScreenType.SMALL
     var isScreenSideways: Boolean = false
+
+    fun isSmallScreen() : Boolean {
+        return screenType == ScreenType.SMALL || screenType == ScreenType.SMALL_SIDEWAYS
+    }
 }
 
 @Composable
@@ -48,9 +52,9 @@ fun getTileWidth(): Int {
     ScreenData.isScreenSideways = ScreenData.screenWidth > ScreenData.screenHeight
 
     if (ScreenData.isScreenSideways) {
-        ScreenData.tileWidth = ScreenData.screenHeight / 18
+        ScreenData.tileWidth = ScreenData.screenHeight / 16
     } else {
-        ScreenData.tileWidth = ScreenData.screenWidth / 18
+        ScreenData.tileWidth = ScreenData.screenWidth / 16
     }
 
     return ScreenData.tileWidth

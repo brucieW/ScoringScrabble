@@ -141,7 +141,15 @@ class ScoringSheetViewModel(
 
     fun setFirstPos(x: Float, y: Float) {
         _isFirstPos.value = false
-        val centerAdjustment = if (ScreenData.screenType == ScreenType.SMALL) ((ScreenData.tileWidth * 2) / 2) else ScreenData.tileWidth / 2
+        var centerAdjustment = ScreenData.tileWidth / 2 + 4
+
+        if (ScreenData.isScreenSideways) {
+            if (ScreenData.isSmallScreen()) {
+                centerAdjustment += 10
+            }
+        } else if (ScreenData.isSmallScreen()){
+            centerAdjustment += 10
+        }
 
         for (col in 0..14) {
             if (x >= tileStartX[col] && x <= tileStartX[col + 1]) {

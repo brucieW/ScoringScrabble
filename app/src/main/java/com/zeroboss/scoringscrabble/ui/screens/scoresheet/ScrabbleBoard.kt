@@ -49,11 +49,12 @@ fun ScrabbleBoard(
 
     val tileWidth = getTileWidth()
     var fTileWidth = tileWidth.toFloat()
-    val isSmallScreen = ScreenData.screenType == ScreenType.SMALL || ScreenData.screenType == ScreenType.SMALL_SIDEWAYS
 
-    val radius = if (isSmallScreen) fTileWidth * 2 - (fTileWidth * 2 / 4) else fTileWidth - fTileWidth / 4
-    val boardWidth = ((tileWidth * 13) + tileWidth / 2).dp
-    val boardHeight = (tileWidth * 13).dp
+    val radius =
+        if (ScreenData.isSmallScreen()) fTileWidth * 2 - (fTileWidth * 2 / 4) else fTileWidth - fTileWidth / 4
+
+    val boardWidth = ((tileWidth * 15) + tileWidth / 2).dp
+    val boardHeight = (tileWidth * 15).dp
 
     val images = listOf(
         ImageBitmap.imageResource(R.drawable.letter_a),
@@ -134,143 +135,153 @@ fun ScrabbleBoard(
             )
         }
 
+        Spacer(Modifier.height(10.dp))
+
         Row {
-            Column(
-                modifier = Modifier.padding(top = 10.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                for (tile in 'A'..'Z' step 2) {
-                    Row {
-                        ShowFrequencyTile(scoringViewModel, tile, fTileWidth)
-                        ShowFrequencyTile(scoringViewModel, tile + 1, fTileWidth)
-                    }
-                }
-
-                ShowFrequencyTile(scoringViewModel, '[', fTileWidth)
-            }
-
-            if (isSmallScreen) {
-                fTileWidth *= 2
-            }
-
-            Column {
-                Surface(
-                    modifier = Modifier
-                        .size(boardWidth, boardHeight)
-                        .padding(end = 10.dp)
-                        .border(BorderStroke(1.dp, Color.Black))
-                ) {
-                    Canvas(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .pointerInput(Unit) {
-                                detectTapGestures(
-                                    onPress = {
-                                        scoringViewModel.setFirstPos(it.x, it.y)
-                                        currentPulseState = PulseState.GrowStart
-                                        scope.launch {
-                                            delay(300)
-                                            currentPulseState = PulseState.GrowEnd
-                                        }
-                                    }
-                                )
-                            }
-                    ) {
-                        var x = fTileWidth * 2 - fTileWidth / 3
-                        var y = fTileWidth - fTileWidth / 4
-
-                        for (col in 0..14) {
-                            drawColumnText(this, fTileWidth, x, y, ('A' + col).toString())
-                            x += fTileWidth + 2
-                        }
-
-                        x = fTileWidth / 2
-                        y = fTileWidth + fTileWidth * 3 / 4
-
-                        for (col in 1..15) {
-                            drawColumnText(this, fTileWidth, x, y, col.toString())
-                            y += fTileWidth + 2
-                        }
-
-                        y = fTileWidth
-
-                        for (row in 0..14) {
-                            x = fTileWidth + fTileWidth / 3
-
-                            for (col in 0..14) {
-                                val position = ('A' + col).toString()
-
-                                if (row == 1) {
-                                    scoringViewModel.tileStartX[col] = x
-                                }
-
-                                if (col == 1) {
-                                    scoringViewModel.tileStartY[row] = y
-                                }
-
-                                drawTile(
-                                    this,
-                                    position + (row + 1).toString(),
-                                    x,
-                                    y,
-                                    fTileWidth,
-                                    star
-                                )
-
-                                x += fTileWidth + 2
-                            }
-
-                            y += fTileWidth + 2
-                        }
-
-                        scoringViewModel.adjustLastStartItems(fTileWidth)
-
-                        if (isFirstPos) {
-                            drawCircle(
-                                color = Color.Red,
-                                radius = growRadius,
-                                center = currentPos,
-                                alpha = 0.2f
-                            )
-                        }
-
-                        if (isNewLetter) {
-                            drawImage(
-                                image = images[newLetter.letter.character - 'A'],
-                                dstOffset = animateLetterTarget,
-                                dstSize = IntSize(fTileWidth.toInt(), fTileWidth.toInt())
-                            )
-                        }
-
-                        if (gameTurnData.value != null) {
-                            gameTurnData.value!!.forEach { turn ->
-                                turn.letters.forEach { tile ->
-                                    drawImage(
-                                        image = images[tile.letter.character - 'A'],
-                                        dstOffset = scoringViewModel.getBoardOffsetForLetter(tile),
-                                        dstSize = IntSize(tileWidth, tileWidth)
-                                    )
-
-                                    if (tile.isBlank) {
-                                        val offset = scoringViewModel.getBoardOffsetForLetter(tile)
-                                        drawRect(
-                                            color = Color.Red,
-                                            topLeft = Offset(offset.x.toFloat(), offset.y.toFloat()),
-                                            size = Size(fTileWidth, fTileWidth),
-                                            style = Stroke(
-                                                width = 1.dp.toPx()
-                                            )
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Dictionary(boardWidth, get())
+            for (tile in 'A'..'I') {
+                ShowFrequencyTile(scoringViewModel, tile, fTileWidth)
             }
         }
+
+        Row {
+            for (tile in 'J'..'R') {
+                ShowFrequencyTile(scoringViewModel, tile, fTileWidth)
+            }
+        }
+
+        Row {
+            for (tile in 'S'..'Z') {
+                ShowFrequencyTile(scoringViewModel, tile, fTileWidth)
+            }
+
+            ShowFrequencyTile(scoringViewModel, '[', fTileWidth)
+        }
+
+        if (ScreenData.isSmallScreen()) {
+            fTileWidth *= 2.4f
+        } else {
+            fTileWidth *= 1.1f
+        }
+
+        Surface(
+            modifier = Modifier
+                .size(boardWidth, boardHeight)
+                .padding(top = 10.dp, end = 10.dp)
+                .border(BorderStroke(1.dp, Color.Black))
+        ) {
+            Canvas(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onPress = {
+                                scoringViewModel.setFirstPos(it.x, it.y)
+                                currentPulseState = PulseState.GrowStart
+                                scope.launch {
+                                    delay(300)
+                                    currentPulseState = PulseState.GrowEnd
+                                }
+                            }
+                        )
+                    }
+            ) {
+                var x = fTileWidth * 2 - fTileWidth / 3
+                var y = fTileWidth - fTileWidth / 4
+
+                for (col in 0..14) {
+                    drawColumnText(this, fTileWidth, x, y, ('A' + col).toString())
+                    x += fTileWidth + 2
+                }
+
+                x = fTileWidth / 2
+                y = fTileWidth + fTileWidth * 3 / 4
+
+                for (col in 1..15) {
+                    drawColumnText(this, fTileWidth, x, y, col.toString())
+                    y += fTileWidth + 2
+                }
+
+                y = fTileWidth
+
+                for (row in 0..14) {
+                    x = fTileWidth + fTileWidth / 3
+
+                    for (col in 0..14) {
+                        val position = ('A' + col).toString()
+
+                        if (row == 1) {
+                            scoringViewModel.tileStartX[col] = x
+                        }
+
+                        if (col == 1) {
+                            scoringViewModel.tileStartY[row] = y
+                        }
+
+                        drawTile(
+                            this,
+                            position + (row + 1).toString(),
+                            x,
+                            y,
+                            fTileWidth,
+                            star
+                        )
+
+                        x += fTileWidth + 2
+                    }
+
+                    y += fTileWidth + 2
+                }
+
+                scoringViewModel.adjustLastStartItems(fTileWidth)
+
+                if (isFirstPos) {
+                    drawCircle(
+                        color = Color.Red,
+                        radius = growRadius,
+                        center = currentPos,
+                        alpha = 0.2f
+                    )
+                }
+
+                if (isNewLetter) {
+                    drawImage(
+                        image = images[newLetter.letter.character - 'A'],
+                        dstOffset = animateLetterTarget,
+                        dstSize = IntSize(fTileWidth.toInt(), fTileWidth.toInt())
+                    )
+                }
+
+                if (gameTurnData.value != null) {
+                    gameTurnData.value!!.forEach { turn ->
+                        turn.letters.forEach { tile ->
+                            drawImage(
+                                image = images[tile.letter.character - 'A'],
+                                dstOffset = scoringViewModel.getBoardOffsetForLetter(tile),
+                                dstSize = IntSize(tileWidth, tileWidth)
+                            )
+
+                            if (tile.isBlank) {
+                                val offset = scoringViewModel.getBoardOffsetForLetter(tile)
+                                drawRect(
+                                    color = Color.Red,
+                                    topLeft = Offset(offset.x.toFloat(), offset.y.toFloat()),
+                                    size = Size(fTileWidth, fTileWidth),
+                                    style = Stroke(
+                                        width = 1.dp.toPx()
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+//        if (isSmallScreen) {
+//            fTileWidth *= 2
+//        }
+
+        Dictionary(boardWidth, get())
     }
 }
 
@@ -293,11 +304,12 @@ fun ShowFrequencyTile(
             )
         },
         modifier = Modifier
-            .padding(end = 20.dp, bottom = 10.dp)
+            .padding(end = 18.dp, bottom = 10.dp)
             .alpha(alpha)
             .clickable {
                 if (scoringViewModel.isGameStarted() &&
-                    scoringViewModel.isCurrentPosSet()
+                    scoringViewModel.isCurrentPosSet() &&
+                    scoringViewModel.tileCounts[offset].value > 0
                 ) {
                     scoringViewModel.addToPlayerTurnData(Letters.get(tile))
                     scoringViewModel.addToTileCount(offset, -1)
