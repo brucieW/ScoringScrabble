@@ -50,11 +50,6 @@ fun SplashScreenContent() {
     val tileWidth = getTileWidth()
     val spacer = tileWidth * 2
 
-//    if (ScreenData.screenType == ScreenType.SMALL) {
-//        tileWidth += (tileWidth / 2)
-//        spacer += (tileWidth / 2)
-//    }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -83,9 +78,10 @@ fun SplashScreenContent() {
                 tile,
                 IntOffset(x, y) ,
                 doAnimations[index + 8])
-            y += spacer
+            y += spacer + 2
         }
 
+        y += 2
         x -= spacer * 2
 
         "SHEET".forEachIndexed { index, tile ->
@@ -133,8 +129,7 @@ fun Letter(
     Card(
         modifier = Modifier
             .offset(target.x.dp, target.y.dp)
-            .size(size),
-        elevation = 20.dp
+            .size(size)
     ) {
         Image(
             painterResource(id = Letters.get(tile).image),

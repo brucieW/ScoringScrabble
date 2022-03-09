@@ -7,6 +7,9 @@ import io.objectbox.annotation.Convert
 import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id
 
+/**
+ * This is used to store a particular letters' position on the scrabble board.
+ */
 @Entity
 data class LetterAndPosition(
     @Convert(converter = LetterConverter::class, dbType = String::class)

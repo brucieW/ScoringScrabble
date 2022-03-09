@@ -8,6 +8,10 @@ import io.objectbox.relation.ToMany
 import io.objectbox.relation.ToOne
 import java.time.LocalDateTime
 
+/**
+ * A game contains the match that the game is associated with plus a collection of
+ * PlayerTurnData or TeamTurnData.
+ */
 @Entity
 data class Game(
     @Id

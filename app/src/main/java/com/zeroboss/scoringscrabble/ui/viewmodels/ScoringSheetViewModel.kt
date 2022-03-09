@@ -4,21 +4,28 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.ViewModel
 import com.zeroboss.scoringscrabble.data.common.ActiveStatus
+import com.zeroboss.scoringscrabble.data.common.ActiveStatus.activePlayerTurnData
 import com.zeroboss.scoringscrabble.data.common.CommonDb
 import com.zeroboss.scoringscrabble.data.entities.*
 import com.zeroboss.scoringscrabble.ui.common.ScreenData
 import com.zeroboss.scoringscrabble.ui.common.ScreenType
+import com.zeroboss.scoringscrabble.ui.screens.scoresheet.PulseState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+
+enum class MoveTileState(var letterAndPosition: LetterAndPosition = LetterAndPosition()) {
+    None(),
+    Start()
+}
 
 class ScoringSheetViewModel(
 
 ) : ViewModel() {
     val players = mutableListOf<Player>()
     val teams = mutableListOf<Team>()
-
-    private var _availableLetters = ActiveStatus.letterFrequency.map { }
 
     private val _firstPlayerSelected = mutableStateOf(
         ActiveStatus.activePlayer != null || ActiveStatus.activeTeam != null)
@@ -127,8 +134,10 @@ class ScoringSheetViewModel(
     private val _isNewLetter = mutableStateOf(false)
     val isNewLetter = _isNewLetter
 
+    private val _newLetterDestination = mutableStateOf(LetterAndPosition())
+    val newLetterDestination = _newLetterDestination
+
     var currentLetterPos = Position()
-    var currentLetterAndPosition = LetterAndPosition()
 
     fun setFirstPos(x: Float, y: Float) {
         _isFirstPos.value = false
@@ -162,6 +171,18 @@ class ScoringSheetViewModel(
         }
     }
 
+    fun moveCurrentPosition(tileWidth: Float) {
+        isNewLetter.value = false
+
+        if (directionSouth.value) {
+            _currentPos.value = Offset(_currentPos.value.x, _currentPos.value.y + tileWidth + 2)
+            currentLetterPos = Position(currentLetterPos.column, currentLetterPos.row + 1)
+        } else {
+            _currentPos.value = Offset(_currentPos.value.x + tileWidth + 2, _currentPos.value.y)
+            currentLetterPos = Position(currentLetterPos.column + 1, currentLetterPos.row)
+        }
+    }
+
     fun adjustLastStartItems(tileWidth: Float) {
         tileStartX[15] = tileStartX[14] + tileWidth + 2
         tileStartY[15] = tileStartY[14] + tileWidth + 2
@@ -190,10 +211,14 @@ class ScoringSheetViewModel(
         letter: Letter,
         isBlank: Boolean = false
     ) {
-        val turnData = PlayerTurnData()
-        turnData.player.target = _activePlayer.value
-        ActiveStatus.activePlayerTurnData = turnData
-        turnData.letters.add(LetterAndPosition(letter, currentLetterPos, isBlank))
+        if (activePlayerTurnData == null) {
+            activePlayerTurnData = PlayerTurnData()
+        }
+
+        activePlayerTurnData!!.player.target = _activePlayer.value
+        _newLetterDestination.value = LetterAndPosition(letter, currentLetterPos, isBlank)
+        activePlayerTurnData!!.letters.add(_newLetterDestination.value)
+        _isNewLetter.value = true
     }
 
     fun addToTeamTurnData(
@@ -207,6 +232,15 @@ class ScoringSheetViewModel(
     }
 
     fun clickedBackSpace() {
+    }
+
+    fun getBoardOffsetForLetter(
+        tile: LetterAndPosition
+    ) : IntOffset {
+        return IntOffset(
+            tileStartX[tile.position.column].toInt(),
+            tileStartY[tile.position.row].toInt()
+        )
     }
 
     init {

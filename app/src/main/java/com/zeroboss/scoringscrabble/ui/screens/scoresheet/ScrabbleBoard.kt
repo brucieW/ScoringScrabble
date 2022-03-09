@@ -1,9 +1,7 @@
 package com.zeroboss.scoringscrabble.ui.screens.scoresheet
 
 import android.graphics.Paint
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateIntOffset
-import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -28,12 +26,20 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.zeroboss.scoringscrabble.R
 import com.zeroboss.scoringscrabble.data.entities.Letters
+import com.zeroboss.scoringscrabble.data.entities.convertPosition
 import com.zeroboss.scoringscrabble.ui.common.*
 import com.zeroboss.scoringscrabble.ui.theme.errorText
+import com.zeroboss.scoringscrabble.ui.viewmodels.MoveTileState
 import com.zeroboss.scoringscrabble.ui.viewmodels.ScoringSheetViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
+
+enum class PulseState {
+    None,
+    GrowStart,
+    GrowEnd
+}
 
 @Composable
 fun ScrabbleBoard(
@@ -43,12 +49,11 @@ fun ScrabbleBoard(
 
     val tileWidth = getTileWidth()
     var fTileWidth = tileWidth.toFloat()
+    val isSmallScreen = ScreenData.screenType == ScreenType.SMALL || ScreenData.screenType == ScreenType.SMALL_SIDEWAYS
 
-    val radius = fTileWidth - fTileWidth / 4
+    val radius = if (isSmallScreen) fTileWidth * 2 - (fTileWidth * 2 / 4) else fTileWidth - fTileWidth / 4
     val boardWidth = ((tileWidth * 13) + tileWidth / 2).dp
     val boardHeight = (tileWidth * 13).dp
-
-    val isSmallScreen = ScreenData.screenType == ScreenType.SMALL || ScreenData.screenType == ScreenType.SMALL_SIDEWAYS
 
     val images = listOf(
         ImageBitmap.imageResource(R.drawable.letter_a),
@@ -79,17 +84,17 @@ fun ScrabbleBoard(
         ImageBitmap.imageResource(R.drawable.letter_z),
     )
 
-
     val star = ImageBitmap.imageResource(id = R.drawable.starting_star)
 
     val isFirstPos by scoringViewModel.isFirstPos
     val currentPos by scoringViewModel.currentPos
     val isNewLetter by scoringViewModel.isNewLetter
+    val newLetter by scoringViewModel.newLetterDestination
 
-    var currentState by remember { mutableStateOf(PulseState.None) }
-    val transition = updateTransition(targetState = currentState, label = "radius")
+    var currentPulseState by remember { mutableStateOf(PulseState.None) }
+    val transitionPulseState = updateTransition(targetState = currentPulseState, label = "radius")
 
-    val growRadius by transition.animateFloat(
+    val growRadius by transitionPulseState.animateFloat(
         label = "radius"
     ) { state ->
         when (state) {
@@ -99,20 +104,18 @@ fun ScrabbleBoard(
         }
     }
 
-    val currentTileState by remember { mutableStateOf(MoveTileState.None) }
-    val tileMoveTransition = updateTransition(targetState = currentTileState, label = "moveTile")
-
-    val tileOffset by tileMoveTransition.animateIntOffset(
-        label = "moveTile"
-    ) { state ->
-        when (state) {
-            MoveTileState.None -> IntOffset(0, 0)
-            MoveTileState.Start -> IntOffset(0, 0)
-            MoveTileState.End -> state.letter.position.getIntOffset()
-        }
-    }
-
     val scope = rememberCoroutineScope()
+
+    val animateLetterTarget by animateIntOffsetAsState(
+        targetValue = scoringViewModel.getBoardOffsetForLetter(newLetter),
+        animationSpec = TweenSpec(300, easing = LinearEasing),
+        finishedListener = {
+            scope.launch {
+                delay(200)
+                scoringViewModel.moveCurrentPosition(fTileWidth)
+            }
+        }
+    )
 
     val error by scoringViewModel.errorText
 
@@ -146,6 +149,10 @@ fun ScrabbleBoard(
                 ShowFrequencyTile(scoringViewModel, '[', fTileWidth)
             }
 
+            if (isSmallScreen) {
+                fTileWidth *= 2
+            }
+
             Column {
                 Surface(
                     modifier = Modifier
@@ -160,19 +167,15 @@ fun ScrabbleBoard(
                                 detectTapGestures(
                                     onPress = {
                                         scoringViewModel.setFirstPos(it.x, it.y)
-                                        currentState = PulseState.GrowStart
+                                        currentPulseState = PulseState.GrowStart
                                         scope.launch {
                                             delay(300)
-                                            currentState = PulseState.GrowEnd
+                                            currentPulseState = PulseState.GrowEnd
                                         }
                                     }
                                 )
                             }
                     ) {
-                        if (isSmallScreen) {
-                            fTileWidth *= 2
-                        }
-
                         var x = fTileWidth * 2 - fTileWidth / 3
                         var y = fTileWidth - fTileWidth / 4
 
@@ -232,28 +235,27 @@ fun ScrabbleBoard(
                         }
 
                         if (isNewLetter) {
-
+                            drawImage(
+                                image = images[newLetter.letter.character - 'A'],
+                                dstOffset = animateLetterTarget,
+                                dstSize = IntSize(fTileWidth.toInt(), fTileWidth.toInt())
+                            )
                         }
 
                         if (gameTurnData.value != null) {
                             gameTurnData.value!!.forEach { turn ->
                                 turn.letters.forEach { tile ->
                                     drawImage(
-                                        image = images[tile.letter.letter - 'A'],
-                                        dstOffset = IntOffset(
-                                            scoringViewModel.tileStartX[tile.position.column].toInt(),
-                                            scoringViewModel.tileStartY[tile.position.row].toInt()
-                                        ),
+                                        image = images[tile.letter.character - 'A'],
+                                        dstOffset = scoringViewModel.getBoardOffsetForLetter(tile),
                                         dstSize = IntSize(tileWidth, tileWidth)
                                     )
 
                                     if (tile.isBlank) {
+                                        val offset = scoringViewModel.getBoardOffsetForLetter(tile)
                                         drawRect(
                                             color = Color.Red,
-                                            topLeft = Offset(
-                                                scoringViewModel.tileStartX[tile.position.column],
-                                                scoringViewModel.tileStartY[tile.position.row],
-                                            ),
+                                            topLeft = Offset(offset.x.toFloat(), offset.y.toFloat()),
                                             size = Size(fTileWidth, fTileWidth),
                                             style = Stroke(
                                                 width = 1.dp.toPx()

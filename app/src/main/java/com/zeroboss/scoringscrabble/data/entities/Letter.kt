@@ -2,8 +2,11 @@ package com.zeroboss.scoringscrabble.data.entities
 
 import com.zeroboss.scoringscrabble.R
 
+/**
+ * This contains information regarding a particular letter used for a scrabble tile.
+ */
 data class Letter (
-    val letter: Char,
+    val character: Char,
     val image: Int,
     val value: Int,
     val quantity: Int

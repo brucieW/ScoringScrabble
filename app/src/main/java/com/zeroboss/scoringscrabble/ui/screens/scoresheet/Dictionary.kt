@@ -21,18 +21,6 @@ import com.zeroboss.scoringscrabble.presentation.WordInfoViewModel
 import com.zeroboss.scoringscrabble.ui.theme.errorText
 import com.zeroboss.scoringscrabble.ui.theme.smallerText
 
-enum class PulseState {
-    None,
-    GrowStart,
-    GrowEnd
-}
-
-enum class MoveTileState(val letter: LetterAndPosition = LetterAndPosition()) {
-    None(),
-    Start(),
-    End()
-}
-
 @Composable
 fun Dictionary(
     width: Dp,

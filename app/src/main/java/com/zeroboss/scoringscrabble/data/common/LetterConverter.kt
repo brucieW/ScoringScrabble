@@ -13,7 +13,7 @@ class LetterConverter : PropertyConverter<Letter?, String?> {
 
     override fun convertToDatabaseValue(letter: Letter?): String? {
         return letter?.let {
-            'A' + it.letter.toString()
+            'A' + it.character.toString()
         }
     }
 }

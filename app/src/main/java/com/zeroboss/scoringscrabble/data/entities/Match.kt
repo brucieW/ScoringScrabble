@@ -7,6 +7,10 @@ import io.objectbox.annotation.Id
 import io.objectbox.relation.ToMany
 import java.time.LocalDateTime
 
+/**
+ * A match is the collection of games that have been played against particular
+ * teams or players.
+ */
 @Entity
 data class Match(
     @Id

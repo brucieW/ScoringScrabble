@@ -5,8 +5,6 @@ import android.widget.Toast
 import com.zeroboss.scoringscrabble.data.common.ActiveStatus.activePlayerTurnData
 import com.zeroboss.scoringscrabble.data.common.ActiveStatus.activeTeamTurnData
 import com.zeroboss.scoringscrabble.data.entities.*
-import com.zeroboss.scoringscrabble.data.entities.Game_.id
-import com.zeroboss.scoringscrabble.data.entities.LetterAndPosition_.letter
 import com.zeroboss.scoringscrabble.ui.viewmodels.Ranking
 import com.zeroboss.scoringscrabble.ui.viewmodels.Rankings
 import io.objectbox.BoxStore
@@ -23,18 +21,18 @@ import java.time.format.DateTimeFormatter
 
 object CommonDb : KoinComponent {
 
-    val testFile = File("testScrabbble-db")
+    val testFile = File("testScrabble-db")
     val liveFile = File("scoringScrabble-db")
 
     val boxStore: BoxStore = get(BoxStore::class.java)
 
-    val playersBox = boxStore.boxFor<Player>()
-    val teamBox = boxStore.boxFor<Team>()
-    val gameBox = boxStore.boxFor<Game>()
-    val matchBox = boxStore.boxFor<Match>()
-    val playerTurnBox = boxStore.boxFor<PlayerTurnData>()
-    val teamTurnBox = boxStore.boxFor<TeamTurnData>()
-    val letterAndPositionBox = boxStore.boxFor<LetterAndPosition>()
+    private val playersBox = boxStore.boxFor<Player>()
+    private val teamBox = boxStore.boxFor<Team>()
+    private val gameBox = boxStore.boxFor<Game>()
+    private val matchBox = boxStore.boxFor<Match>()
+    private val playerTurnBox = boxStore.boxFor<PlayerTurnData>()
+    private val teamTurnBox = boxStore.boxFor<TeamTurnData>()
+    private val letterAndPositionBox = boxStore.boxFor<LetterAndPosition>()
 
     private var matchesQuery: Query<Match>? = null
     private var gameQuery: Query<Game>? = null
@@ -42,7 +40,7 @@ object CommonDb : KoinComponent {
 
     // This clears all data from the database.
     fun clearBoxStore() {
-        boxStore.close()
+        closeDatabase()
         BoxStore.deleteAllFiles(File(DATA_PATH))
     }
 
@@ -335,7 +333,7 @@ object CommonDb : KoinComponent {
         player: Player?,
         game: Game?
     ) : MutableList<PlayerTurnData>? {
-//        if (player == null || game == null) {
+        if (player == null || game == null) {
 //            val data = PlayerTurnData()
 //            data.letters.add(LetterAndPosition(Letters.get('B'), Position(7, 4)))
 //            data.letters.add(LetterAndPosition(Letters.get('A'), Position(7, 5)))
@@ -350,11 +348,12 @@ object CommonDb : KoinComponent {
 //            data.letters.add(LetterAndPosition(Letters.get('C'), Position(12,14)))
 //            data.letters.add(LetterAndPosition(Letters.get('A'), Position(13,14)))
 //            data.letters.add(LetterAndPosition(Letters.get('T'), Position(14,14), true))
-//            return null
-//        }
+//            return data
+            return null
+        }
 
-        val builder = playerTurnBox.query().equal(PlayerTurnData_.gameId, game!!.id)
-        builder.backlink(PlayerTurnData_.player).equal(PlayerTurnData_.playerId, player!!.id)
+        val builder = playerTurnBox.query().equal(PlayerTurnData_.gameId, game.id)
+        builder.backlink(PlayerTurnData_.player).equal(PlayerTurnData_.playerId, player.id)
 
         return builder.build().find()
     }

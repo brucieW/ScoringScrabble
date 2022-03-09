@@ -5,6 +5,10 @@ import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id
 import io.objectbox.relation.ToMany
 
+/**
+ * This contains a player's details, i.e. their name and which matches and teams they
+ * have been involved with.
+ */
 @Entity
 data class Player(
     @Id

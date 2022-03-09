@@ -18,7 +18,7 @@ class LetterAndPositionConverter : PropertyConverter<LetterAndPosition?, String?
 
     override fun convertToDatabaseValue(lp: LetterAndPosition?): String {
         val sb = StringBuilder()
-        sb.append(lp!!.letter.letter)
+        sb.append(lp!!.letter.character)
         sb.append('A' + lp.position.column)
         sb.append(lp.position.row)
         sb.append(',')

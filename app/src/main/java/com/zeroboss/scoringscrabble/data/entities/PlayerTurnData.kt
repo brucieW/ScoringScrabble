@@ -7,6 +7,10 @@ import io.objectbox.annotation.Id
 import io.objectbox.relation.ToMany
 import io.objectbox.relation.ToOne
 
+/**
+ * This contains the details of a player's turn details, i.e. which letters have been
+ * selected for the turn and which game these letters are associated with.
+ */
 @Entity
 data class PlayerTurnData(
     @Id
