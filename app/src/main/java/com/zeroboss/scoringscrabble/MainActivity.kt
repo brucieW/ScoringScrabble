@@ -10,7 +10,7 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.SideEffect
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.ramcosta.composedestinations.DestinationsNavHost
-import com.zeroboss.scoringscrabble.ui.screens.NavGraphs
+import com.zeroboss.scoringscrabble.presentation.screens.NavGraphs
 import com.zeroboss.scoringscrabble.ui.theme.Blue50
 import com.zeroboss.scoringscrabble.ui.theme.ScoringScrabbleTheme
 

@@ -36,7 +36,7 @@
     <string name="about_text">Application for keeping track of all of your scrabble game scores.</string>
     <string name="version">Version 1.0</string>
     <string name="programmed_by">Programmed by Bruce Edgerton</string>
-    <string name="copyright">Copyright 2021, All Rights Reserved</string>
+    <string name="copyright">Copyright &#169; 2022, All Rights Reserved</string>
 
     <string name="yes">Yes</string>
     <string name="no">No</string>

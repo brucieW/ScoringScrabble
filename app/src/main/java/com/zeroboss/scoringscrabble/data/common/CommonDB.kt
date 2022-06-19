@@ -5,8 +5,8 @@ import android.widget.Toast
 import com.zeroboss.scoringscrabble.data.common.ActiveStatus.activePlayerTurnData
 import com.zeroboss.scoringscrabble.data.common.ActiveStatus.activeTeamTurnData
 import com.zeroboss.scoringscrabble.data.entities.*
-import com.zeroboss.scoringscrabble.ui.viewmodels.Ranking
-import com.zeroboss.scoringscrabble.ui.viewmodels.Rankings
+import com.zeroboss.scoringscrabble.presentation.screens.statistics.Ranking
+import com.zeroboss.scoringscrabble.presentation.screens.statistics.Rankings
 import io.objectbox.BoxStore
 import io.objectbox.kotlin.boxFor
 import io.objectbox.query.Query
